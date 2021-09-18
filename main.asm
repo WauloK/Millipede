@@ -116,6 +116,8 @@ Font_font1:	db $00, $00, $00, $00, $00, $010, $010, $010
 	db $010, $050, $010, $04, $010, $050, $011, $044
 	db $00, $00, $00
 Input_c:	db	$00
+Sound_freq:	dw	0
+Sound_dur:	dw	0
 data:
 	incbin	 "D:/VZ/TRSE_Mysrc/Millipede///title.bin_c"
 mychar:		db	"A"
@@ -125,6 +127,7 @@ mym: dw  0
 startgame:	db	$00
 strlen:	db	$d3
 strpos:	db	$00
+	gameGrid:	 ds 448
 u:	db	0
 message:		db	"Press 'S' to start! Millipede was developed by Jason Oakley / Blue Bilby using TRSE. Check out more stuff at BlueBilby.com  You can use either Joystick or Keys: QA = Up/Down and <> = Left/Right Space to fire... "
 	db	0
@@ -134,7 +137,6 @@ message:		db	"Press 'S' to start! Millipede was developed by Jason Oakley / Blue
 	; ***********  Defining procedure : Screen_Cls
 	;    Procedure type : User-defined procedure
  ; Temp vars section
-MainProgram_stringassignstr215: db "You pressed S!",0
  ; Temp vars section ends
 Screen_Cls_block2:
 Screen_Cls:
@@ -1437,6 +1439,91 @@ joy1d
 joyend
 	ld a,[Input_c]
 	ret
+	 
+; //	Makes the VZ keyboard BEEP sound
+; //	
+	; ***********  Defining procedure : Sound_Beep
+	;    Procedure type : User-defined procedure
+Sound_Beep:
+	; ****** Inline assembler section
+  call #3450
+	
+	ret
+	; ***********  Defining procedure : Sound_Play
+	;    Procedure type : User-defined procedure
+Sound_Play_block172:
+Sound_Play:
+	; ****** Inline assembler section
+  ld hl,[Sound_freq]
+  ld bc,[Sound_dur]
+  call #345c
+	
+	ret
+	; ***********  Defining procedure : Sound_Shoot
+	;    Procedure type : User-defined procedure
+Sound_Shoot_block173:
+Sound_Shoot:
+	; ****** Inline assembler section
+	ld      hl,[Sound_freq] ;%000000011000011     ;450
+expl
+  push    hl
+  push    af
+  ld      a,#21
+  ld      h,0
+  and(hl)
+  ld      l,a
+  pop     af
+  xor     l
+	or      #08
+	and     #ef
+  ld(#6800),a
+  pop     hl
+  push    af
+  ld      bc,[Sound_dur]
+dly      
+  dec     bc
+  ld      a,b
+  or      c
+  jr      nz,dly
+  pop     af
+  inc     hl
+  bit     5,l
+  jr      z,expl
+	
+	ret
+	 
+; //  Makes explosion sound
+; //  
+	; ***********  Defining procedure : Sound_Explode
+	;    Procedure type : User-defined procedure
+Sound_Explode:
+	; ****** Inline assembler section
+	ld hl,450
+expl0
+  push    hl
+  push    af
+  ld      a,#21
+  ld      h,0
+  and(hl)
+  ld      l,a
+  pop     af
+  xor     l
+  or      #08
+  and     #ef
+  ld(#6800),a
+  pop     hl
+  push    af
+  ld      b,h
+  ld      c,l
+xdly      dec     bc
+  ld      a,b
+  or      c
+  jr      nz,xdly
+  pop     af
+  inc     hl
+  bit     1,h
+  jr      z,expl0
+	ret
 	; ***********  Defining procedure : TitleScreen
 	;    Procedure type : User-defined procedure
 TitleScreen:
@@ -1444,17 +1531,16 @@ TitleScreen:
 	ld [myp],hl
 	ld hl,message
 	ld [mym],hl
-	
-; //u := Input::GetPressedKey();
-; //if(u = Input::Key_S) then startgame := true;		
-TitleScreen_while172:
-TitleScreen_loopstart176:
+TitleScreen_while176:
+TitleScreen_loopstart180:
 	; Binary clause core: NOTEQUALS
 	; Compare with pure num / var optimization
 	call Input_GetPressedKey
 	cp $27
-	jr z, TitleScreen_elsedoneblock175
-TitleScreen_ConditionalTrueBlock173: ;Main true block ;keep :
+	jr z, TitleScreen_elsedoneblock179
+TitleScreen_ConditionalTrueBlock177: ;Main true block ;keep :
+	
+; // Keep titlescreen going until S pressed
 	call Trsedemo_doScroll
 	ld a,[strpos]
 	ld e,a ; variable is 8-bit
@@ -1480,37 +1566,96 @@ TitleScreen_ConditionalTrueBlock173: ;Main true block ;keep :
 	ld b,a
 	ld a,[strpos]
 	cp b
-	jr nc,TitleScreen_elseblock199
-TitleScreen_ConditionalTrueBlock198: ;Main true block ;keep :
+	jr nc,TitleScreen_elseblock203
+TitleScreen_ConditionalTrueBlock202: ;Main true block ;keep :
 	; 'a:=a + const'  optimization 
 	ld a,[strpos]
 	add  a,$1
 	ld [strpos], a
-	jr TitleScreen_elsedoneblock200
-TitleScreen_elseblock199:
+	jr TitleScreen_elsedoneblock204
+TitleScreen_elseblock203:
 	ld a, $0
 	ld [strpos], a
-TitleScreen_elsedoneblock200:
+TitleScreen_elsedoneblock204:
 	ld a, $0
 	ld [u], a
-TitleScreen_forloop205:
+TitleScreen_forloop209:
 	; Wait
 	ld a,$c8
-TitleScreen_wait213:
+TitleScreen_wait217:
 	sub 1
-	jr nz,TitleScreen_wait213
-TitleScreen_forloopcounter207:
-TitleScreen_loopstart208:
+	jr nz,TitleScreen_wait217
+TitleScreen_forloopcounter211:
+TitleScreen_loopstart212:
 	ld a,[u]
 	add a,1
 	ld [u],a
 	cp $190
-	jr nz,TitleScreen_forloop205
-TitleScreen_forloopend206:
-TitleScreen_loopend209:
-	jr TitleScreen_while172
-TitleScreen_elsedoneblock175:
-TitleScreen_loopend177:
+	jr nz,TitleScreen_forloop209
+TitleScreen_forloopend210:
+TitleScreen_loopend213:
+	jr TitleScreen_while176
+TitleScreen_elsedoneblock179:
+TitleScreen_loopend181:
+	ret
+	; ***********  Defining procedure : PlaySound
+	;    Procedure type : User-defined procedure
+PlaySound_block218:
+PlaySound:
+	; Binary clause core: EQUALS
+	; Compare with pure num / var optimization
+	ld a,[u]
+	cp $1
+	jr nz,PlaySound_elsedoneblock222
+PlaySound_ConditionalTrueBlock220: ;Main true block ;keep :
+	; generic assign 
+	ld hl,$50
+	; Integer assignment 
+	; Loading pointer
+	ld [Sound_freq],hl
+	; generic assign 
+	ld hl,$32
+	; Integer assignment 
+	; Loading pointer
+	ld [Sound_dur],hl
+	call Sound_Play
+	; generic assign 
+	ld hl,$32
+	; Integer assignment 
+	; Loading pointer
+	ld [Sound_freq],hl
+	; generic assign 
+	; Integer assignment 
+	; Loading pointer
+	ld [Sound_dur],hl
+	call Sound_Play
+PlaySound_elsedoneblock222:
+	ret
+	; ***********  Defining procedure : InitialiseGame
+	;    Procedure type : User-defined procedure
+InitialiseGame:
+	ld a, $0
+	ld [u], a
+InitialiseGame_forloop226:
+	
+; // Playfield grid array
+	; Storing to array
+	ld a,[u]
+	ld e,a
+	ld d,0
+	ld hl,gameGrid
+	add hl,de
+	ld a,$0
+	ld [hl],a
+InitialiseGame_forloopcounter228:
+InitialiseGame_loopstart229:
+	ld a,[u]
+	add a,1
+	ld [u],a
+	cp $1c0
+	jr nz,InitialiseGame_forloop226
+InitialiseGame_forloopend227:
+InitialiseGame_loopend230:
 	ret
 block1:
 	; ****** Inline assembler section
@@ -1538,18 +1683,16 @@ block1:
 	
 ; // Do titlescreen stuff
 	call TitleScreen
-	; Assigning a string : Font_text
-	ld hl,MainProgram_stringassignstr215
-	; Loading pointer
-	ld [Font_text],hl
-	ld a, $4
-	ld [Font_tx], a
-	ld a, $3a
-	ld [Font_ty], a
-	call Font_DrawTextAt
-MainProgram_end217:
+	ld a, $1
+	ld [Screen_u], a
+	call Screen_Cls
+	ld a, $1
+	ld [u], a
+	call PlaySound
+	call InitialiseGame
+MainProgram_end234:
 	;nop
-	jr MainProgram_end217
+	jr MainProgram_end234
 ; Copy BC bytes from HL to DE.
 z80_copy_mem:
     ld      a,b

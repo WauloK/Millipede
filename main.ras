@@ -5,6 +5,7 @@ program MyProject;
 @use "Font"
 @use "Trsedemo"
 @use "Input"
+@use "Sound"
 
 @export "images/title.flf" "title.bin" 256
 
@@ -15,6 +16,8 @@ var
 	startgame : boolean = false;
 	strlen : byte = 211;
 	strpos : byte = 0;	
+	const gridWidth : byte = 32;
+	gameGrid : array[gridWidth*14] of byte;
 	u : byte;
 	message : string = "Press 'S' to start! Millipede was developed by Jason Oakley / Blue Bilby using TRSE. Check out more stuff at BlueBilby.com  You can use either Joystick or Keys: QA = Up/Down and <> = Left/Right Space to fire... ";
 
@@ -22,17 +25,33 @@ procedure TitleScreen();
 begin
 	myp := #mychar;
 	mym := #message;
-	
+	// Keep titlescreen going until S pressed
 	while (Input::GetPressedKey() <> Input::Key_S) do
 	begin
 		Trsedemo::doScroll();
 		myp[0] := mym[strpos];
 		Font::DrawTextAt(#mychar,31,58);
 		if (strpos < strlen) then strpos := strpos + 1 else strpos := 0;
-		for u := 0 to 400 do wait(200);
-		//u := Input::GetPressedKey();
-		//if (u = Input::Key_S) then startgame := true;		
+		for u := 0 to 400 do wait(200);	
 	end;	
+end;
+
+procedure PlaySound(u : global byte);
+begin
+	if (u = 1) then
+	begin
+		Sound::Play(80,50);
+		Sound::Play(50,50);
+	end;
+end;
+
+procedure InitialiseGame();
+begin
+	// Playfield grid array
+	for u := 0 to gridWidth * 14 do
+	begin
+		gameGrid[u] := 0;
+	end;
 end;
 	
 begin
@@ -47,7 +66,9 @@ begin
 
 	// Do titlescreen stuff
 	TitleScreen();
-	Font::DrawTextAt("You pressed S!",4,58);
+	Screen::Cls(1);
+	PlaySound(1);
+	InitialiseGame();
 	Loop();
 
 end.
