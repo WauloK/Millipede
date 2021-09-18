@@ -2,11 +2,38 @@ program MyProject;
 @use "Screen"
 @use "Memory"
 @use "Compression"
+@use "Font"
+@use "Trsedemo"
+@use "Input"
 
-@export "images/trse.flf" "trse.bin" 256
+@export "images/title.flf" "title.bin" 256
 
 var  
-	data : incbin("trse.bin") compressed;
+	data : incbin("title.bin") compressed;
+	mychar : string = "A";
+	myp, mym : pointer;
+	startgame : boolean = false;
+	strlen : byte = 211;
+	strpos : byte = 0;	
+	u : byte;
+	message : string = "Press 'S' to start! Millipede was developed by Jason Oakley / Blue Bilby using TRSE. Check out more stuff at BlueBilby.com  You can use either Joystick or Keys: QA = Up/Down and <> = Left/Right Space to fire... ";
+
+procedure TitleScreen();
+begin
+	myp := #mychar;
+	mym := #message;
+	
+	while (Input::GetPressedKey() <> Input::Key_S) do
+	begin
+		Trsedemo::doScroll();
+		myp[0] := mym[strpos];
+		Font::DrawTextAt(#mychar,31,58);
+		if (strpos < strlen) then strpos := strpos + 1 else strpos := 0;
+		for u := 0 to 400 do wait(200);
+		//u := Input::GetPressedKey();
+		//if (u = Input::Key_S) then startgame := true;		
+	end;	
+end;
 	
 begin
 	Memory::DisableInterrupts();
@@ -14,6 +41,13 @@ begin
 	Screen::SetMode(1);
 	// Decompress the image to the screen
 	Compression::Decompress(#data, #screen); 
+	// Set pen colour
+	Screen::SetPen(1);
+	Font::SetFont(#Font::font1);
 
+	// Do titlescreen stuff
+	TitleScreen();
+	Font::DrawTextAt("You pressed S!",4,58);
 	Loop();
+
 end.
