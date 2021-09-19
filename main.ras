@@ -18,21 +18,27 @@ var
 	strpos : byte = 0;	
 	const gridWidth : byte = 32;
 	gameGrid : array[gridWidth*14] of byte;
-	u : byte;
+	u, v : byte;
 	message : string = "Press 'S' to start! Millipede was developed by Jason Oakley / Blue Bilby using TRSE. Check out more stuff at BlueBilby.com  You can use either Joystick or Keys: QA = Up/Down and <> = Left/Right Space to fire... ";
 
 procedure TitleScreen();
 begin
 	myp := #mychar;
 	mym := #message;
+	v := 0;
 	// Keep titlescreen going until S pressed
 	while (Input::GetPressedKey() <> Input::Key_S) do
 	begin
-		Trsedemo::doScroll();
-		myp[0] := mym[strpos];
-		Font::DrawTextAt(#mychar,31,58);
-		if (strpos < strlen) then strpos := strpos + 1 else strpos := 0;
-		for u := 0 to 400 do wait(200);	
+		if (v = 0) then
+		begin
+			v := 4;
+			myp[0] := mym[strpos];
+			Font::DrawTextAt(#mychar,31,58);
+			if (strpos < strlen) then strpos := strpos + 1 else strpos := 0;
+		end;
+		for u := 0 to 200 do wait(50);	
+		Screen::doSmoothScroll(30559,5);
+		v := v - 1;
 	end;	
 end;
 
