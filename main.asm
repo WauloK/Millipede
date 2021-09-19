@@ -118,6 +118,12 @@ Font_font1:	db $00, $00, $00, $00, $00, $010, $010, $010
 Input_c:	db	$00
 Sound_freq:	dw	0
 Sound_dur:	dw	0
+Functions_i:	dw	0
+Functions_j:	db	0
+Functions_h:	db	0
+Functions_l:	db	0
+Functions_p: dw  0
+Functions_s: dw  0
 data:
 	incbin	 "D:/VZ/TRSE_Mysrc/Millipede///title.bin_c"
 mychar:		db	"A"
@@ -128,9 +134,44 @@ startgame:	db	$00
 strlen:	db	$d2
 strpos:	db	$00
 	gameGrid:	 ds 448
-	milliBuffer:	 ds 11
+	milliBuffer:	 ds 12
+gridRandoms:	db $06, $04, $05, $04, $00, $02, $00, $04
+	db $02, $06, $01, $03, $04, $00, $00, $05
+	db $02, $03, $02, $06, $00, $03, $04, $00
+	db $04, $02, $00, $00, $01, $04, $05, $06
+	db $05, $06, $04, $06, $04, $05, $01, $02
+	db $03, $06, $04, $02, $00, $06, $01, $00
+	db $04, $04, $05, $01, $05, $00, $01, $04
+	db $01, $05, $02, $03, $01, $04, $03, $05
+	db $02, $05, $01, $00, $03, $01, $06, $06
+	db $05, $04, $00, $04, $05, $01, $05, $02
+	db $04, $03, $03, $01, $03, $04, $05, $05
+	db $03, $03, $01, $02, $05, $02, $01, $04
+	db $03, $00, $06, $00, $05, $00, $05, $01
+	db $06, $06, $06, $01, $02, $00, $04, $02
+	db $02, $04, $01, $02, $04, $06, $03, $02
+	db $04, $05, $01, $04, $01, $01, $02, $04
+	db $04, $01, $03, $01, $03, $01, $00, $02
+	db $00, $01, $01, $01, $06, $00, $02, $02
+	db $03, $01, $06, $01, $01, $03, $01, $06
+	db $02, $04, $05, $05, $04, $05, $04, $05
+	db $01, $03, $00, $00, $00, $03, $05, $06
+	db $01, $01, $05, $01, $01, $00, $03, $06
+	db $00, $06, $00, $02, $06, $01, $02, $05
+	db $04, $02, $01, $04, $05, $00, $00, $00
+	db $02, $00, $00, $04, $00, $05, $00, $06
+	db $05, $01, $03, $01, $03, $03, $01, $01
+	db $02, $04, $00, $06, $03, $06, $02, $02
+	db $03, $00, $05, $06, $00, $00, $05, $00
+	db $06, $01, $02, $01, $00, $00, $00, $05
+	db $01, $02, $00, $06, $00, $02, $00, $04
+	db $00, $02, $00, $03, $00, $00, $02, $03
+	db $00, $05, $05, $00, $02, $06, $05, $01
 u:	db	0
 v:	db	0
+level:	db	0
+lives:	db	0
+score:	dw	0
 message:		db	"Press 'S' to start! You can use either Joystick or Keys:QA = Up/Down and <> = Left/Right Space to fire. Millipede was developed by Jason Oakley / Blue Bilby using TRSE. Check out more stuff at BlueBilby.com ... "
 	db	0
 	 
@@ -139,6 +180,8 @@ message:		db	"Press 'S' to start! You can use either Joystick or Keys:QA = Up/Do
 	; ***********  Defining procedure : Screen_Cls
 	;    Procedure type : User-defined procedure
  ; Temp vars section
+DrawHUD_stringassignstr293: db "Score:",0
+DrawHUD_stringassignstr295: db "Lives:",0
  ; Temp vars section ends
 Screen_Cls_block2:
 Screen_Cls:
@@ -717,8 +760,8 @@ doscroll
 	jr nz,nextline
 	ret
 	;*
-; //	Course scroll in mode(1)
-; //	First parameter is right-most char onscreen of starting location
+; //	Coarse scroll in mode(1)
+; //	First parameter is left-most char onscreen of starting location
 ; //	Second parameter is the height of the scroll
 ; //	*
 	; ***********  Defining procedure : Screen_doCoarseScroll
@@ -1268,42 +1311,6 @@ enddraw
   pop hl  ; Clear the stack!
   
 	ret
-	; ***********  Defining procedure : Trsedemo_doScroll
-	;    Procedure type : User-defined procedure
-Trsedemo_doScroll:
-	; ****** Inline assembler section
-  ld hl,#7741
-  ld de,#7740
-  ld bc,#1f
-  ldir
-  dec hl
-  ld a,#00
-  ld(hl),a
-  ld hl,#7761
-  ld de,#7760
-  ld bc,#1f
-  ldir
-  dec hl
-  ld(hl),a  
-  ld hl,#7781
-  ld de,#7780
-  ld bc,#1f
-  ldir
-  dec hl
-  ld(hl),a  
-  ld hl,#77a1
-  ld de,#77a0
-  ld bc,#1f
-  ldir
-  dec hl
-  ld(hl),a  
-  ld hl,#77c1
-  ld de,#77c0
-  ld bc,#1f
-  ldir
-  dec hl
-  ld(hl),a  
-	ret
 	
 ; // Defined joystick directions. Delete any not used
 ; // Defined keys. Delete any not used.*
@@ -1411,7 +1418,7 @@ keyend
 ; //  *
 	; ***********  Defining procedure : Input_GetJoystick
 	;    Procedure type : User-defined procedure
-Input_GetJoystick_block172:
+Input_GetJoystick_block171:
 Input_GetJoystick:
 	; ****** Inline assembler section
    
@@ -1510,7 +1517,7 @@ Sound_Beep:
 	ret
 	; ***********  Defining procedure : Sound_Play
 	;    Procedure type : User-defined procedure
-Sound_Play_block174:
+Sound_Play_block173:
 Sound_Play:
 	; ****** Inline assembler section
   ld hl,[Sound_freq]
@@ -1520,7 +1527,7 @@ Sound_Play:
 	ret
 	; ***********  Defining procedure : Sound_Shoot
 	;    Procedure type : User-defined procedure
-Sound_Shoot_block175:
+Sound_Shoot_block174:
 Sound_Shoot:
 	; ****** Inline assembler section
 	ld      hl,[Sound_freq] ;%000000011000011     ;450
@@ -1583,6 +1590,123 @@ xdly      dec     bc
   bit     1,h
   jr      z,expl0
 	ret
+	;* 
+; //  Gets a random integer number 0-65535
+; //  *
+	; ***********  Defining procedure : Functions_GetRnd
+	;    Procedure type : User-defined procedure
+Functions_GetRnd_block176:
+Functions_GetRnd:
+	; ****** Inline assembler section
+    ld bc,#0000
+    ld de,[Functions_i]
+    call #09b4    ; Loads ACC with BCDE
+    call #0a9d    ; Set flag to Integer
+    call #14c9    ; RND routine. Using ACC, not A
+    call #0a7f    ; CINT. Puts ACC into HL  
+    ld a,h
+    ld [Functions_h],a
+    ld a,l
+    ld [Functions_l],a
+  
+	; Generic 16-bit binop
+	; Variable is 16-bit
+	ld l,a
+	ld h,0
+	ex de,hl
+	push de
+	; Generic mul
+	ld de,$100
+	ld a,[Functions_h]
+	ld hl,0
+	ld c,0
+	call mul_16x8
+	pop de
+	add hl,de
+	ret
+	;* 
+; //  Converts an Integer to a byte
+; //  *
+	; ***********  Defining procedure : Functions_IntToByte
+	;    Procedure type : User-defined procedure
+Functions_IntToByte_block178:
+Functions_IntToByte:
+	; ****** Inline assembler section
+    ld hl,[Functions_i]
+    ld a,l
+    ld [Functions_j],a
+  
+	ret
+	;* 
+; //  Converts a byte to an Integer
+; //  *
+	; ***********  Defining procedure : Functions_ByteToInt
+	;    Procedure type : User-defined procedure
+Functions_ByteToInt_block179:
+Functions_ByteToInt:
+	; ****** Inline assembler section
+  ld h,#00
+  ld a,[Functions_j]
+  ld l,a
+  ld [Functions_i],hl
+	; Variable is 16-bit
+	; Integer
+	ret
+	; ***********  Defining procedure : Functions_getRandFromArray
+	;    Procedure type : User-defined procedure
+Functions_getRandFromArray_block180:
+Functions_getRandFromArray:
+	; ****** Inline assembler section
+    ld hl,[Functions_p]
+    ld a,r
+    ld b,#00
+    ld c,a
+    add hl,bc
+    ld a,(hl)
+    ld [Functions_i],a
+  
+	; Variable is 16-bit
+	; Integer
+	ld hl,[Functions_i]
+	ret
+	;*
+; //  Converts an Integer number to a string
+; //  *
+	; ***********  Defining procedure : Functions_IntegerToString
+	;    Procedure type : User-defined procedure
+Functions_IntegerToString_block181:
+Functions_IntegerToString:
+	; ****** Inline assembler section
+    ld bc,#0000
+    ld de,[Functions_i]
+    call #09b4      ; Loads ACC with BCDE
+    //call #0a9d      ; Set flag to Integer 
+    ld a,#02
+    ld(#78af),a   
+    call #0fbd      ; Convert ACC to ASCII string 0-delim HL points to string  
+    ld [Functions_s],hl
+tstlp jp tstlp    
+  
+	ret
+	;*
+; //  Converts a Byte number to a string
+; //  *
+	; ***********  Defining procedure : Functions_ByteToString
+	;    Procedure type : User-defined procedure
+Functions_ByteToString_block182:
+Functions_ByteToString:
+	; ****** Inline assembler section
+    ld bc,#0000
+    ld d,#00
+    ld a,[Functions_j]
+    ld e,a
+    call #09b4      ; Loads ACC with BCDE
+    call #0a9d      ; Set flag to Integer    
+    call #0fbd      ; Convert ACC to ASCII string 0-delim HL points to string  
+    inc hl
+    ld [Functions_s],hl
+  
+	ret
 	; ***********  Defining procedure : TitleScreen
 	;    Procedure type : User-defined procedure
 TitleScreen:
@@ -1592,20 +1716,20 @@ TitleScreen:
 	ld [mym],hl
 	ld a, $0
 	ld [v], a
-TitleScreen_while178:
-TitleScreen_loopstart182:
+TitleScreen_while184:
+TitleScreen_loopstart188:
 	; Binary clause core: NOTEQUALS
 	; Compare with pure num / var optimization
 	call Input_GetPressedKey
 	cp $27
-	jp z, TitleScreen_elsedoneblock181
-TitleScreen_ConditionalTrueBlock179: ;Main true block ;keep :
+	jp z, TitleScreen_elsedoneblock187
+TitleScreen_ConditionalTrueBlock185: ;Main true block ;keep :
 	; Binary clause core: EQUALS
 	; Compare with pure num / var optimization
 	ld a,[v]
 	cp $0
-	jr nz,TitleScreen_elsedoneblock220
-TitleScreen_ConditionalTrueBlock218: ;Main true block ;keep :
+	jr nz,TitleScreen_elsedoneblock226
+TitleScreen_ConditionalTrueBlock224: ;Main true block ;keep :
 	
 ; // Keep titlescreen going until S pressed
 	ld a, $4
@@ -1634,35 +1758,35 @@ TitleScreen_ConditionalTrueBlock218: ;Main true block ;keep :
 	ld b,a
 	ld a,[strpos]
 	cp b
-	jr nc,TitleScreen_elseblock233
-TitleScreen_ConditionalTrueBlock232: ;Main true block ;keep :
+	jr nc,TitleScreen_elseblock239
+TitleScreen_ConditionalTrueBlock238: ;Main true block ;keep :
 	; 'a:=a + const'  optimization 
 	ld a,[strpos]
 	add  a,$1
 	ld [strpos], a
-	jr TitleScreen_elsedoneblock234
-TitleScreen_elseblock233:
+	jr TitleScreen_elsedoneblock240
+TitleScreen_elseblock239:
 	ld a, $0
 	ld [strpos], a
-TitleScreen_elsedoneblock234:
-TitleScreen_elsedoneblock220:
+TitleScreen_elsedoneblock240:
+TitleScreen_elsedoneblock226:
 	ld a, $0
 	ld [u], a
-TitleScreen_forloop239:
+TitleScreen_forloop245:
 	; Wait
 	ld a,$32
-TitleScreen_wait247:
+TitleScreen_wait253:
 	sub 1
-	jr nz,TitleScreen_wait247
-TitleScreen_forloopcounter241:
-TitleScreen_loopstart242:
+	jr nz,TitleScreen_wait253
+TitleScreen_forloopcounter247:
+TitleScreen_loopstart248:
 	ld a,[u]
 	add a,1
 	ld [u],a
 	cp $c8
-	jr nz,TitleScreen_forloop239
-TitleScreen_forloopend240:
-TitleScreen_loopend243:
+	jr nz,TitleScreen_forloop245
+TitleScreen_forloopend246:
+TitleScreen_loopend249:
 	; generic assign 
 	ld hl,$775f
 	; Integer assignment 
@@ -1675,20 +1799,20 @@ TitleScreen_loopend243:
 	ld a,[v]
 	sub $1
 	ld [v], a
-	jp TitleScreen_while178
-TitleScreen_elsedoneblock181:
-TitleScreen_loopend183:
+	jp TitleScreen_while184
+TitleScreen_elsedoneblock187:
+TitleScreen_loopend189:
 	ret
 	; ***********  Defining procedure : PlaySound
 	;    Procedure type : User-defined procedure
-PlaySound_block248:
+PlaySound_block254:
 PlaySound:
 	; Binary clause core: EQUALS
 	; Compare with pure num / var optimization
 	ld a,[u]
 	cp $1
-	jr nz,PlaySound_elsedoneblock252
-PlaySound_ConditionalTrueBlock250: ;Main true block ;keep :
+	jr nz,PlaySound_elsedoneblock258
+PlaySound_ConditionalTrueBlock256: ;Main true block ;keep :
 	; generic assign 
 	ld hl,$50
 	; Integer assignment 
@@ -1710,14 +1834,180 @@ PlaySound_ConditionalTrueBlock250: ;Main true block ;keep :
 	; Loading pointer
 	ld [Sound_dur],hl
 	call Sound_Play
-PlaySound_elsedoneblock252:
+PlaySound_elsedoneblock258:
+	ret
+	; ***********  Defining procedure : DrawPadded
+	;    Procedure type : User-defined procedure
+zscore:	dw	0
+x:	db	0
+y:	db	0
+DrawPadded_block261:
+DrawPadded:
+	; Binary clause core: LESS
+	; Binary clause INTEGER: LESS
+	ld hl,$10000
+	push hl
+	; Variable is 16-bit
+	; Integer
+	ld hl,[zscore]
+	pop de
+	xor a ; clear carry
+	sbc hl,de
+	jr nc,DrawPadded_elsedoneblock265
+DrawPadded_ConditionalTrueBlock263: ;Main true block ;keep :
+	; 'a:=a + const'  optimization 
+	ld a,[x]
+	add  a,$1
+	ld [x], a
+DrawPadded_elsedoneblock265:
+	; Binary clause core: LESS
+	; Binary clause INTEGER: LESS
+	ld hl,$2710
+	push hl
+	; Variable is 16-bit
+	; Integer
+	ld hl,[zscore]
+	pop de
+	xor a ; clear carry
+	sbc hl,de
+	jr nc,DrawPadded_elsedoneblock271
+DrawPadded_ConditionalTrueBlock269: ;Main true block ;keep :
+	; 'a:=a + const'  optimization 
+	ld a,[x]
+	add  a,$1
+	ld [x], a
+DrawPadded_elsedoneblock271:
+	; Binary clause core: LESS
+	; Binary clause INTEGER: LESS
+	ld hl,$3e8
+	push hl
+	; Variable is 16-bit
+	; Integer
+	ld hl,[zscore]
+	pop de
+	xor a ; clear carry
+	sbc hl,de
+	jr nc,DrawPadded_elsedoneblock277
+DrawPadded_ConditionalTrueBlock275: ;Main true block ;keep :
+	; 'a:=a + const'  optimization 
+	ld a,[x]
+	add  a,$1
+	ld [x], a
+DrawPadded_elsedoneblock277:
+	; Binary clause core: LESS
+	; Binary clause INTEGER: LESS
+	ld hl,$64
+	push hl
+	; Variable is 16-bit
+	; Integer
+	ld hl,[zscore]
+	pop de
+	xor a ; clear carry
+	sbc hl,de
+	jr nc,DrawPadded_elsedoneblock283
+DrawPadded_ConditionalTrueBlock281: ;Main true block ;keep :
+	; 'a:=a + const'  optimization 
+	ld a,[x]
+	add  a,$1
+	ld [x], a
+DrawPadded_elsedoneblock283:
+	; Binary clause core: LESS
+	; Binary clause INTEGER: LESS
+	ld hl,$a
+	push hl
+	; Variable is 16-bit
+	; Integer
+	ld hl,[zscore]
+	pop de
+	xor a ; clear carry
+	sbc hl,de
+	jr nc,DrawPadded_elsedoneblock289
+DrawPadded_ConditionalTrueBlock287: ;Main true block ;keep :
+	; 'a:=a + const'  optimization 
+	ld a,[x]
+	add  a,$1
+	ld [x], a
+DrawPadded_elsedoneblock289:
+	; generic assign 
+	; Variable is 16-bit
+	; Integer
+	ld hl,[zscore]
+	; Integer assignment 
+	; Loading pointer
+	ld [Functions_i],hl
+	call Functions_IntegerToString
+	ld hl,[Functions_s]
+	ld [Font_text],hl
+	; generic assign 
+	ld a,[x]
+	ld [Font_tx], a
+	; generic assign 
+	ld a,[y]
+	ld [Font_ty], a
+	call Font_DrawTextAt
+	ret
+	; ***********  Defining procedure : DrawHUD
+	;    Procedure type : User-defined procedure
+DrawHUD:
+	
+; // Draw lives
+	ld a, $2
+	ld [Screen_c], a
+	call Screen_SetPen
+	; Assigning a string : Font_text
+	ld hl,DrawHUD_stringassignstr293
+	; Loading pointer
+	ld [Font_text],hl
+	ld a, $14
+	ld [Font_tx], a
+	ld a, $0
+	ld [Font_ty], a
+	call Font_DrawTextAt
+	ld a, $1
+	ld [Screen_c], a
+	call Screen_SetPen
+	; generic assign 
+	ld hl,$8000
+	; Integer assignment 
+	; Loading pointer
+	ld [zscore],hl
+	ld a, $19
+	ld [x], a
+	ld a, $0
+	ld [y], a
+	call DrawPadded
+	ld a, $2
+	ld [Screen_c], a
+	call Screen_SetPen
+	; Assigning a string : Font_text
+	ld hl,DrawHUD_stringassignstr295
+	; Loading pointer
+	ld [Font_text],hl
+	ld a, $0
+	ld [Font_tx], a
+	ld [Font_ty], a
+	call Font_DrawTextAt
+	ld a, $1
+	ld [Screen_c], a
+	call Screen_SetPen
+	; generic assign 
+	ld a,[lives]
+	ld [Functions_j], a
+	call Functions_ByteToString
+	ld hl,[Functions_s]
+	ld [Font_text],hl
+	ld a, $6
+	ld [Font_tx], a
+	ld a, $0
+	ld [Font_ty], a
+	call Font_DrawTextAt
 	ret
 	; ***********  Defining procedure : InitialiseGame
 	;    Procedure type : User-defined procedure
 InitialiseGame:
 	ld a, $0
 	ld [v], a
-InitialiseGame_forloop256:
+InitialiseGame_forloop298:
 	
 ; // Scroll titlescreen off to the left
 	; generic assign 
@@ -1730,72 +2020,88 @@ InitialiseGame_forloop256:
 	call Screen_doCoarseScroll
 	ld a, $0
 	ld [u], a
-InitialiseGame_forloop272:
+InitialiseGame_forloop314:
 	; Wait
 	ld a,$8c
-InitialiseGame_wait280:
+InitialiseGame_wait322:
 	sub 1
-	jr nz,InitialiseGame_wait280
-InitialiseGame_forloopcounter274:
-InitialiseGame_loopstart275:
+	jr nz,InitialiseGame_wait322
+InitialiseGame_forloopcounter316:
+InitialiseGame_loopstart317:
 	ld a,[u]
 	add a,1
 	ld [u],a
 	cp $1e
-	jr nz,InitialiseGame_forloop272
-InitialiseGame_forloopend273:
-InitialiseGame_loopend276:
-InitialiseGame_forloopcounter258:
-InitialiseGame_loopstart259:
+	jr nz,InitialiseGame_forloop314
+InitialiseGame_forloopend315:
+InitialiseGame_loopend318:
+InitialiseGame_forloopcounter300:
+InitialiseGame_loopstart301:
 	ld a,[v]
 	add a,1
 	ld [v],a
 	cp $20
-	jr nz,InitialiseGame_forloop256
-InitialiseGame_forloopend257:
-InitialiseGame_loopend260:
+	jr nz,InitialiseGame_forloop298
+InitialiseGame_forloopend299:
+InitialiseGame_loopend302:
 	ld a, $0
 	ld [u], a
-InitialiseGame_forloop281:
+InitialiseGame_forloop323:
 	
 ; // Playfield grid array
 	; Storing to array
+	ld hl,gridRandoms
+	ld [Functions_p],hl
+	call Functions_getRandFromArray
+	push af
 	ld a,[u]
 	ld e,a
 	ld d,0
 	ld hl,gameGrid
 	add hl,de
-	ld a,$0
+	pop af
 	ld [hl],a
-InitialiseGame_forloopcounter283:
-InitialiseGame_loopstart284:
+InitialiseGame_forloopcounter325:
+InitialiseGame_loopstart326:
 	ld a,[u]
 	add a,1
 	ld [u],a
 	cp $1c0
-	jr nz,InitialiseGame_forloop281
-InitialiseGame_forloopend282:
-InitialiseGame_loopend285:
+	jr nz,InitialiseGame_forloop323
+InitialiseGame_forloopend324:
+InitialiseGame_loopend327:
 	ld a, $0
 	ld [u], a
-InitialiseGame_forloop288:
+InitialiseGame_forloop330:
+	
+; // Millipede buffer array
 	; Storing to array
 	ld a,[u]
 	ld e,a
 	ld d,0
 	ld hl,milliBuffer
 	add hl,de
-	ld a,$0
+	ld a,$5
 	ld [hl],a
-InitialiseGame_forloopcounter290:
-InitialiseGame_loopstart291:
+InitialiseGame_forloopcounter332:
+InitialiseGame_loopstart333:
 	ld a,[u]
 	add a,1
 	ld [u],a
 	cp $b
-	jr nz,InitialiseGame_forloop288
-InitialiseGame_forloopend289:
-InitialiseGame_loopend292:
+	jr nz,InitialiseGame_forloop330
+InitialiseGame_forloopend331:
+InitialiseGame_loopend334:
+	
+; // Initialise variables
+	ld a, $3
+	ld [lives], a
+	; generic assign 
+	ld hl,$0
+	; Integer assignment 
+	; Loading pointer
+	ld [score],hl
+	call DrawHUD
 	ret
 block1:
 	; ****** Inline assembler section
@@ -1827,9 +2133,9 @@ block1:
 	ld [u], a
 	call PlaySound
 	call InitialiseGame
-MainProgram_end296:
+MainProgram_end338:
 	;nop
-	jr MainProgram_end296
+	jr MainProgram_end338
 ; Copy BC bytes from HL to DE.
 z80_copy_mem:
     ld      a,b

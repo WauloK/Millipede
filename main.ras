@@ -3,9 +3,9 @@ program MyProject;
 @use "Memory"
 @use "Compression"
 @use "Font"
-@use "Trsedemo"
 @use "Input"
 @use "Sound"
+@use "Functions"
 
 @export "images/title.flf" "title.bin" 256
 
@@ -18,8 +18,10 @@ var
 	strpos : byte = 0;	
 	const gridWidth : byte = 32;
 	gameGrid : array[gridWidth*14] of byte;
-	milliBuffer : array[11] of byte;
-	u, v : byte;
+	milliBuffer : array[12] of byte;
+	gridRandoms : array[256] of byte = (6,4,5,4,0,2,0,4,2,6,1,3,4,0,0,5,2,3,2,6,0,3,4,0,4,2,0,0,1,4,5,6,5,6,4,6,4,5,1,2,3,6,4,2,0,6,1,0,4,4,5,1,5,0,1,4,1,5,2,3,1,4,3,5,2,5,1,0,3,1,6,6,5,4,0,4,5,1,5,2,4,3,3,1,3,4,5,5,3,3,1,2,5,2,1,4,3,0,6,0,5,0,5,1,6,6,6,1,2,0,4,2,2,4,1,2,4,6,3,2,4,5,1,4,1,1,2,4,4,1,3,1,3,1,0,2,0,1,1,1,6,0,2,2,3,1,6,1,1,3,1,6,2,4,5,5,4,5,4,5,1,3,0,0,0,3,5,6,1,1,5,1,1,0,3,6,0,6,0,2,6,1,2,5,4,2,1,4,5,0,0,0,2,0,0,4,0,5,0,6,5,1,3,1,3,3,1,1,2,4,0,6,3,6,2,2,3,0,5,6,0,0,5,0,6,1,2,1,0,0,0,5,1,2,0,6,0,2,0,4,0,2,0,3,0,0,2,3,0,5,5,0,2,6,5,1);
+	u, v, level, lives : byte;
+	score : integer;
 	message : string = "Press 'S' to start! You can use either Joystick or Keys:QA = Up/Down and <> = Left/Right Space to fire. Millipede was developed by Jason Oakley / Blue Bilby using TRSE. Check out more stuff at BlueBilby.com ... ";
 
 procedure TitleScreen();
@@ -52,6 +54,31 @@ begin
 	end;
 end;
 
+procedure DrawPadded(zscore : Integer; x, y: byte);
+begin
+	if (zscore < 65536) then x := x + 1;
+	if (zscore < 10000) then x := x + 1;
+	if (zscore < 1000) then x := x + 1;
+	if (zscore < 100) then x := x + 1;
+	if (zscore < 10) then x := x + 1;
+	Functions::IntegerToString(zscore);
+	Font::DrawTextAt(#Functions_s,x,y);	
+end;
+
+procedure DrawHUD();
+begin
+	// Draw lives
+	Screen::SetPen(2);
+	Font::DrawTextAt("Score:",20,0);
+	Screen::SetPen(1);
+	DrawPadded(32768,25,0);
+	Screen::SetPen(2);
+	Font::DrawTextAt("Lives:",0,0);
+	Screen::SetPen(1);
+	Functions::ByteToString(lives);
+	Font::DrawTextAt(#Functions_s,6,0);
+end;
+
 procedure InitialiseGame();
 begin
 	// Scroll titlescreen off to the left
@@ -61,8 +88,13 @@ begin
 		for u := 0 to 30 do wait(140);	
 	end;
 	// Playfield grid array
-	for u := 0 to gridWidth * 14 do gameGrid[u] := 0;
-	for u := 0 to 11 do milliBuffer[u] := 0
+	for u := 0 to gridWidth * 14 do gameGrid[u] := Functions::getRandFromArray(#gridRandoms);
+	// Millipede buffer array
+	for u := 0 to 11 do milliBuffer[u] := 5;
+	// Initialise variables
+	lives := 3;
+	score := 0;
+	DrawHUD();
 end;
 	
 begin
