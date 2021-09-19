@@ -55,23 +55,31 @@ begin
 end;
 
 procedure DrawPadded(zscore : Integer; x, y: byte);
+var
+	tmp : byte;
 begin
-	if (zscore < 65536) then x := x + 1;
+	tmp := x;
+	if (zscore < 1) then 
+	begin
+		Font::DrawTextAt("0",tmp+7,y);
+		return;
+	end;
 	if (zscore < 10000) then x := x + 1;
 	if (zscore < 1000) then x := x + 1;
 	if (zscore < 100) then x := x + 1;
 	if (zscore < 10) then x := x + 1;
 	Functions::IntegerToString(zscore);
 	Font::DrawTextAt(#Functions_s,x,y);	
+	Font::DrawTextAt("00",tmp+6,y);
 end;
 
 procedure DrawHUD();
 begin
 	// Draw lives
 	Screen::SetPen(2);
-	Font::DrawTextAt("Score:",20,0);
+	Font::DrawTextAt("Score:",19,0);
 	Screen::SetPen(1);
-	DrawPadded(32768,25,0);
+	DrawPadded(0,24,0);
 	Screen::SetPen(2);
 	Font::DrawTextAt("Lives:",0,0);
 	Screen::SetPen(1);
