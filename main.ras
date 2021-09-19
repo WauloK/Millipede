@@ -19,10 +19,15 @@ var
 	const gridWidth : byte = 32;
 	gameGrid : array[gridWidth*14] of byte;
 	milliBuffer : array[12] of byte;
-	gridRandoms : array[256] of byte = (6,4,5,4,0,2,0,4,2,6,1,3,4,0,0,5,2,3,2,6,0,3,4,0,4,2,0,0,1,4,5,6,5,6,4,6,4,5,1,2,3,6,4,2,0,6,1,0,4,4,5,1,5,0,1,4,1,5,2,3,1,4,3,5,2,5,1,0,3,1,6,6,5,4,0,4,5,1,5,2,4,3,3,1,3,4,5,5,3,3,1,2,5,2,1,4,3,0,6,0,5,0,5,1,6,6,6,1,2,0,4,2,2,4,1,2,4,6,3,2,4,5,1,4,1,1,2,4,4,1,3,1,3,1,0,2,0,1,1,1,6,0,2,2,3,1,6,1,1,3,1,6,2,4,5,5,4,5,4,5,1,3,0,0,0,3,5,6,1,1,5,1,1,0,3,6,0,6,0,2,6,1,2,5,4,2,1,4,5,0,0,0,2,0,0,4,0,5,0,6,5,1,3,1,3,3,1,1,2,4,0,6,3,6,2,2,3,0,5,6,0,0,5,0,6,1,2,1,0,0,0,5,1,2,0,6,0,2,0,4,0,2,0,3,0,0,2,3,0,5,5,0,2,6,5,1);
+	gridRandoms : array[256] of byte = (0,0,1,1,1,1,0,0,0,0,1,1,1,0,0,1,1,1,0,1,1,1,0,0,1,0,0,1,1,0,0,0,0,1,1,0,0,0,1,1,1,1,1,1,0,0,0,0,0,0,1,1,0,1,1,0,0,1,1,0,1,0,1,0,1,1,0,0,1,1,1,0,0,1,1,1,0,0,0,0,0,0,1,0,1,1,0,0,1,1,1,1,0,1,1,0,0,1,0,1,1,0,1,1,0,0,1,1,0,1,1,0,1,1,1,1,0,0,0,0,1,0,0,1,0,0,0,0,0,0,1,1,0,0,1,0,0,1,1,1,0,0,0,1,0,0,0,1,1,1,1,0,0,0,0,0,1,0,0,1,1,0,1,1,0,1,1,0,1,1,1,1,0,0,1,1,0,0,1,1,1,0,0,1,0,1,1,0,1,0,1,0,0,0,0,0,1,1,1,0,1,0,0,1,1,0,0,1,1,0,0,1,1,0,1,1,1,1,0,0,1,0,1,1,0,1,0,0,0,1,1,1,0,0,0,1,0,0,0,1,0,1,0,0,1,1,0,1,0,1,0,1,1,1,1,0);
 	u, v, level, lives : byte;
 	score : integer;
 	message : string = "Press 'S' to start! You can use either Joystick or Keys:QA = Up/Down and <> = Left/Right Space to fire. Millipede was developed by Jason Oakley / Blue Bilby using TRSE. Check out more stuff at BlueBilby.com ... ";
+	milliSegments = record
+		x,y : byte;
+		dir : boolean; // false = left. true = right
+		head : boolean; // false = body. true = head
+	end;
 
 procedure TitleScreen();
 begin
@@ -79,7 +84,7 @@ begin
 	Screen::SetPen(2);
 	Font::DrawTextAt("Score:",19,0);
 	Screen::SetPen(1);
-	DrawPadded(0,24,0);
+	DrawPadded(score,24,0);
 	Screen::SetPen(2);
 	Font::DrawTextAt("Lives:",0,0);
 	Screen::SetPen(1);
@@ -102,7 +107,9 @@ begin
 	// Initialise variables
 	lives := 3;
 	score := 0;
+	level := 1;
 	DrawHUD();
+	if (level = 1) then return;
 end;
 	
 begin

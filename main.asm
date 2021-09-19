@@ -1996,7 +1996,9 @@ DrawHUD:
 	ld [Screen_c], a
 	call Screen_SetPen
 	; generic assign 
-	ld hl,$0
+	; Variable is 16-bit
+	; Integer
+	ld hl,[score]
 	; Integer assignment 
 	; Loading pointer
 	ld [zscore],hl
@@ -2126,7 +2128,7 @@ InitialiseGame_loopend340:
 	ld a, $3
 	ld [lives], a
 	; generic assign 
-	ld hl,$0
+	ld hl,$28
 	; Integer assignment 
 	; Loading pointer
 	ld [score],hl
