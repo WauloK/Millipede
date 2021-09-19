@@ -14,12 +14,13 @@ var
 	mychar : string = "A";
 	myp, mym : pointer;
 	startgame : boolean = false;
-	strlen : byte = 211;
+	strlen : byte = 210;
 	strpos : byte = 0;	
 	const gridWidth : byte = 32;
 	gameGrid : array[gridWidth*14] of byte;
+	milliBuffer : array[11] of byte;
 	u, v : byte;
-	message : string = "Press 'S' to start! Millipede was developed by Jason Oakley / Blue Bilby using TRSE. Check out more stuff at BlueBilby.com  You can use either Joystick or Keys: QA = Up/Down and <> = Left/Right Space to fire... ";
+	message : string = "Press 'S' to start! You can use either Joystick or Keys:QA = Up/Down and <> = Left/Right Space to fire. Millipede was developed by Jason Oakley / Blue Bilby using TRSE. Check out more stuff at BlueBilby.com ... ";
 
 procedure TitleScreen();
 begin
@@ -53,11 +54,15 @@ end;
 
 procedure InitialiseGame();
 begin
-	// Playfield grid array
-	for u := 0 to gridWidth * 14 do
+	// Scroll titlescreen off to the left
+	for v := 0 to 32 do
 	begin
-		gameGrid[u] := 0;
+		Screen::doCoarseScroll(28672,63);
+		for u := 0 to 30 do wait(140);	
 	end;
+	// Playfield grid array
+	for u := 0 to gridWidth * 14 do gameGrid[u] := 0;
+	for u := 0 to 11 do milliBuffer[u] := 0
 end;
 	
 begin
@@ -72,7 +77,6 @@ begin
 
 	// Do titlescreen stuff
 	TitleScreen();
-	Screen::Cls(1);
 	PlaySound(1);
 	InitialiseGame();
 	Loop();
