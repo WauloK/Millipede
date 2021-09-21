@@ -17,8 +17,9 @@ var
 	strlen : byte = 210;
 	strpos : byte = 0;	
 	const gridWidth : byte = 32;
+	const milliLength : byte = 12;
 	gameGrid : array[gridWidth*14] of byte;
-	milliBuffer : array[12] of byte;
+	milliBuffer : array[milliLength] of byte;
 	gridRandoms : array[256] of byte = (0,0,1,1,1,1,0,0,0,0,1,1,1,0,0,1,1,1,0,1,1,1,0,0,1,0,0,1,1,0,0,0,0,1,1,0,0,0,1,1,1,1,1,1,0,0,0,0,0,0,1,1,0,1,1,0,0,1,1,0,1,0,1,0,1,1,0,0,1,1,1,0,0,1,1,1,0,0,0,0,0,0,1,0,1,1,0,0,1,1,1,1,0,1,1,0,0,1,0,1,1,0,1,1,0,0,1,1,0,1,1,0,1,1,1,1,0,0,0,0,1,0,0,1,0,0,0,0,0,0,1,1,0,0,1,0,0,1,1,1,0,0,0,1,0,0,0,1,1,1,1,0,0,0,0,0,1,0,0,1,1,0,1,1,0,1,1,0,1,1,1,1,0,0,1,1,0,0,1,1,1,0,0,1,0,1,1,0,1,0,1,0,0,0,0,0,1,1,1,0,1,0,0,1,1,0,0,1,1,0,0,1,1,0,1,1,1,1,0,0,1,0,1,1,0,1,0,0,0,1,1,1,0,0,0,1,0,0,0,1,0,1,0,0,1,1,0,1,0,1,0,1,1,1,1,0);
 	u, v, level, lives : byte;
 	score : integer;
@@ -27,6 +28,7 @@ var
 		x,y : byte;
 		dir : boolean; // false = left. true = right
 		head : boolean; // false = body. true = head
+		down : boolean; // false = no. true = yes
 	end;
 
 procedure TitleScreen();
@@ -103,7 +105,7 @@ begin
 	// Playfield grid array
 	for u := 0 to gridWidth * 14 do gameGrid[u] := Functions::getRandFromArray(#gridRandoms);
 	// Millipede buffer array
-	for u := 0 to 11 do milliBuffer[u] := 5;
+	for u := 0 to milliLength do milliBuffer[u] := 5;
 	// Initialise variables
 	lives := 3;
 	score := 0;
