@@ -6,31 +6,60 @@ program MyProject;
 @use "Input"
 @use "Sound"
 @use "Functions"
+@use "Sprite"
 
 @export "images/title.flf" "title.bin" 256
 
 var  
 	data : incbin("title.bin") compressed;
+	// Constants
+	const gridWidth : byte = 32;
+	const gridHeight : byte = 14;
+	const milliLength : byte = 12;
+	const snakeSprite : byte = 9;
+	const mushroomSprite : byte = 0;
+	const PlayerYMin : byte = 42;
+	const PlayerYMax : byte = 60;
+	const PlayerXMax : byte = 31;
+	const countdownMax : byte = 200;
+	// Other variables	
 	mychar : string = "A";
 	myp, mym : pointer;
-	startgame : boolean = false;
-	strlen : byte = 210;
 	strpos : byte = 0;	
-	const gridWidth : byte = 32;
-	const milliLength : byte = 12;
-	gameGrid : array[gridWidth*14] of byte;
+	gameGrid : array[gridWidth*gridHeight] of byte;
 	milliBuffer : array[milliLength] of byte;
-	gridRandoms : array[256] of byte = (0,0,1,1,1,1,0,0,0,0,1,1,1,0,0,1,1,1,0,1,1,1,0,0,1,0,0,1,1,0,0,0,0,1,1,0,0,0,1,1,1,1,1,1,0,0,0,0,0,0,1,1,0,1,1,0,0,1,1,0,1,0,1,0,1,1,0,0,1,1,1,0,0,1,1,1,0,0,0,0,0,0,1,0,1,1,0,0,1,1,1,1,0,1,1,0,0,1,0,1,1,0,1,1,0,0,1,1,0,1,1,0,1,1,1,1,0,0,0,0,1,0,0,1,0,0,0,0,0,0,1,1,0,0,1,0,0,1,1,1,0,0,0,1,0,0,0,1,1,1,1,0,0,0,0,0,1,0,0,1,1,0,1,1,0,1,1,0,1,1,1,1,0,0,1,1,0,0,1,1,1,0,0,1,0,1,1,0,1,0,1,0,0,0,0,0,1,1,1,0,1,0,0,1,1,0,0,1,1,0,0,1,1,0,1,1,1,1,0,0,1,0,1,1,0,1,0,0,0,1,1,1,0,0,0,1,0,0,0,1,0,1,0,0,1,1,0,1,0,1,0,1,1,1,1,0);
-	u, v, level, lives : byte;
-	score : integer;
-	message : string = "Press 'S' to start! You can use either Joystick or Keys:QA = Up/Down and <> = Left/Right Space to fire. Millipede was developed by Jason Oakley / Blue Bilby using TRSE. Check out more stuff at BlueBilby.com ... ";
-	milliSegments = record
+	gridRandoms : array[256] of byte = (24,4,29,22,26,24,26,19,21,8,23,20,20,1,30,27,19,2,16,20,11,2,18,17,1,9,14,9,29,29,17,8,7,5,2,0,31,10,22,24,8,19,1,29,7,25,29,20,4,15,12,25,0,11,23,6,6,31,21,2,26,29,10,15,20,23,30,30,31,9,6,2,14,12,28,22,7,21,6,1,20,31,4,25,30,8,11,24,17,24,27,14,20,9,18,18,30,4,28,6,18,4,20,9,26,12,4,12,26,19,18,12,25,30,5,15,14,5,23,24,4,27,13,4,26,11,26,20,22,16,5,28,1,2,18,31,20,20,17,21,6,11,24,0,10,24,31,2,27,12,19,31,20,8,13,19,4,18,6,7,30,2,27,19,16,7,1,18,17,31,6,24,17,1,16,6,6,20,0,29,16,23,3,16,18,1,28,28,21,12,17,25,18,0,22,21,15,5,10,18,24,17,6,31,5,23,12,1,17,20,12,30,25,3,10,26,30,5,30,11,0,26,19,16,11,23,11,18,14,27,26,20,25,23,28,17,13,31,15,19,29,25,9,3,29,27,1,14,14,30,15,16,31,31,18,21);
+	smallSprites: array[] of byte =(20,85,40,40,20,85,40,9,20,85,0,0,20,0,0,0,40,170,60,60,40,170,60,0,40,170,0,0,40,0,0,0,60,223,255,204,20,215,85,20,20,20,0,0,20,85,85,20,23,85,85,23,20,85,85,215,212,85,85,212,215,85,85,20,0,16,0,0,0,16,4,0,0,4,16,0,68,17,68,17,0,48,0,0,0,48,12,0,0,12,48,0,204,51,204,51);
+	bigSprites: array[] of byte = (0,0,48,12,199,211,15,240,48,12,48,12,48,12,204,51,7,208,15,24,0,48,12,192,3,240,15,12,48,7,208,63,252,192,3,0,0,48,12,204,51,7,208,15,24,0,48,12,192,3,0,0,204,204,48,48,55,124,15,255,3,252,0,0,204,204,48,48,55,115,15,255,3,252,0,0,48,48,48,48,55,124,15,255,3,252,0,0,204,204,48,48,55,115,15,255,3,252,0,0,51,51,12,12,61,220,255,240,63,192,0,0,51,51,12,12,205,220,255,240,63,192,0,0,12,12,12,12,61,220,255,240,63,192,0,0,51,51,12,12,205,220,255,240,63,192,204,51,55,220,208,67,193,7,55,220,204,51,0,0,204,51,55,204,51,220,204,51,0,0,0,4,16,0,0,0,0,0,0,0,0,0,0,0,1,192,3,64,0,0,0,0,0,0);
+	u, v, w : byte;
+	message : string = "Press 'S' to start! You can use either Joystick or Keys:QA = Up/Down and M, = Left/Right Space to fire. Millipede was developed by Jason Oakley / Blue Bilby using TRSE. Check out more stuff at BlueBilby.com ... ";
+	strlen : byte = 210;
+	milliSegments_record = record
 		x,y : byte;
 		dir : boolean; // false = left. true = right
 		head : boolean; // false = body. true = head
 		down : boolean; // false = no. true = yes
 	end;
+	playerSnake_record = record
+		x,y : byte;
+	end;
+	playerBullet_record = record
+		x,y : byte;
+	end;
+	gameStats_record = record
+		lives, level : byte;
+		score : Integer;
+		hiScore : Integer;
+		gameRunning : boolean;
+		milliPoisoned : boolean;
+		playerMoveCountdown : byte;
+	end;
+	playerBullet : playerBullet_record;
+	milliSegments : milliSegments_record;
+	playerSnake : playerSnake_record;
+	gameStats : gameStats_record;
 
+// Procedures	
 procedure TitleScreen();
 begin
 	myp := #mychar;
@@ -50,6 +79,7 @@ begin
 		Screen::doSmoothScroll(30559,5);
 		v := v - 1;
 	end;	
+	gameStats.gameRunning := true;
 end;
 
 procedure PlaySound(u : global byte);
@@ -83,14 +113,14 @@ end;
 procedure DrawHUD();
 begin
 	// Draw lives
-	Screen::SetPen(2);
+	Screen::SetPen(3);
 	Font::DrawTextAt("Score:",19,0);
-	Screen::SetPen(1);
-	DrawPadded(score,24,0);
-	Screen::SetPen(2);
 	Font::DrawTextAt("Lives:",0,0);
+	Font::DrawTextAt("Hi:",8,0);
 	Screen::SetPen(1);
-	Functions::ByteToString(lives);
+	DrawPadded(gameStats.score,24,0);
+	DrawPadded(gameStats.hiScore,10,0);
+	Functions::ByteToString(gameStats.lives);
 	Font::DrawTextAt(#Functions_s,6,0);
 end;
 
@@ -102,19 +132,77 @@ begin
 		Screen::doCoarseScroll(28672,63);
 		for u := 0 to 30 do wait(140);	
 	end;
-	// Playfield grid array
-	for u := 0 to gridWidth * 14 do gameGrid[u] := Functions::getRandFromArray(#gridRandoms);
+	// Initialise grid
+	for u := 0 to 255 do gameGrid[u] := 0;
+	for u := 0 to (gridWidth * gridHeight) - 255 do gameGrid[u+256] := 0;
 	// Millipede buffer array
 	for u := 0 to milliLength do milliBuffer[u] := 5;
 	// Initialise variables
-	lives := 3;
-	score := 0;
-	level := 1;
+	gameStats.lives := 3;
+	gameStats.score := 0;
+	gameStats.level := 1;
+	gameStats.playerMoveCountdown := countdownMax;
+	playerSnake.x := 16;
+	playerSnake.y := 59;
+	gameStats.milliPoisoned := false;
 	DrawHUD();
-	if (level = 1) then return;
+	// Draw player sprite
+	Sprite::SetData(#smallSprites);
+	Sprite::SetSize(1,4);	
+	Sprite::DrawAt(playerSnake.x,playerSnake.y,snakeSprite);
+	if (gameStats.level = 1) then return;
+end;
+
+procedure DrawGrid();
+begin
+	x := 0; y := 6;
+	Sprite::SetData(#smallSprites);
+	Sprite::SetSize(1,4);
+	// Playfield grid array
+	for y := 0 to gridHeight - 1 do
+	begin
+		x := Functions::getRandFromArray(#gridRandoms);
+		gameGrid[y*gridWidth+x] := 1;
+		Sprite::DrawAt(x,6+y*4,0);
+		x := Functions::getRandFromArray(#gridRandoms);
+		gameGrid[y*gridWidth+x] := 1;
+		Sprite::DrawAt(x,6+y*4,0);
+	end;
+end;
+
+procedure ControlPlayer();
+begin
+	// Get player input
+	u := Input::GetJoystick(1);
+	v := Input::GetJoystick(2);
+	w := Input::GetPressedKey();
+	
+	// Test for moving up
+	if (u = Input::Joy_None and (v = Input::Joy_None and (w = Input::Key_None))) then return;
+  // Erase player sprite
+	Sprite::DrawAt(playerSnake.x,playerSnake.y,snakeSprite);
+	if (u = Input::Joy_Up or (v = Input::Joy_Up or (w = Input::Key_Q))) then
+	begin
+		if (playerSnake.y > PlayerYMin) then playerSnake.y := playerSnake.y - 1;
+	end;
+	if (u = Input::Joy_Down or (v = Input::Joy_Down or (w = Input::Key_A))) then
+	begin
+		if (playerSnake.y < PlayerYMax) then playerSnake.y := playerSnake.y + 1;
+	end;	
+	if (u = Input::Joy_Left or (v = Input::Joy_Left or (w = Input::Key_M))) then
+	begin
+		if (playerSnake.x > 0) then playerSnake.x := playerSnake.x - 1;
+	end;
+	if (u = Input::Joy_Right or (v = Input::Joy_Right or (w = Input::Key_COMMA))) then
+	begin
+		if (playerSnake.x < PlayerXMax) then playerSnake.x := playerSnake.x + 1;
+	end;
+	// Draw player sprite at new location
+	Sprite::DrawAt(playerSnake.x,playerSnake.y,snakeSprite);
 end;
 	
 begin
+	gameStats.hiScore := 0;
 	Memory::DisableInterrupts();
 	// Set Graphics mode
 	Screen::SetMode(1);
@@ -128,6 +216,17 @@ begin
 	TitleScreen();
 	PlaySound(1);
 	InitialiseGame();
+	DrawGrid();
+	while (gameStats.gameRunning) do
+	begin
+		gameStats.playerMoveCountdown := gameStats.playerMoveCountdown - 1;
+		if (gameStats.playerMoveCountdown = 0) then
+		begin
+			ControlPlayer();
+			wait(150);
+			gameStats.playerMoveCountdown := countdownMax;
+		end;
+	end;
 	Loop();
 
 end.
