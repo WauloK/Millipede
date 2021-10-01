@@ -248,6 +248,8 @@ gameStats_gameStats_record_gameStats_record_gameRunning	db	0
 gameStats_gameStats_record_gameStats_record_milliPoisoned	db	0
 fleaEnemy_flea_record_flea_record_enabled	db	0
 fleaEnemy_flea_record_flea_record_dropCount	db	0
+fleaEnemy_flea_record_flea_record_hasBeenShot	db	0
+fleaEnemy_flea_record_flea_record_moveSpeed	db	0
 fleaEnemy_flea_record_flea_record_x	db	0
 fleaEnemy_flea_record_flea_record_y	db	0
 	 
@@ -3531,6 +3533,10 @@ DoFleaCheck_ConditionalTrueBlock760: ;Main true block ;keep :
 	ld [fleaEnemy_flea_record_flea_record_x], a
 	ld a, $a
 	ld [fleaEnemy_flea_record_flea_record_y], a
+	ld a, $1
+	ld [fleaEnemy_flea_record_flea_record_moveSpeed], a
+	ld a, $0
+	ld [fleaEnemy_flea_record_flea_record_hasBeenShot], a
 	; generic assign 
 	ld a,[fleaEnemy_flea_record_flea_record_x]
 	ld [Sprite_spritex], a
@@ -3547,6 +3553,36 @@ DoFleaCheck_elsedoneblock762:
 	; ***********  Defining procedure : MoveFlea
 	;    Procedure type : User-defined procedure
 MoveFlea:
+	; Binary clause core: EQUALS
+	; Compare with pure num / var optimization
+	ld a,[fleaEnemy_flea_record_flea_record_hasBeenShot]
+	cp $0
+	jr nz,MoveFlea_elsedoneblock769
+MoveFlea_localsuccess771: ;keep:
+	; ; logical AND, second requirement
+	; Binary clause core: NOTEQUALS
+	; Compare with pure num / var optimization
+	ld a,[fleaEnemy_flea_record_flea_record_moveSpeed]
+	cp $0
+	jr z, MoveFlea_elsedoneblock769
+MoveFlea_ConditionalTrueBlock767: ;Main true block ;keep :
+	
+; // Speed control
+	; 'a:=a + const'  optimization 
+	ld a,[fleaEnemy_flea_record_flea_record_moveSpeed]
+	sub $1
+	ld [fleaEnemy_flea_record_flea_record_moveSpeed], a
+	ret
+MoveFlea_elsedoneblock769:
+	; Binary clause core: EQUALS
+	; Compare with pure num / var optimization
+	ld a,[fleaEnemy_flea_record_flea_record_moveSpeed]
+	cp $0
+	jr nz,MoveFlea_elsedoneblock776
+MoveFlea_ConditionalTrueBlock774: ;Main true block ;keep :
+	ld a, $1
+	ld [fleaEnemy_flea_record_flea_record_moveSpeed], a
+MoveFlea_elsedoneblock776:
 	
 ; // Erase flea sprite
 	; generic assign 
@@ -3565,13 +3601,13 @@ MoveFlea:
 	; Binary clause core: GREATER
 	; Compare with pure num / var optimization
 	cp $36
-	jr c, MoveFlea_elsedoneblock769
-	jr z, MoveFlea_elsedoneblock769
-MoveFlea_ConditionalTrueBlock767: ;Main true block ;keep :
+	jr c, MoveFlea_elsedoneblock782
+	jr z, MoveFlea_elsedoneblock782
+MoveFlea_ConditionalTrueBlock780: ;Main true block ;keep :
 	ld a, $0
 	ld [fleaEnemy_flea_record_flea_record_enabled], a
 	ret
-MoveFlea_elsedoneblock769:
+MoveFlea_elsedoneblock782:
 	; generic assign 
 	ld a,[fleaEnemy_flea_record_flea_record_x]
 	ld [Sprite_spritex], a
@@ -3592,8 +3628,8 @@ MoveFlea_elsedoneblock769:
 	; Compare with pure num / var optimization
 	ld a,[fleaEnemy_flea_record_flea_record_dropCount]
 	cp $4
-	jr nz,MoveFlea_elsedoneblock775
-MoveFlea_ConditionalTrueBlock773: ;Main true block ;keep :
+	jr nz,MoveFlea_elsedoneblock788
+MoveFlea_ConditionalTrueBlock786: ;Main true block ;keep :
 	ld a, $0
 	ld [fleaEnemy_flea_record_flea_record_dropCount], a
 	; generic assign 
@@ -3604,9 +3640,9 @@ MoveFlea_ConditionalTrueBlock773: ;Main true block ;keep :
 	; Binary clause core: GREATER
 	; Compare with pure num / var optimization
 	cp $a
-	jr c, MoveFlea_elsedoneblock799
-	jr z, MoveFlea_elsedoneblock799
-MoveFlea_ConditionalTrueBlock797: ;Main true block ;keep :
+	jr c, MoveFlea_elsedoneblock812
+	jr z, MoveFlea_elsedoneblock812
+MoveFlea_ConditionalTrueBlock810: ;Main true block ;keep :
 	; generic assign 
 	; generic assign 
 	ld a,[fleaEnemy_flea_record_flea_record_x]
@@ -3619,8 +3655,8 @@ MoveFlea_ConditionalTrueBlock797: ;Main true block ;keep :
 	; Binary clause core: EQUALS
 	; Compare with pure num / var optimization
 	cp $0
-	jr nz,MoveFlea_elsedoneblock811
-MoveFlea_ConditionalTrueBlock809: ;Main true block ;keep :
+	jr nz,MoveFlea_elsedoneblock824
+MoveFlea_ConditionalTrueBlock822: ;Main true block ;keep :
 	; generic assign 
 	ld a,[fleaEnemy_flea_record_flea_record_x]
 	ld [v], a
@@ -3632,9 +3668,9 @@ MoveFlea_ConditionalTrueBlock809: ;Main true block ;keep :
 	ld a, $1
 	ld [t], a
 	call SetGridLocVal
-MoveFlea_elsedoneblock811:
-MoveFlea_elsedoneblock799:
-MoveFlea_elsedoneblock775:
+MoveFlea_elsedoneblock824:
+MoveFlea_elsedoneblock812:
+MoveFlea_elsedoneblock788:
 	ret
 block1:
 	
@@ -3674,14 +3710,14 @@ block1:
 	call PlaySound
 	call InitialiseGame
 	call DrawGrid
-MainProgram_while815:
-MainProgram_loopstart819:
+MainProgram_while828:
+MainProgram_loopstart832:
 	; Binary clause core: NOTEQUALS
 	; Compare with pure num / var optimization
 	ld a,[gameStats_gameStats_record_gameStats_record_gameRunning]
 	cp $0
-	jr z, MainProgram_elsedoneblock818
-MainProgram_ConditionalTrueBlock816: ;Main true block ;keep :
+	jr z, MainProgram_elsedoneblock831
+MainProgram_ConditionalTrueBlock829: ;Main true block ;keep :
 	
 ; // Keep game going until gameRunning is false(Game over)
 ; // Sync everything so the speed is correct
@@ -3691,27 +3727,27 @@ MainProgram_ConditionalTrueBlock816: ;Main true block ;keep :
 	; Compare with pure num / var optimization
 	ld a,[playerBullet_playerBullet_record_playerBullet_record_fired]
 	cp $0
-	jr z, MainProgram_elsedoneblock840
-MainProgram_ConditionalTrueBlock838: ;Main true block ;keep :
+	jr z, MainProgram_elsedoneblock853
+MainProgram_ConditionalTrueBlock851: ;Main true block ;keep :
 	call MoveBullet
-MainProgram_elsedoneblock840:
+MainProgram_elsedoneblock853:
 	; Binary clause core: NOTEQUALS
 	; Compare with pure num / var optimization
 	ld a,[fleaEnemy_flea_record_flea_record_enabled]
 	cp $0
-	jr z, MainProgram_elseblock845
-MainProgram_ConditionalTrueBlock844: ;Main true block ;keep :
+	jr z, MainProgram_elseblock858
+MainProgram_ConditionalTrueBlock857: ;Main true block ;keep :
 	call MoveFlea
-	jr MainProgram_elsedoneblock846
-MainProgram_elseblock845:
+	jr MainProgram_elsedoneblock859
+MainProgram_elseblock858:
 	call DoFleaCheck
-MainProgram_elsedoneblock846:
-	jr MainProgram_while815
-MainProgram_elsedoneblock818:
-MainProgram_loopend820:
-MainProgram_end851:
+MainProgram_elsedoneblock859:
+	jr MainProgram_while828
+MainProgram_elsedoneblock831:
+MainProgram_loopend833:
+MainProgram_end864:
 	;nop
-	jr MainProgram_end851
+	jr MainProgram_end864
 ; Copy BC bytes from HL to DE.
 z80_copy_mem:
     ld      a,b

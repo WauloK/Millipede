@@ -27,6 +27,7 @@ var
 	const PlayerYMin : byte = 42;
 	const PlayerYMax : byte = 58;
 	const PlayerXMax : byte = 31;
+	const fleaMovespeed : byte = 1;
 	const screenYOffset : byte = 6;
 	const Sfx_Gamestart : byte = 1;
 	const Sfx_Playershoot : byte = 2;
@@ -66,6 +67,8 @@ var
 	flea_record = record
 		enabled : boolean;
 		dropCount : byte;
+		hasBeenShot : boolean;
+		moveSpeed : byte;
 		x,y : byte;
 	end;
 	gameStats_record = record
@@ -379,6 +382,8 @@ begin
 		fleaEnemy.enabled := true;
 		fleaEnemy.x := Functions::getRandFromArray(#gridRandoms);
 		fleaEnemy.y := screenYOffset + 4;
+		fleaEnemy.moveSpeed := fleaMovespeed;
+		fleaEnemy.hasBeenShot := false;
 		Sprite::DrawAt(fleaEnemy.x, fleaEnemy.y, fleaSprite);
 	end;
 end;
@@ -386,6 +391,13 @@ end;
 // Move the flea down the screen, dropping mushies on the way
 procedure MoveFlea();
 begin
+	// Speed control
+	if (fleaEnemy.hasBeenShot = false and (fleaEnemy.moveSpeed)) then
+	begin
+		fleaEnemy.moveSpeed := fleaEnemy.moveSpeed - 1;
+		return;
+	end;
+	if (fleaEnemy.moveSpeed = 0) then fleaEnemy.moveSpeed := fleaMovespeed;
 	// Erase flea sprite
 	Sprite::DrawAt(fleaEnemy.x, fleaEnemy.y, fleaSprite);
 	fleaEnemy.y := fleaEnemy.y + 1;
