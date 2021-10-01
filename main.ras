@@ -138,6 +138,18 @@ begin
 	Font::DrawTextAt("00",tmp+6,y);
 end;
 
+// Erase Headsup Display
+procedure EraseHUD();
+begin
+	asm("
+	ld hl,#7000
+	ld de,#7001
+	ld bc,#a0
+	ld (hl),#00
+	ldir
+	")
+end;
+
 // Draw Headsup Display.
 procedure DrawHUD();
 begin
@@ -224,6 +236,13 @@ begin
 	gameGrid[tempint] := t;
 	// Draw new grid sprite
 	Sprite::DrawAt(v,lookupGridY[w]+screenYOffset,t);
+end;
+
+procedure AddScore(t : global byte);
+begin
+	EraseHUD();
+	gameStats.score := gameStats.score + t;
+	DrawHUD();
 end;
 
 // Get player input and move snake head
@@ -328,6 +347,7 @@ begin
 			begin
 				// Delete mushy
 				SetGridLocVal(playerBullet.x,playerBullet.y,mushroomSprite - 1);
+				AddScore(1);
 			end;
 		end;
 	end;
