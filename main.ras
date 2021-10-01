@@ -17,6 +17,7 @@ var
 	const gridWidth : byte = 32;
 	const gridHeight : byte = 14;
 	const milliLength : byte = 12;
+	const fleaSprite : byte = 9;
 	const snakeSprite : byte = 10;
 	const bulletSprite : byte = 11;
 	const mushroomSprite : byte = 1;
@@ -29,6 +30,7 @@ var
 	const screenYOffset : byte = 6;
 	const Sfx_Gamestart : byte = 1;
 	const Sfx_Playershoot : byte = 2;
+	const Sfx_Flea : byte = 3;
 	// Other variables	
 	tempint : Integer;
 	mychar : string = "A";
@@ -61,6 +63,11 @@ var
 		fired : boolean;
 		x,y : byte;
 	end;
+	flea_record = record
+		enabled : boolean;
+		dropCount : byte;
+		x,y : byte;
+	end;
 	gameStats_record = record
 		lives, level : byte;
 		score : Integer;
@@ -72,6 +79,7 @@ var
 	milliSegments : milliSegments_record;
 	playerSnake : playerSnake_record;
 	gameStats : gameStats_record;
+	fleaEnemy : flea_record;
 
 // Procedures	
 procedure TitleScreen();
@@ -109,24 +117,25 @@ begin
 				Sound::Play(50,50);
 			end;
 		Sfx_Playershoot:
-		begin
-			//Sound::Shoot(400,80);
-			Sound::Play(80,10);
-			Sound::Play(100,10);
-			Sound::Play(120,10);
-		end;
+			begin
+				Sound::Play(80,10);
+				Sound::Play(100,10);
+				Sound::Play(120,10);
+			end;
+		Sfx_Flea:
+			begin
+				Sound::Play(fleaEnemy.y * 5,3);
+			end;
 	end;
 end;
 
 // Draw numbers on the screen padded and with trailing zeroes
 procedure DrawPadded(zscore : Integer; x, y: global byte);
-var
-	tmp : byte;
 begin
-	tmp := x;
+	u := x;
 	if (zscore < 1) then 
 	begin
-		Font::DrawTextAt("0",tmp+7,y);
+		Font::DrawTextAt("0",u+7,y);
 		return;
 	end;
 	if (zscore < 10000) then x := x + 1;
@@ -135,7 +144,7 @@ begin
 	if (zscore < 10) then x := x + 1;
 	Functions::IntegerToString(zscore);
 	Font::DrawTextAt(#Functions_s,x,y);	
-	Font::DrawTextAt("00",tmp+6,y);
+	Font::DrawTextAt("00",u+6,y);
 end;
 
 // Erase Headsup Display
@@ -187,6 +196,7 @@ begin
 	playerSnake.y := 58;
 	playerBullet.fired := false;
 	gameStats.milliPoisoned := false;
+	fleaEnemy.enabled := false;
 	DrawHUD();
 	// Draw player sprite
 	Sprite::SetData(#smallSprites);
@@ -316,7 +326,7 @@ begin
 end;
 
 // Player fired
-procedure moveBullet();
+procedure MoveBullet();
 begin
 	// Erase sprite
 	Sprite::DrawAt(playerBullet.x,playerBullet.y,bulletSprite);
@@ -354,7 +364,51 @@ begin
 	// Draw sprite at new location onscreen
 	if (playerBullet.fired) then Sprite::DrawAt(playerBullet.x,playerBullet.y,bulletSprite);
 end;
-	
+
+// Check if we need to put a flea on the screen
+procedure DoFleaCheck();
+begin
+	t := 0;
+	for u := 0 to 160 do
+	begin
+		v := gameGrid[u+256];
+		if (v > mushroomSprite - 1 and (v < mushroomSpriteEnd)) then t := t + 1;
+	end;
+	if (t < 5) then
+	begin
+		fleaEnemy.enabled := true;
+		fleaEnemy.x := Functions::getRandFromArray(#gridRandoms);
+		fleaEnemy.y := screenYOffset + 4;
+		Sprite::DrawAt(fleaEnemy.x, fleaEnemy.y, fleaSprite);
+	end;
+end;
+
+// Move the flea down the screen, dropping mushies on the way
+procedure MoveFlea();
+begin
+	// Erase flea sprite
+	Sprite::DrawAt(fleaEnemy.x, fleaEnemy.y, fleaSprite);
+	fleaEnemy.y := fleaEnemy.y + 1;
+	if (fleaEnemy.y > PlayerYMax - 4) then
+	begin
+		fleaEnemy.enabled := false;
+		return;
+	end;
+	Sprite::DrawAt(fleaEnemy.x, fleaEnemy.y, fleaSprite);
+	fleaEnemy.dropCount := fleaEnemy.dropCount + 1;
+	PlaySound(Sfx_Flea);
+	if (fleaEnemy.dropCount = 4) then
+	begin
+		fleaEnemy.dropCount := 0;
+		t := Functions::getRandFromArray(#gridRandoms);
+		if (t > 10) then
+		begin
+			u := GetGridLocVal(fleaEnemy.x, fleaEnemy.y);
+			if (u =0) then SetGridLocVal(fleaEnemy.x, fleaEnemy.y - 4, mushroomSprite);
+		end;
+	end;
+end;
+
 // Actual code start
 begin
 	gameStats.hiScore := 0;
@@ -378,7 +432,8 @@ begin
 		// Sync everything so the speed is correct
 		Screen::WaitForVerticalBlank();
 		ControlPlayer();
-		if (playerBullet.fired) then moveBullet();
+		if (playerBullet.fired) then MoveBullet();
+		if (fleaEnemy.enabled) then MoveFlea() else DoFleaCheck();
 	end;
 	Loop();
 
