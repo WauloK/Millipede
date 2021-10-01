@@ -11,27 +11,41 @@ program MyProject;
 @export "images/title.flf" "title.bin" 256
 
 var  
+	// Get data for the title screen
 	data : incbin("title.bin") compressed;
-	// Constants
+	// Constants to make code easier to read
 	const gridWidth : byte = 32;
 	const gridHeight : byte = 14;
 	const milliLength : byte = 12;
-	const snakeSprite : byte = 9;
-	const mushroomSprite : byte = 0;
+	const snakeSprite : byte = 10;
+	const bulletSprite : byte = 11;
+	const mushroomSprite : byte = 1;
+	const mushroomSpriteEnd : byte = 5;
+	const milliSprite : byte = 12;
+	const milliSpriteEnd : byte = 17;
 	const PlayerYMin : byte = 42;
-	const PlayerYMax : byte = 60;
+	const PlayerYMax : byte = 58;
 	const PlayerXMax : byte = 31;
-	const countdownMax : byte = 200;
+	const screenYOffset : byte = 6;
+	const Sfx_Gamestart : byte = 1;
+	const Sfx_Playershoot : byte = 2;
 	// Other variables	
+	tempint : Integer;
 	mychar : string = "A";
 	myp, mym : pointer;
 	strpos : byte = 0;	
+	// Set up an array for the mushrooms
 	gameGrid : array[gridWidth*gridHeight] of byte;
+	// Make a small buffer for millipede to begin in before moving onto the screen
 	milliBuffer : array[milliLength] of byte;
+	// An array of random numbers 0-31 for putting mushrooms in the grid
 	gridRandoms : array[256] of byte = (24,4,29,22,26,24,26,19,21,8,23,20,20,1,30,27,19,2,16,20,11,2,18,17,1,9,14,9,29,29,17,8,7,5,2,0,31,10,22,24,8,19,1,29,7,25,29,20,4,15,12,25,0,11,23,6,6,31,21,2,26,29,10,15,20,23,30,30,31,9,6,2,14,12,28,22,7,21,6,1,20,31,4,25,30,8,11,24,17,24,27,14,20,9,18,18,30,4,28,6,18,4,20,9,26,12,4,12,26,19,18,12,25,30,5,15,14,5,23,24,4,27,13,4,26,11,26,20,22,16,5,28,1,2,18,31,20,20,17,21,6,11,24,0,10,24,31,2,27,12,19,31,20,8,13,19,4,18,6,7,30,2,27,19,16,7,1,18,17,31,6,24,17,1,16,6,6,20,0,29,16,23,3,16,18,1,28,28,21,12,17,25,18,0,22,21,15,5,10,18,24,17,6,31,5,23,12,1,17,20,12,30,25,3,10,26,30,5,30,11,0,26,19,16,11,23,11,18,14,27,26,20,25,23,28,17,13,31,15,19,29,25,9,3,29,27,1,14,14,30,15,16,31,31,18,21);
-	smallSprites: array[] of byte =(20,85,40,40,20,85,40,9,20,85,0,0,20,0,0,0,40,170,60,60,40,170,60,0,40,170,0,0,40,0,0,0,60,223,255,204,20,215,85,20,20,20,0,0,20,85,85,20,23,85,85,23,20,85,85,215,212,85,85,212,215,85,85,20,0,16,0,0,0,16,4,0,0,4,16,0,68,17,68,17,0,48,0,0,0,48,12,0,0,12,48,0,204,51,204,51);
+	smallSprites: array[] of byte =(0,0,0,0,20,85,40,40,20,85,40,8,20,85,0,0,20,0,0,0,40,170,60,60,40,170,60,0,40,170,0,0,40,0,0,0,60,223,255,204,20,215,85,20,20,0,0,0,20,85,85,20,23,85,85,23,20,85,85,215,212,85,85,212,215,85,85,20,0,16,0,0,0,16,4,0,0,4,16,0,68,17,68,17,0,48,0,0,0,48,12,0,0,12,48,0,204,51,204,51);
 	bigSprites: array[] of byte = (0,0,48,12,199,211,15,240,48,12,48,12,48,12,204,51,7,208,15,24,0,48,12,192,3,240,15,12,48,7,208,63,252,192,3,0,0,48,12,204,51,7,208,15,24,0,48,12,192,3,0,0,204,204,48,48,55,124,15,255,3,252,0,0,204,204,48,48,55,115,15,255,3,252,0,0,48,48,48,48,55,124,15,255,3,252,0,0,204,204,48,48,55,115,15,255,3,252,0,0,51,51,12,12,61,220,255,240,63,192,0,0,51,51,12,12,205,220,255,240,63,192,0,0,12,12,12,12,61,220,255,240,63,192,0,0,51,51,12,12,205,220,255,240,63,192,204,51,55,220,208,67,193,7,55,220,204,51,0,0,204,51,55,204,51,220,204,51,0,0,0,4,16,0,0,0,0,0,0,0,0,0,0,0,1,192,3,64,0,0,0,0,0,0);
-	u, v, w : byte;
+	// Array to look up Y values to speed things up
+	lookupPlayerY : array[gridHeight] of integer = BuildTable("i*GRIDWIDTH");
+	lookupGridY : array[gridHeight] of integer = BuildTable("i*4");
+	t, u, v, w, x, y : byte;
 	message : string = "Press 'S' to start! You can use either Joystick or Keys:QA = Up/Down and M, = Left/Right Space to fire. Millipede was developed by Jason Oakley / Blue Bilby using TRSE. Check out more stuff at BlueBilby.com ... ";
 	strlen : byte = 210;
 	milliSegments_record = record
@@ -44,6 +58,7 @@ var
 		x,y : byte;
 	end;
 	playerBullet_record = record
+		fired : boolean;
 		x,y : byte;
 	end;
 	gameStats_record = record
@@ -52,7 +67,6 @@ var
 		hiScore : Integer;
 		gameRunning : boolean;
 		milliPoisoned : boolean;
-		playerMoveCountdown : byte;
 	end;
 	playerBullet : playerBullet_record;
 	milliSegments : milliSegments_record;
@@ -68,6 +82,7 @@ begin
 	// Keep titlescreen going until S pressed
 	while (Input::GetPressedKey() <> Input::Key_S) do
 	begin
+		// Draw new char in the onscreen scroll every 4 pixels
 		if (v = 0) then
 		begin
 			v := 4;
@@ -76,22 +91,35 @@ begin
 			if (strpos < strlen) then strpos := strpos + 1 else strpos := 0;
 		end;
 		for u := 0 to 200 do wait(50);	
+		// Smooth scroll the message 1 pixel at a time
 		Screen::doSmoothScroll(30559,5);
 		v := v - 1;
 	end;	
 	gameStats.gameRunning := true;
 end;
 
+// Sound effects manager
 procedure PlaySound(u : global byte);
 begin
-	if (u = 1) then
-	begin
-		Sound::Play(80,50);
-		Sound::Play(50,50);
+	// Game start sfx
+	case u of
+		Sfx_Gamestart:
+			begin
+				Sound::Play(80,50);
+				Sound::Play(50,50);
+			end;
+		Sfx_Playershoot:
+		begin
+			//Sound::Shoot(400,80);
+			Sound::Play(80,10);
+			Sound::Play(100,10);
+			Sound::Play(120,10);
+		end;
 	end;
 end;
 
-procedure DrawPadded(zscore : Integer; x, y: byte);
+// Draw numbers on the screen padded and with trailing zeroes
+procedure DrawPadded(zscore : Integer; x, y: global byte);
 var
 	tmp : byte;
 begin
@@ -110,6 +138,7 @@ begin
 	Font::DrawTextAt("00",tmp+6,y);
 end;
 
+// Draw Headsup Display.
 procedure DrawHUD();
 begin
 	// Draw lives
@@ -124,6 +153,7 @@ begin
 	Font::DrawTextAt(#Functions_s,6,0);
 end;
 
+// Initialise stuff
 procedure InitialiseGame();
 begin
 	// Scroll titlescreen off to the left
@@ -141,9 +171,9 @@ begin
 	gameStats.lives := 3;
 	gameStats.score := 0;
 	gameStats.level := 1;
-	gameStats.playerMoveCountdown := countdownMax;
 	playerSnake.x := 16;
-	playerSnake.y := 59;
+	playerSnake.y := 58;
+	playerBullet.fired := false;
 	gameStats.milliPoisoned := false;
 	DrawHUD();
 	// Draw player sprite
@@ -153,23 +183,50 @@ begin
 	if (gameStats.level = 1) then return;
 end;
 
+// Initialise the mushrooms in an array grid and display
 procedure DrawGrid();
 begin
-	x := 0; y := 6;
 	Sprite::SetData(#smallSprites);
 	Sprite::SetSize(1,4);
 	// Playfield grid array
 	for y := 0 to gridHeight - 1 do
 	begin
 		x := Functions::getRandFromArray(#gridRandoms);
-		gameGrid[y*gridWidth+x] := 1;
-		Sprite::DrawAt(x,6+y*4,0);
+		tempint := lookupPlayerY[y] + x;
+		gameGrid[tempint] := mushroomSprite;
+		Sprite::DrawAt(x,screenYOffset+y*4,mushroomSprite);
 		x := Functions::getRandFromArray(#gridRandoms);
-		gameGrid[y*gridWidth+x] := 1;
-		Sprite::DrawAt(x,6+y*4,0);
+		tempint := lookupPlayerY[y] + x;
+		gameGrid[tempint] := mushroomSprite;
+		Sprite::DrawAt(x,screenYOffset+y*4,mushroomSprite);
 	end;
 end;
 
+// Calculate the player's position in the mushroom grid
+// to compare if colliding with mushrooms or millipede
+function GetGridLocVal(v,w : global byte):byte;
+begin
+	w := (w - screenYOffset) / 4 + 1;
+	tempint := lookupPlayerY[w]+v;
+	// Return value from function call
+	GetGridLocVal := gameGrid[tempint];
+end;
+
+// Update value at grid location
+procedure SetGridLocVal(v,w,t : global byte);
+begin
+	w := (w - screenYOffset) / 4 + 1;
+	tempint := lookupPlayerY[w]+v;
+	// Delete sprite at this location on screen
+	u := gameGrid[tempint];
+	Sprite::DrawAt(v,lookupGridY[w]+screenYOffset,u);
+	// Update grid value
+	gameGrid[tempint] := t;
+	// Draw new grid sprite
+	Sprite::DrawAt(v,lookupGridY[w]+screenYOffset,t);
+end;
+
+// Get player input and move snake head
 procedure ControlPlayer();
 begin
 	// Get player input
@@ -179,28 +236,106 @@ begin
 	
 	// Test for moving up
 	if (u = Input::Joy_None and (v = Input::Joy_None and (w = Input::Key_None))) then return;
+	// Player shooting
+	if (u = Input::Joy_Fire or (v = Input::Joy_Fire or (w = Input::Key_SPC))) then
+	begin
+		// Test if a bullet already exists onscreen. Snake can only shoot once at a time
+		if (playerBullet.fired) then return;
+		playerBullet.fired := true;
+		PlaySound(Sfx_Playershoot);
+		playerBullet.x := playerSnake.x;
+		playerBullet.y := playerSnake.y;
+		Sprite::DrawAt(playerBullet.x,playerBullet.y,bulletSprite);
+		return;
+	end;		
   // Erase player sprite
 	Sprite::DrawAt(playerSnake.x,playerSnake.y,snakeSprite);
+	// Check if player wants to move UP
 	if (u = Input::Joy_Up or (v = Input::Joy_Up or (w = Input::Key_Q))) then
 	begin
-		if (playerSnake.y > PlayerYMin) then playerSnake.y := playerSnake.y - 1;
+		// Make sure we're not already at the top of the player area
+		if (playerSnake.y > PlayerYMin) then 
+		begin
+			// Move player y pos
+			playerSnake.y := playerSnake.y - 1;
+			// Test if we're colliding with a mushroom. If so, move player y back
+			if (GetGridLocVal(playerSnake.x,playerSnake.y) > 0) then playerSnake.y := playerSnake.y + 1;
+		end;
 	end;
 	if (u = Input::Joy_Down or (v = Input::Joy_Down or (w = Input::Key_A))) then
 	begin
-		if (playerSnake.y < PlayerYMax) then playerSnake.y := playerSnake.y + 1;
+		if (playerSnake.y < PlayerYMax) then 
+		begin
+			// Due to player sprite being 4 pixels high we need to check 4 below the Y value.
+			playerSnake.y := playerSnake.y + 4;
+			// If a mushroom is below the player, move the y back to where it was, otherwise move one pixel down
+			if (GetGridLocVal(playerSnake.x,playerSnake.y) > 0) then playerSnake.y := playerSnake.y - 4 else playerSnake.y := playerSnake.y - 3;
+		end;
 	end;	
 	if (u = Input::Joy_Left or (v = Input::Joy_Left or (w = Input::Key_M))) then
 	begin
-		if (playerSnake.x > 0) then playerSnake.x := playerSnake.x - 1;
+		if (playerSnake.x > 0) then
+		begin
+			playerSnake.x := playerSnake.x - 1;
+			if (GetGridLocVal(playerSnake.x,playerSnake.y) > 0) then playerSnake.x := playerSnake.x + 1;
+			// Test bottom of sprite
+			if (GetGridLocVal(playerSnake.x,playerSnake.y + 3) > 0) then playerSnake.x := playerSnake.x + 1;
+		end;
 	end;
 	if (u = Input::Joy_Right or (v = Input::Joy_Right or (w = Input::Key_COMMA))) then
 	begin
-		if (playerSnake.x < PlayerXMax) then playerSnake.x := playerSnake.x + 1;
+		if (playerSnake.x < PlayerXMax) then
+		begin
+			playerSnake.x := playerSnake.x + 1;
+			if (GetGridLocVal(playerSnake.x,playerSnake.y) > 0) then playerSnake.x := playerSnake.x - 1;		
+			// Test bottom of sprite
+			if (GetGridLocVal(playerSnake.x,playerSnake.y + 3) > 0) then playerSnake.x := playerSnake.x - 1;			
+		end;
 	end;
 	// Draw player sprite at new location
 	Sprite::DrawAt(playerSnake.x,playerSnake.y,snakeSprite);
 end;
+
+// Player fired
+procedure moveBullet();
+begin
+	// Erase sprite
+	Sprite::DrawAt(playerBullet.x,playerBullet.y,bulletSprite);
+	playerBullet.y := playerBullet.y - 1;
+	if (playerBullet.y < screenYOffset) then
+	begin
+		playerBullet.fired := false;
+		return;
+	end;
+	// Find out any values in the grid at the bullet location
+	t := GetGridLocVal(playerBullet.x,playerBullet.y);
+	// Collided with something on the grid
+	if (t > 0) then
+	begin
+		// Turn bullet off
+		playerBullet.fired := false;
+		// Test for mushies
+		if (t > mushroomSprite - 1 and (t < mushroomSpriteEnd)) then
+		begin
+			// Mushy at this grid loc
+			if (t < mushroomSpriteEnd) then
+			begin
+				t := t + 1;
+				// Update value in grid location
+				SetGridLocVal(playerBullet.x,playerBullet.y,t);
+			end;
+			if (t = mushroomSpriteEnd) then 
+			begin
+				// Delete mushy
+				SetGridLocVal(playerBullet.x,playerBullet.y,mushroomSprite - 1);
+			end;
+		end;
+	end;
+	// Draw sprite at new location onscreen
+	if (playerBullet.fired) then Sprite::DrawAt(playerBullet.x,playerBullet.y,bulletSprite);
+end;
 	
+// Actual code start
 begin
 	gameStats.hiScore := 0;
 	Memory::DisableInterrupts();
@@ -217,15 +352,13 @@ begin
 	PlaySound(1);
 	InitialiseGame();
 	DrawGrid();
+	// Keep game going until gameRunning is false (Game over)
 	while (gameStats.gameRunning) do
 	begin
-		gameStats.playerMoveCountdown := gameStats.playerMoveCountdown - 1;
-		if (gameStats.playerMoveCountdown = 0) then
-		begin
-			ControlPlayer();
-			wait(150);
-			gameStats.playerMoveCountdown := countdownMax;
-		end;
+		// Sync everything so the speed is correct
+		Screen::WaitForVerticalBlank();
+		ControlPlayer();
+		if (playerBullet.fired) then moveBullet();
 	end;
 	Loop();
 
