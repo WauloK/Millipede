@@ -56,12 +56,14 @@ var
 		dir : boolean; // false = left. true = right
 		head : boolean; // false = body. true = head
 		down : boolean; // false = no. true = yes
+		up : boolean; // Moving up from bottom?
 	end;
 	playerSnake_record = record
 		x,y : byte;
 	end;
 	playerBullet_record = record
 		fired : boolean;
+		moveCount : byte;
 		x,y : byte;
 	end;
 	flea_record = record
@@ -138,7 +140,7 @@ begin
 	u := x;
 	if (zscore < 1) then 
 	begin
-		Font::DrawTextAt("0",u+7,y);
+		Font::DrawTextAt("0",u+6,y);
 		return;
 	end;
 	if (zscore < 10000) then x := x + 1;
@@ -147,7 +149,7 @@ begin
 	if (zscore < 10) then x := x + 1;
 	Functions::IntegerToString(zscore);
 	Font::DrawTextAt(#Functions_s,x,y);	
-	Font::DrawTextAt("00",u+6,y);
+	Font::DrawTextAt("0",u+6,y);
 end;
 
 // Erase Headsup Display
@@ -197,6 +199,7 @@ begin
 	gameStats.level := 1;
 	playerSnake.x := 16;
 	playerSnake.y := 58;
+	playerBullet.moveCount := 4;
 	playerBullet.fired := false;
 	gameStats.milliPoisoned := false;
 	fleaEnemy.enabled := false;
@@ -276,7 +279,7 @@ begin
 		playerBullet.fired := true;
 		PlaySound(Sfx_Playershoot);
 		playerBullet.x := playerSnake.x;
-		playerBullet.y := playerSnake.y;
+		playerBullet.y := playerSnake.y + 2;
 		Sprite::DrawAt(playerBullet.x,playerBullet.y,bulletSprite);
 		return;
 	end;		
@@ -328,6 +331,24 @@ begin
 	Sprite::DrawAt(playerSnake.x,playerSnake.y,snakeSprite);
 end;
 
+// Check if we need to put a flea on the screen
+procedure DoFleaCheck();
+begin
+	t := 0;
+	for u := 0 to 160 do
+	begin
+		v := gameGrid[u+256];
+		if (v > mushroomSprite - 1 and (v < mushroomSpriteEnd)) then t := t + 1;
+		if (t > 5) then return;
+	end;
+	fleaEnemy.enabled := true;
+	fleaEnemy.x := Functions::getRandFromArray(#gridRandoms);
+	fleaEnemy.y := screenYOffset + 4;
+	fleaEnemy.moveSpeed := fleaMovespeed;
+	fleaEnemy.hasBeenShot := false;
+	Sprite::DrawAt(fleaEnemy.x, fleaEnemy.y, fleaSprite);
+end;
+
 // Player fired
 procedure MoveBullet();
 begin
@@ -339,6 +360,16 @@ begin
 		playerBullet.fired := false;
 		return;
 	end;
+	// Only check every 4 pixels moved
+	playerBullet.moveCount := playerBullet.moveCount - 1;
+	if (playerBullet.moveCount > 0) then
+	begin
+		// Draw sprite at new location onscreen
+		if (playerBullet.fired) then Sprite::DrawAt(playerBullet.x,playerBullet.y,bulletSprite);
+		return;	
+	end;
+	// Reset movement counter
+	playerBullet.moveCount := 4;
 	// Find out any values in the grid at the bullet location
 	t := GetGridLocVal(playerBullet.x,playerBullet.y);
 	// Collided with something on the grid
@@ -361,31 +392,13 @@ begin
 				// Delete mushy
 				SetGridLocVal(playerBullet.x,playerBullet.y,mushroomSprite - 1);
 				AddScore(1);
+				// See if number of mushies in player area needs updating
+				if (fleaEnemy.enabled = false) then DoFleaCheck();
 			end;
 		end;
 	end;
 	// Draw sprite at new location onscreen
 	if (playerBullet.fired) then Sprite::DrawAt(playerBullet.x,playerBullet.y,bulletSprite);
-end;
-
-// Check if we need to put a flea on the screen
-procedure DoFleaCheck();
-begin
-	t := 0;
-	for u := 0 to 160 do
-	begin
-		v := gameGrid[u+256];
-		if (v > mushroomSprite - 1 and (v < mushroomSpriteEnd)) then t := t + 1;
-	end;
-	if (t < 5) then
-	begin
-		fleaEnemy.enabled := true;
-		fleaEnemy.x := Functions::getRandFromArray(#gridRandoms);
-		fleaEnemy.y := screenYOffset + 4;
-		fleaEnemy.moveSpeed := fleaMovespeed;
-		fleaEnemy.hasBeenShot := false;
-		Sprite::DrawAt(fleaEnemy.x, fleaEnemy.y, fleaSprite);
-	end;
 end;
 
 // Move the flea down the screen, dropping mushies on the way
@@ -395,9 +408,8 @@ begin
 	if (fleaEnemy.hasBeenShot = false and (fleaEnemy.moveSpeed)) then
 	begin
 		fleaEnemy.moveSpeed := fleaEnemy.moveSpeed - 1;
-		return;
+		if (fleaEnemy.moveSpeed = 0) then fleaEnemy.moveSpeed := fleaMovespeed;
 	end;
-	if (fleaEnemy.moveSpeed = 0) then fleaEnemy.moveSpeed := fleaMovespeed;
 	// Erase flea sprite
 	Sprite::DrawAt(fleaEnemy.x, fleaEnemy.y, fleaSprite);
 	fleaEnemy.y := fleaEnemy.y + 1;
@@ -445,7 +457,7 @@ begin
 		Screen::WaitForVerticalBlank();
 		ControlPlayer();
 		if (playerBullet.fired) then MoveBullet();
-		if (fleaEnemy.enabled) then MoveFlea() else DoFleaCheck();
+		if (fleaEnemy.enabled) then MoveFlea();
 	end;
 	Loop();
 
