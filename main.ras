@@ -100,7 +100,7 @@ begin
 		begin
 			v := 4;
 			myp[0] := mym[strpos];
-			Font::DrawTextAt(#mychar,31,58);
+			Font::DrawTextAt(#mychar,31,58,false);
 			if (strpos < strlen) then strpos := strpos + 1 else strpos := 0;
 		end;
 		for u := 0 to 200 do wait(50);	
@@ -140,7 +140,7 @@ begin
 	u := x;
 	if (zscore < 1) then 
 	begin
-		Font::DrawTextAt("0",u+6,y);
+		Font::DrawTextAt("0",u+6,y,false);
 		return;
 	end;
 	if (zscore < 10000) then x := x + 1;
@@ -148,20 +148,8 @@ begin
 	if (zscore < 100) then x := x + 1;
 	if (zscore < 10) then x := x + 1;
 	Functions::IntegerToString(zscore);
-	Font::DrawTextAt(#Functions_s,x,y);	
-	Font::DrawTextAt("0",u+6,y);
-end;
-
-// Erase Headsup Display
-procedure EraseHUD();
-begin
-	asm("
-	ld hl,#7000
-	ld de,#7001
-	ld bc,#a0
-	ld (hl),#00
-	ldir
-	")
+	Font::DrawTextAt(#Functions_s,x,y,false);	
+	Font::DrawTextAt("0",u+6,y,false);
 end;
 
 // Draw Headsup Display.
@@ -169,14 +157,14 @@ procedure DrawHUD();
 begin
 	// Draw lives
 	Screen::SetPen(3);
-	Font::DrawTextAt("Score:",19,0);
-	Font::DrawTextAt("Lives:",0,0);
-	Font::DrawTextAt("Hi:",8,0);
+	Font::DrawTextAt("Score:",19,0,false);
+	Font::DrawTextAt("Lives:",0,0,false);
+	Font::DrawTextAt("Hi:",8,0,false);
 	Screen::SetPen(1);
 	DrawPadded(gameStats.score,24,0);
 	DrawPadded(gameStats.hiScore,10,0);
 	Functions::ByteToString(gameStats.lives);
-	Font::DrawTextAt(#Functions_s,6,0);
+	Font::DrawTextAt(#Functions_s,6,0,false);
 end;
 
 // Initialise stuff
@@ -256,7 +244,6 @@ end;
 
 procedure AddScore(t : global byte);
 begin
-	EraseHUD();
 	gameStats.score := gameStats.score + t;
 	DrawHUD();
 end;
