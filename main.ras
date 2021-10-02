@@ -24,14 +24,16 @@ var
 	const mushroomSpriteEnd : byte = 5;
 	const milliSprite : byte = 12;
 	const milliSpriteEnd : byte = 17;
+	const fleaDeathSprite : byte = 20;
 	const PlayerYMin : byte = 42;
 	const PlayerYMax : byte = 58;
 	const PlayerXMax : byte = 31;
-	const fleaMovespeed : byte = 1;
+	const fleaMovespeed : byte = 2;
 	const screenYOffset : byte = 6;
 	const Sfx_Gamestart : byte = 1;
 	const Sfx_Playershoot : byte = 2;
 	const Sfx_Flea : byte = 3;
+	const Sfx_FleaDead : byte = 4;
 	// Other variables	
 	tempint : Integer;
 	mychar : string = "A";
@@ -69,8 +71,9 @@ var
 	flea_record = record
 		enabled : boolean;
 		dropCount : byte;
-		hasBeenShot : boolean;
+		shotCount : byte;
 		moveSpeed : byte;
+		animFrame : byte;
 		x,y : byte;
 	end;
 	gameStats_record = record
@@ -130,6 +133,10 @@ begin
 		Sfx_Flea:
 			begin
 				Sound::Play(fleaEnemy.y * 5,3);
+			end;
+		Sfx_FleaDead:
+			begin
+				Sound::Shoot(450,200);
 			end;
 	end;
 end;
@@ -191,6 +198,7 @@ begin
 	playerBullet.fired := false;
 	gameStats.milliPoisoned := false;
 	fleaEnemy.enabled := false;
+	fleaEnemy.shotCount := 0;
 	DrawHUD();
 	// Draw player sprite
 	Sprite::SetData(#smallSprites);
@@ -329,10 +337,10 @@ begin
 		if (t > 5) then return;
 	end;
 	fleaEnemy.enabled := true;
-	fleaEnemy.x := Functions::getRandFromArray(#gridRandoms);
+	fleaEnemy.x := Functions::getRandFromArray(#gridRandoms); fleaEnemy.x := 15;
 	fleaEnemy.y := screenYOffset + 4;
 	fleaEnemy.moveSpeed := fleaMovespeed;
-	fleaEnemy.hasBeenShot := false;
+	fleaEnemy.shotCount := 0;
 	Sprite::DrawAt(fleaEnemy.x, fleaEnemy.y, fleaSprite);
 end;
 
@@ -388,14 +396,72 @@ begin
 	if (playerBullet.fired) then Sprite::DrawAt(playerBullet.x,playerBullet.y,bulletSprite);
 end;
 
+procedure CheckFleaShot();
+begin
+	if (playerBullet.fired = false) then return;
+	// If x values differ there can be no collision
+	if (fleaEnemy.x <> playerBullet.x) then return;
+	t := playerBullet.y;
+	u := fleaEnemy.y - 1;
+	v := fleaEnemy.y + 4;
+	if (t > u and (t < v)) then
+	begin
+		// Flea shot by player
+		// Erase bullet
+		Sprite::DrawAt(playerBullet.x,playerBullet.y,bulletSprite);
+		playerBullet.fired := false;
+		if (fleaEnemy.shotCount = 0) then
+		begin
+			fleaEnemy.shotCount := 1;
+			return;
+		end;
+		// Flea was already shot once
+		if (fleaEnemy.shotCount = 1) then
+		begin
+			AddScore(20);
+			fleaEnemy.shotCount := 2;
+			fleaEnemy.animFrame := 0;
+			fleaEnemy.enabled := false;
+		end;
+	end;
+end;
+
+// All enemy death sequences
+procedure DoEnemyDeathAnim();
+begin
+	// Test for flea death occurring
+	if (fleaEnemy.shotCount < 2) then return;
+	if (fleaEnemy.shotCount = 2) then
+	begin
+		// Flea death - erase flea
+		if (fleaEnemy.animFrame = 0) then 
+		begin
+			Sprite::DrawAt(fleaEnemy.x, fleaEnemy.y, fleaSprite);
+			fleaEnemy.animFrame := 1;
+			return;
+		end
+		else begin
+			Sprite::DrawAt(fleaEnemy.x, fleaEnemy.y, fleaDeathSprite + fleaEnemy.animFrame);	
+		end;
+		PlaySound(Sfx_FleaDead);
+		Sprite::DrawAt(fleaEnemy.x, fleaEnemy.y, fleaDeathSprite + fleaEnemy.animFrame);
+		if (fleaEnemy.animFrame = 4) then
+		begin
+			fleaEnemy.shotCount := 0;
+			return;
+		end;
+		fleaEnemy.animFrame := fleaEnemy.animFrame + 1;
+	end;
+end;
+
 // Move the flea down the screen, dropping mushies on the way
 procedure MoveFlea();
 begin
 	// Speed control
-	if (fleaEnemy.hasBeenShot = false and (fleaEnemy.moveSpeed)) then
+	if (fleaEnemy.shotCount = 0 and (fleaEnemy.moveSpeed)) then
 	begin
 		fleaEnemy.moveSpeed := fleaEnemy.moveSpeed - 1;
-		if (fleaEnemy.moveSpeed = 0) then fleaEnemy.moveSpeed := fleaMovespeed;
+		if (fleaEnemy.moveSpeed = 0) then fleaEnemy.moveSpeed := fleaMovespeed else return;
 	end;
 	// Erase flea sprite
 	Sprite::DrawAt(fleaEnemy.x, fleaEnemy.y, fleaSprite);
@@ -408,6 +474,7 @@ begin
 	Sprite::DrawAt(fleaEnemy.x, fleaEnemy.y, fleaSprite);
 	fleaEnemy.dropCount := fleaEnemy.dropCount + 1;
 	PlaySound(Sfx_Flea);
+	// Only update every 4 pixels down
 	if (fleaEnemy.dropCount = 4) then
 	begin
 		fleaEnemy.dropCount := 0;
@@ -415,7 +482,7 @@ begin
 		if (t > 10) then
 		begin
 			u := GetGridLocVal(fleaEnemy.x, fleaEnemy.y);
-			if (u =0) then SetGridLocVal(fleaEnemy.x, fleaEnemy.y - 4, mushroomSprite);
+			if (u = 0) then SetGridLocVal(fleaEnemy.x, fleaEnemy.y - 4, mushroomSprite);
 		end;
 	end;
 end;
@@ -434,7 +501,7 @@ begin
 
 	// Do titlescreen stuff
 	TitleScreen();
-	PlaySound(1);
+	PlaySound(Sfx_Gamestart);
 	InitialiseGame();
 	DrawGrid();
 	// Keep game going until gameRunning is false (Game over)
@@ -444,7 +511,13 @@ begin
 		Screen::WaitForVerticalBlank();
 		ControlPlayer();
 		if (playerBullet.fired) then MoveBullet();
-		if (fleaEnemy.enabled) then MoveFlea();
+		if (fleaEnemy.enabled) then
+		begin
+			MoveFlea();
+			CheckFleaShot;
+		end;
+		// Test if any enemies shot and if so, animate sprite
+		DoEnemyDeathAnim();
 	end;
 	Loop();
 
