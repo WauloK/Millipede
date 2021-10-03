@@ -19,6 +19,7 @@ var
 	const milliLength : byte = 12;
 	const fleaSprite : byte = 9;
 	const snakeSprite : byte = 10;
+	const snakeDeathSprite : byte = 20;
 	const bulletSprite : byte = 11;
 	const mushroomSprite : byte = 1;
 	const mushroomSpriteEnd : byte = 5;
@@ -35,6 +36,7 @@ var
 	const Sfx_Playershoot : byte = 2;
 	const Sfx_Flea : byte = 3;
 	const Sfx_FleaDead : byte = 4;
+	const Sfx_PlayerDead : byte = 5;
 	// Other variables	
 	tempint : Integer;
 	mychar : string = "A";
@@ -138,7 +140,11 @@ begin
 			end;
 		Sfx_FleaDead:
 			begin
-				Sound::Shoot(450,2000);
+				Sound::Shoot(450,200);
+			end;
+		Sfx_PlayerDead:
+			begin
+				Sound::Explode();
 			end;
 	end;
 end;
@@ -253,10 +259,42 @@ begin
 	Sprite::DrawAt(v,lookupGridY[w]+screenYOffset,t);
 end;
 
+// Update Lives HUD
+procedure SubtractLife();
+begin
+	gameStats.lives := gameStats.lives - 1;
+	// Check if Game Over
+	if (gameStats.lives = 0) then
+	begin
+		// Player dead. TODO
+		gameStats.gameRunning := false;
+	end;
+	DrawHUD();
+end;
+
+// Add points to player's score
 procedure AddScore(t : global byte);
 begin
 	gameStats.score := gameStats.score + t;
 	DrawHUD();
+end;
+
+// Delete a sprite
+procedure DeleteSprite(x, y : global byte);
+begin
+	t := #screen+ Screen::tab32[y] + x;
+	asm("
+	ld hl,[t]
+	ld de,#0032
+	ld (hl),#00
+	add hl,de
+	ld (hl),#00
+	add hl,de
+	ld (hl),#00
+	add hl,de
+	ld (hl),#00
+	add hl,de	
+	");
 end;
 
 // Get player input and move snake head
@@ -340,7 +378,7 @@ begin
 		if (t > 5) then return;
 	end;
 	fleaEnemy.enabled := true;
-	fleaEnemy.x := Functions::getRandFromArray(#gridRandoms); fleaEnemy.x := 15;
+	fleaEnemy.x := Functions::getRandFromArray(#gridRandoms);
 	fleaEnemy.y := screenYOffset + 4;
 	fleaEnemy.moveSpeed := fleaMovespeed;
 	fleaEnemy.shotCount := 0;
@@ -405,13 +443,14 @@ begin
 	// If x values differ there can be no collision
 	if (fleaEnemy.x <> playerBullet.x) then return;
 	t := playerBullet.y;
-	u := fleaEnemy.y - 1;
-	v := fleaEnemy.y + 4;
+	u := fleaEnemy.y - 2;
+	v := fleaEnemy.y + 3;
 	if (t > u and (t < v)) then
 	begin
 		// Flea shot by player
 		// Erase bullet
 		Sprite::DrawAt(playerBullet.x,playerBullet.y,bulletSprite);
+		DeleteSprite(fleaEnemy.x,fleaEnemy.y);
 		playerBullet.fired := false;
 		if (fleaEnemy.shotCount = 0) then
 		begin
@@ -425,7 +464,21 @@ begin
 			fleaEnemy.shotCount := 2;
 			fleaEnemy.animFrame := 0;
 			fleaEnemy.enabled := false;
+			// Delete player sprite
+			Sprite::DrawAt(playerSnake.x,playerSnake.y,snakeSprite);
 		end;
+	end;
+end;
+
+// Player death sequence
+procedure DoPlayerDeathAnim();
+begin
+	for v:= 1 to 4 do
+	begin
+		Sprite::DrawAt(playerSnake.x,playerSnake.y,snakeDeathSprite + u);
+		for t:= 0 to 100 do wait(100);
+		PlaySound(Sfx_PlayerDead);
+		Sprite::DrawAt(playerSnake.x,playerSnake.y,snakeDeathSprite + u);
 	end;
 end;
 
@@ -457,6 +510,23 @@ begin
 	end;
 end;
 
+// Check if flea and player collided
+procedure CheckFleaCollide();
+begin
+	// If not touching player, ignore
+	if (fleaEnemy.y < PlayerYMax - 4) then return;
+	if (fleaEnemy.x <> playerSnake.x) then return;
+	if (fleaEnemy.enabled = false) then return;
+	// Passed the above, so flea and snake are touching
+	fleaEnemy.enabled := false;
+	DeleteSprite(fleaEnemy.x,fleaEnemy.y);
+	DeleteSprite(playerSnake.x,playerSnake.y);
+	playerBullet.fired := false;
+	Sprite::DrawAt(playerBullet.x,playerBullet.y,bulletSprite);
+	SubtractLife();
+	DoPlayerDeathAnim();
+end;
+
 // Move the flea down the screen, dropping mushies on the way
 procedure MoveFlea();
 begin
@@ -470,9 +540,11 @@ begin
 	// Erase flea sprite
 	Sprite::DrawAt(fleaEnemy.x, fleaEnemy.y, fleaSprite);
 	fleaEnemy.y := fleaEnemy.y + 1;
-	if (fleaEnemy.y > PlayerYMax - 3) then
+	if (fleaEnemy.y > PlayerYMax) then
 	begin
 		fleaEnemy.enabled := false;
+		DeleteSprite(fleaEnemy.x,fleaEnemy.y);
+		DoFleaCheck();
 		return;
 	end;
 	Sprite::DrawAt(fleaEnemy.x, fleaEnemy.y, fleaSprite);
@@ -528,6 +600,7 @@ begin
 		begin
 			MoveFlea();
 			CheckFleaShot();
+			CheckFleaCollide();
 		end;
 		// Test if any enemies shot and if so, animate sprite
 		DoEnemyDeathAnim();
