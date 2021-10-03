@@ -241,6 +241,7 @@ milliSegments_milliSegments_record_milliSegments_record_dir	db	0
 milliSegments_milliSegments_record_milliSegments_record_head	db	0
 milliSegments_milliSegments_record_milliSegments_record_down	db	0
 milliSegments_milliSegments_record_milliSegments_record_up	db	0
+playerSnake_playerSnake_record_playerSnake_record_moveCount	db	0
 playerSnake_playerSnake_record_playerSnake_record_x	db	0
 playerSnake_playerSnake_record_playerSnake_record_y	db	0
 gameStats_gameStats_record_gameStats_record_lives	db	0
@@ -2225,7 +2226,7 @@ PlaySound_casenext279:
 	; Loading pointer
 	ld [Sound_freq],hl
 	; generic assign 
-	ld hl,$c8
+	ld hl,$7d0
 	; Integer assignment 
 	; Loading pointer
 	ld [Sound_dur],hl
@@ -2581,6 +2582,8 @@ InitialiseGame_loopend372:
 	ld [playerSnake_playerSnake_record_playerSnake_record_x], a
 	ld a, $3a
 	ld [playerSnake_playerSnake_record_playerSnake_record_y], a
+	ld a, $2
+	ld [playerSnake_playerSnake_record_playerSnake_record_moveCount], a
 	ld a, $4
 	ld [playerBullet_playerBullet_record_playerBullet_record_moveCount], a
 	ld a, $0
@@ -3474,7 +3477,7 @@ MoveBullet:
 	ld [playerBullet_playerBullet_record_playerBullet_record_y], a
 	; Binary clause core: LESS
 	; Compare with pure num / var optimization
-	cp $6
+	cp $7
 	jr nc,MoveBullet_elsedoneblock695
 MoveBullet_ConditionalTrueBlock693: ;Main true block ;keep :
 	ld a, $0
@@ -3702,9 +3705,6 @@ CheckFleaShot_ConditionalTrueBlock852: ;Main true block ;keep :
 	cp $0
 	jr nz,CheckFleaShot_elsedoneblock873
 CheckFleaShot_ConditionalTrueBlock871: ;Main true block ;keep :
-	ld a, $14
-	ld [t], a
-	call AddScore
 	ld a, $1
 	ld [fleaEnemy_flea_record_flea_record_shotCount], a
 	ret
@@ -3717,6 +3717,9 @@ CheckFleaShot_elsedoneblock873:
 CheckFleaShot_ConditionalTrueBlock877: ;Main true block ;keep :
 	
 ; // Flea was already shot once
+	ld a, $14
+	ld [t], a
+	call AddScore
 	ld a, $2
 	ld [fleaEnemy_flea_record_flea_record_shotCount], a
 	ld a, $0
@@ -3843,6 +3846,8 @@ MoveFlea_ConditionalTrueBlock925: ;Main true block ;keep :
 	cp $0
 	jr nz,MoveFlea_elseblock941
 MoveFlea_ConditionalTrueBlock940: ;Main true block ;keep :
+	
+; // Flea moves faster if shot once already
 	ld a, $2
 	ld [fleaEnemy_flea_record_flea_record_moveSpeed], a
 	jr MoveFlea_elsedoneblock942
@@ -3867,7 +3872,7 @@ MoveFlea_elsedoneblock927:
 	ld [fleaEnemy_flea_record_flea_record_y], a
 	; Binary clause core: GREATER
 	; Compare with pure num / var optimization
-	cp $36
+	cp $37
 	jr c, MoveFlea_elsedoneblock950
 	jr z, MoveFlea_elsedoneblock950
 MoveFlea_ConditionalTrueBlock948: ;Main true block ;keep :
@@ -3991,33 +3996,46 @@ MainProgram_ConditionalTrueBlock997: ;Main true block ;keep :
 ; // Keep game going until gameRunning is false(Game over)
 ; // Sync everything so the speed is correct
 	call Screen_WaitForVerticalBlank
+	; 'a:=a + const'  optimization 
+	ld a,[playerSnake_playerSnake_record_playerSnake_record_moveCount]
+	sub $1
+	ld [playerSnake_playerSnake_record_playerSnake_record_moveCount], a
+	; Binary clause core: EQUALS
+	; Compare with pure num / var optimization
+	cp $0
+	jr nz,MainProgram_elsedoneblock1025
+MainProgram_ConditionalTrueBlock1023: ;Main true block ;keep :
 	call ControlPlayer
+	ld a, $2
+	ld [playerSnake_playerSnake_record_playerSnake_record_moveCount], a
+MainProgram_elsedoneblock1025:
 	; Binary clause core: NOTEQUALS
 	; Compare with pure num / var optimization
 	ld a,[playerBullet_playerBullet_record_playerBullet_record_fired]
 	cp $0
-	jr z, MainProgram_elsedoneblock1019
-MainProgram_ConditionalTrueBlock1017: ;Main true block ;keep :
+	jr z, MainProgram_elsedoneblock1031
+MainProgram_ConditionalTrueBlock1029: ;Main true block ;keep :
 	call MoveBullet
-MainProgram_elsedoneblock1019:
+	call MoveBullet
+MainProgram_elsedoneblock1031:
 	; Binary clause core: NOTEQUALS
 	; Compare with pure num / var optimization
 	ld a,[fleaEnemy_flea_record_flea_record_enabled]
 	cp $0
-	jr z, MainProgram_elsedoneblock1025
-MainProgram_ConditionalTrueBlock1023: ;Main true block ;keep :
+	jr z, MainProgram_elsedoneblock1037
+MainProgram_ConditionalTrueBlock1035: ;Main true block ;keep :
 	call MoveFlea
 	call CheckFleaShot
-MainProgram_elsedoneblock1025:
+MainProgram_elsedoneblock1037:
 	
 ; // Test if any enemies shot and if so, animate sprite
 	call DoEnemyDeathAnim
 	jr MainProgram_while996
 MainProgram_elsedoneblock999:
 MainProgram_loopend1001:
-MainProgram_end1028:
+MainProgram_end1040:
 	;nop
-	jr MainProgram_end1028
+	jr MainProgram_end1040
 ; Copy BC bytes from HL to DE.
 z80_copy_mem:
     ld      a,b

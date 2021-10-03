@@ -28,6 +28,7 @@ var
 	const PlayerYMin : byte = 42;
 	const PlayerYMax : byte = 58;
 	const PlayerXMax : byte = 31;
+	const PlayerMoveCount : byte = 2;
 	const fleaMovespeed : byte = 2;
 	const screenYOffset : byte = 6;
 	const Sfx_Gamestart : byte = 1;
@@ -61,6 +62,7 @@ var
 		up : boolean; // Moving up from bottom?
 	end;
 	playerSnake_record = record
+		moveCount : byte;
 		x,y : byte;
 	end;
 	playerBullet_record = record
@@ -136,7 +138,7 @@ begin
 			end;
 		Sfx_FleaDead:
 			begin
-				Sound::Shoot(450,200);
+				Sound::Shoot(450,2000);
 			end;
 	end;
 end;
@@ -194,6 +196,7 @@ begin
 	gameStats.level := 1;
 	playerSnake.x := 16;
 	playerSnake.y := 58;
+	playerSnake.moveCount := PlayerMoveCount;
 	playerBullet.moveCount := 4;
 	playerBullet.fired := false;
 	gameStats.milliPoisoned := false;
@@ -350,7 +353,7 @@ begin
 	// Erase sprite
 	Sprite::DrawAt(playerBullet.x,playerBullet.y,bulletSprite);
 	playerBullet.y := playerBullet.y - 1;
-	if (playerBullet.y < screenYOffset) then
+	if (playerBullet.y < screenYOffset + 1) then
 	begin
 		playerBullet.fired := false;
 		return;
@@ -461,12 +464,13 @@ begin
 	if (fleaEnemy.shotCount = 0 and (fleaEnemy.moveSpeed)) then
 	begin
 		fleaEnemy.moveSpeed := fleaEnemy.moveSpeed - 1;
+		// Flea moves faster if shot once already
 		if (fleaEnemy.moveSpeed = 0) then fleaEnemy.moveSpeed := fleaMovespeed else return;
 	end;
 	// Erase flea sprite
 	Sprite::DrawAt(fleaEnemy.x, fleaEnemy.y, fleaSprite);
 	fleaEnemy.y := fleaEnemy.y + 1;
-	if (fleaEnemy.y > PlayerYMax - 4) then
+	if (fleaEnemy.y > PlayerYMax - 3) then
 	begin
 		fleaEnemy.enabled := false;
 		return;
@@ -509,12 +513,21 @@ begin
 	begin
 		// Sync everything so the speed is correct
 		Screen::WaitForVerticalBlank();
-		ControlPlayer();
-		if (playerBullet.fired) then MoveBullet();
+		playerSnake.moveCount := playerSnake.moveCount - 1;
+		if (playerSnake.moveCount = 0) then
+		begin
+			ControlPlayer();
+			playerSnake.moveCount := PlayerMoveCount;
+		end;
+		if (playerBullet.fired) then
+		begin
+			MoveBullet();
+			MoveBullet();
+		end;
 		if (fleaEnemy.enabled) then
 		begin
 			MoveFlea();
-			CheckFleaShot;
+			CheckFleaShot();
 		end;
 		// Test if any enemies shot and if so, animate sprite
 		DoEnemyDeathAnim();
