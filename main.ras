@@ -20,7 +20,6 @@ var
 	const fleaSprite : byte = 9;
 	const snakeSprite : byte = 10;
 	const snakeDeathSprite : byte = 20;
-	const bulletSprite : byte = 11;
 	const mushroomSprite : byte = 1;
 	const mushroomSpriteEnd : byte = 5;
 	const milliSprite : byte = 12;
@@ -30,7 +29,7 @@ var
 	const PlayerYMax : byte = 58;
 	const PlayerXMax : byte = 31;
 	const PlayerMoveCount : byte = 2;
-	const fleaMovespeed : byte = 2;
+	const fleaMovespeed : byte = 6;
 	const screenYOffset : byte = 6;
 	const Sfx_Gamestart : byte = 1;
 	const Sfx_Playershoot : byte = 2;
@@ -282,10 +281,13 @@ end;
 // Delete a sprite
 procedure DeleteSprite(x, y : global byte);
 begin
-	t := #screen+ Screen::tab32[y] + x;
+	tempint := #screen + Screen::tab32[y] + x;
 	asm("
-	ld hl,[t]
-	ld de,#0032
+	ld a,[tempint+1]
+	ld h,a
+	ld a,[tempint]
+	ld l,a
+	ld de,#0020
 	ld (hl),#00
 	add hl,de
 	ld (hl),#00
@@ -295,6 +297,20 @@ begin
 	ld (hl),#00
 	add hl,de	
 	");
+end;
+
+// DrawBullet
+procedure DrawBullet(x,y : global byte);
+begin
+	tempint := #screen + Screen::tab32[y] + x;
+	Screen::Poke(tempint,20);
+end;
+
+// Delete Bullet
+procedure DeleteBullet(x,y : global byte);
+begin
+	tempint := #screen + Screen::tab32[y] + x;
+	Screen::Poke(tempint,0);	
 end;
 
 // Get player input and move snake head
@@ -315,12 +331,12 @@ begin
 		playerBullet.fired := true;
 		PlaySound(Sfx_Playershoot);
 		playerBullet.x := playerSnake.x;
-		playerBullet.y := playerSnake.y + 2;
-		Sprite::DrawAt(playerBullet.x,playerBullet.y,bulletSprite);
+		playerBullet.y := playerSnake.y - 1;
+		DrawBullet(playerBullet.x,playerBullet.y);
 		return;
 	end;		
   // Erase player sprite
-	Sprite::DrawAt(playerSnake.x,playerSnake.y,snakeSprite);
+	DeleteSprite(playerSnake.x,playerSnake.y);
 	// Check if player wants to move UP
 	if (u = Input::Joy_Up or (v = Input::Joy_Up or (w = Input::Key_Q))) then
 	begin
@@ -328,7 +344,7 @@ begin
 		if (playerSnake.y > PlayerYMin) then 
 		begin
 			// Move player y pos
-			playerSnake.y := playerSnake.y - 1;
+			playerSnake.y := playerSnake.y - 2;
 			// Test if we're colliding with a mushroom. If so, move player y back
 			if (GetGridLocVal(playerSnake.x,playerSnake.y) > 0) then playerSnake.y := playerSnake.y + 1;
 		end;
@@ -389,7 +405,7 @@ end;
 procedure MoveBullet();
 begin
 	// Erase sprite
-	Sprite::DrawAt(playerBullet.x,playerBullet.y,bulletSprite);
+	DeleteBullet(playerBullet.x,playerBullet.y);
 	playerBullet.y := playerBullet.y - 1;
 	if (playerBullet.y < screenYOffset + 1) then
 	begin
@@ -398,12 +414,12 @@ begin
 	end;
 	// Only check every 4 pixels moved
 	playerBullet.moveCount := playerBullet.moveCount - 1;
-	if (playerBullet.moveCount > 0) then
-	begin
-		// Draw sprite at new location onscreen
-		if (playerBullet.fired) then Sprite::DrawAt(playerBullet.x,playerBullet.y,bulletSprite);
-		return;	
-	end;
+//	if (playerBullet.moveCount > 0) then
+//	begin
+// Draw sprite at new location onscreen
+//		DrawBullet(playerBullet.x,playerBullet.y);
+//		return;	
+//	end;
 	// Reset movement counter
 	playerBullet.moveCount := 4;
 	// Find out any values in the grid at the bullet location
@@ -434,23 +450,20 @@ begin
 		end;
 	end;
 	// Draw sprite at new location onscreen
-	if (playerBullet.fired) then Sprite::DrawAt(playerBullet.x,playerBullet.y,bulletSprite);
+	if (playerBullet.fired) then DrawBullet(playerBullet.x,playerBullet.y);
 end;
 
 procedure CheckFleaShot();
 begin
-	if (playerBullet.fired = false) then return;
-	// If x values differ there can be no collision
 	if (fleaEnemy.x <> playerBullet.x) then return;
 	t := playerBullet.y;
-	u := fleaEnemy.y - 2;
-	v := fleaEnemy.y + 3;
-	if (t > u and (t < v)) then
+	u := fleaEnemy.y;
+	v := fleaEnemy.y + 4;
+	if (t < v and (t > u)) then
+	// Flea shot by player
 	begin
-		// Flea shot by player
 		// Erase bullet
-		Sprite::DrawAt(playerBullet.x,playerBullet.y,bulletSprite);
-		DeleteSprite(fleaEnemy.x,fleaEnemy.y);
+		DeleteBullet(playerBullet.x,playerBullet.y);
 		playerBullet.fired := false;
 		if (fleaEnemy.shotCount = 0) then
 		begin
@@ -458,28 +471,25 @@ begin
 			return;
 		end;
 		// Flea was already shot once
-		if (fleaEnemy.shotCount = 1) then
-		begin
-			AddScore(20);
-			fleaEnemy.shotCount := 2;
-			fleaEnemy.animFrame := 0;
-			fleaEnemy.enabled := false;
-			// Delete player sprite
-			Sprite::DrawAt(playerSnake.x,playerSnake.y,snakeSprite);
-		end;
+		Sprite::DrawAt(fleaEnemy.x, fleaEnemy.y, fleaSprite);
+		AddScore(20);
+		fleaEnemy.shotCount := 2;
+		fleaEnemy.animFrame := 0;
+		fleaEnemy.enabled := false;
 	end;
 end;
 
 // Player death sequence
 procedure DoPlayerDeathAnim();
 begin
-	for v:= 1 to 4 do
+	for v:= 1 to 5 do
 	begin
-		Sprite::DrawAt(playerSnake.x,playerSnake.y,snakeDeathSprite + u);
-		for t:= 0 to 100 do wait(100);
-		PlaySound(Sfx_PlayerDead);
-		Sprite::DrawAt(playerSnake.x,playerSnake.y,snakeDeathSprite + u);
+		Sprite::DrawAt(playerSnake.x,playerSnake.y,snakeDeathSprite + v);
+		PlaySound(Sfx_PlayerDead);	
+		DeleteSprite(playerSnake.x,playerSnake.y);
 	end;
+	playerSnake.x := 16;
+	Sprite::DrawAt(playerSnake.x,playerSnake.y,snakeSprite);
 end;
 
 // All enemy death sequences
@@ -487,12 +497,13 @@ procedure DoEnemyDeathAnim();
 begin
 	// Test for flea death occurring
 	if (fleaEnemy.shotCount < 2) then return;
+	// Do flea stuff
 	if (fleaEnemy.shotCount = 2) then
 	begin
 		// Flea death - erase flea
 		if (fleaEnemy.animFrame = 0) then 
 		begin
-			Sprite::DrawAt(fleaEnemy.x, fleaEnemy.y, fleaSprite);
+			DeleteSprite(fleaEnemy.x, fleaEnemy.y);
 			fleaEnemy.animFrame := 1;
 			return;
 		end
@@ -504,6 +515,7 @@ begin
 		if (fleaEnemy.animFrame = 4) then
 		begin
 			fleaEnemy.shotCount := 0;
+			fleaEnemy.y := 0;
 			return;
 		end;
 		fleaEnemy.animFrame := fleaEnemy.animFrame + 1;
@@ -514,15 +526,15 @@ end;
 procedure CheckFleaCollide();
 begin
 	// If not touching player, ignore
-	if (fleaEnemy.y < PlayerYMax - 4) then return;
-	if (fleaEnemy.x <> playerSnake.x) then return;
 	if (fleaEnemy.enabled = false) then return;
+	if (fleaEnemy.x <> playerSnake.x) then return;
+	if (fleaEnemy.y < playerSnake.y) then return;
 	// Passed the above, so flea and snake are touching
 	fleaEnemy.enabled := false;
 	DeleteSprite(fleaEnemy.x,fleaEnemy.y);
 	DeleteSprite(playerSnake.x,playerSnake.y);
 	playerBullet.fired := false;
-	Sprite::DrawAt(playerBullet.x,playerBullet.y,bulletSprite);
+	DeleteSprite(playerBullet.x,playerBullet.y);
 	SubtractLife();
 	DoPlayerDeathAnim();
 end;
@@ -531,10 +543,9 @@ end;
 procedure MoveFlea();
 begin
 	// Speed control
-	if (fleaEnemy.shotCount = 0 and (fleaEnemy.moveSpeed)) then
+	if (fleaEnemy.shotCount = 0) then
 	begin
 		fleaEnemy.moveSpeed := fleaEnemy.moveSpeed - 1;
-		// Flea moves faster if shot once already
 		if (fleaEnemy.moveSpeed = 0) then fleaEnemy.moveSpeed := fleaMovespeed else return;
 	end;
 	// Erase flea sprite
@@ -543,7 +554,7 @@ begin
 	if (fleaEnemy.y > PlayerYMax) then
 	begin
 		fleaEnemy.enabled := false;
-		DeleteSprite(fleaEnemy.x,fleaEnemy.y);
+		DeleteSprite(fleaEnemy.x,fleaEnemy.y - 1);
 		DoFleaCheck();
 		return;
 	end;
@@ -555,7 +566,7 @@ begin
 	begin
 		fleaEnemy.dropCount := 0;
 		t := Functions::getRandFromArray(#gridRandoms);
-		if (t > 10) then
+		if (t > 15) then
 		begin
 			u := GetGridLocVal(fleaEnemy.x, fleaEnemy.y);
 			if (u = 0) then SetGridLocVal(fleaEnemy.x, fleaEnemy.y - 4, mushroomSprite);
@@ -594,13 +605,17 @@ begin
 		if (playerBullet.fired) then
 		begin
 			MoveBullet();
+			if (fleaEnemy.enabled) then CheckFleaShot();
 			MoveBullet();
 		end;
 		if (fleaEnemy.enabled) then
 		begin
-			MoveFlea();
-			CheckFleaShot();
+			// Only move flea if it's not dead.
+			if (fleaEnemy.shotCount < 2) then MoveFlea();
+			// Check if flea collided with player
 			CheckFleaCollide();
+			// Check if flea was shot
+			if (playerBullet.fired) then CheckFleaShot();
 		end;
 		// Test if any enemies shot and if so, animate sprite
 		DoEnemyDeathAnim();
