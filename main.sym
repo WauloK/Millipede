@@ -1,8 +1,8 @@
 ; labels
 al  $7b07 .Screen_c
+al  $7b08 .Screen_ga
 al  $7b03 .Screen_Count
 al  $7b09 .Screen_u
-al  $7b08 .Screen_ga
 al  $7b0a .Screen_i
 al  $7b05 .Screen_Loc
 al  $7b0b .Screen_j

@@ -3187,7 +3187,7 @@ ControlPlayer_localsuccess415: ;keep:
 	jr nz,ControlPlayer_elsedoneblock412
 ControlPlayer_ConditionalTrueBlock410: ;Main true block ;keep :
 	
-; // Test for moving up
+; // Test for player movement
 	ret
 ControlPlayer_elsedoneblock412:
 	; Binary clause core: EQUALS
@@ -3603,7 +3603,7 @@ DoFleaCheck_loopend674:
 	ld [fleaEnemy_flea_record_flea_record_x], a
 	ld a, $a
 	ld [fleaEnemy_flea_record_flea_record_y], a
-	ld a, $6
+	ld a, $2
 	ld [fleaEnemy_flea_record_flea_record_moveSpeed], a
 	ld a, $0
 	ld [fleaEnemy_flea_record_flea_record_shotCount], a
@@ -3651,12 +3651,6 @@ MoveBullet_elsedoneblock707:
 	sub $1
 	ld [playerBullet_playerBullet_record_playerBullet_record_moveCount], a
 	
-; //	if(playerBullet.moveCount > 0) then
-; //	begin
-; // Draw sprite at new location onscreen
-; //		DrawBullet(playerBullet.x,playerBullet.y);
-; //		return;	
-; //	end;
 ; // Reset movement counter
 	ld a, $4
 	ld [playerBullet_playerBullet_record_playerBullet_record_moveCount], a
@@ -3789,7 +3783,7 @@ CheckFleaShot_elsedoneblock836:
 	ld a,[fleaEnemy_flea_record_flea_record_y]
 	ld [u], a
 	; generic assign 
-	ld b,$4
+	ld b,$5
 	ld a,[fleaEnemy_flea_record_flea_record_y]
 	add  a, b
 	ld [v], a
@@ -4080,7 +4074,7 @@ MoveFlea_ConditionalTrueBlock928: ;Main true block ;keep :
 	cp $0
 	jr nz,MoveFlea_elseblock943
 MoveFlea_ConditionalTrueBlock942: ;Main true block ;keep :
-	ld a, $6
+	ld a, $2
 	ld [fleaEnemy_flea_record_flea_record_moveSpeed], a
 	jr MoveFlea_elsedoneblock944
 MoveFlea_elseblock943:
@@ -4247,9 +4241,9 @@ MainProgram_ConditionalTrueBlock999: ;Main true block ;keep :
 	cp $0
 	jr nz,MainProgram_elsedoneblock1063
 MainProgram_ConditionalTrueBlock1061: ;Main true block ;keep :
-	call ControlPlayer
 	ld a, $2
 	ld [playerSnake_playerSnake_record_playerSnake_record_moveCount], a
+	call ControlPlayer
 MainProgram_elsedoneblock1063:
 	; Binary clause core: NOTEQUALS
 	; Compare with pure num / var optimization

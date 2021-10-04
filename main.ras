@@ -29,7 +29,7 @@ var
 	const PlayerYMax : byte = 58;
 	const PlayerXMax : byte = 31;
 	const PlayerMoveCount : byte = 2;
-	const fleaMovespeed : byte = 6;
+	const fleaMovespeed : byte = 2;
 	const screenYOffset : byte = 6;
 	const Sfx_Gamestart : byte = 1;
 	const Sfx_Playershoot : byte = 2;
@@ -321,7 +321,7 @@ begin
 	v := Input::GetJoystick(2);
 	w := Input::GetPressedKey();
 	
-	// Test for moving up
+	// Test for player movement
 	if (u = Input::Joy_None and (v = Input::Joy_None and (w = Input::Key_None))) then return;
 	// Player shooting
 	if (u = Input::Joy_Fire or (v = Input::Joy_Fire or (w = Input::Key_SPC))) then
@@ -414,12 +414,6 @@ begin
 	end;
 	// Only check every 4 pixels moved
 	playerBullet.moveCount := playerBullet.moveCount - 1;
-//	if (playerBullet.moveCount > 0) then
-//	begin
-// Draw sprite at new location onscreen
-//		DrawBullet(playerBullet.x,playerBullet.y);
-//		return;	
-//	end;
 	// Reset movement counter
 	playerBullet.moveCount := 4;
 	// Find out any values in the grid at the bullet location
@@ -458,7 +452,7 @@ begin
 	if (fleaEnemy.x <> playerBullet.x) then return;
 	t := playerBullet.y;
 	u := fleaEnemy.y;
-	v := fleaEnemy.y + 4;
+	v := fleaEnemy.y + 5;
 	if (t < v and (t > u)) then
 	// Flea shot by player
 	begin
@@ -599,8 +593,8 @@ begin
 		playerSnake.moveCount := playerSnake.moveCount - 1;
 		if (playerSnake.moveCount = 0) then
 		begin
-			ControlPlayer();
 			playerSnake.moveCount := PlayerMoveCount;
+			ControlPlayer();
 		end;
 		if (playerBullet.fired) then
 		begin
