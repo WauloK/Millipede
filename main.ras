@@ -28,7 +28,7 @@ var
 	const PlayerYMin : byte = 42;
 	const PlayerYMax : byte = 58;
 	const PlayerXMax : byte = 31;
-	const PlayerMoveCount : byte = 2;
+	const PlayerMoveCount : byte = 3;
 	const fleaMovespeed : byte = 2;
 	const screenYOffset : byte = 6;
 	const Sfx_Gamestart : byte = 1;

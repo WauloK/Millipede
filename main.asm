@@ -2588,7 +2588,7 @@ InitialiseGame_loopend374:
 	ld [playerSnake_playerSnake_record_playerSnake_record_x], a
 	ld a, $3a
 	ld [playerSnake_playerSnake_record_playerSnake_record_y], a
-	ld a, $2
+	ld a, $3
 	ld [playerSnake_playerSnake_record_playerSnake_record_moveCount], a
 	ld a, $4
 	ld [playerBullet_playerBullet_record_playerBullet_record_moveCount], a
@@ -4241,7 +4241,7 @@ MainProgram_ConditionalTrueBlock999: ;Main true block ;keep :
 	cp $0
 	jr nz,MainProgram_elsedoneblock1063
 MainProgram_ConditionalTrueBlock1061: ;Main true block ;keep :
-	ld a, $2
+	ld a, $3
 	ld [playerSnake_playerSnake_record_playerSnake_record_moveCount], a
 	call ControlPlayer
 MainProgram_elsedoneblock1063:
