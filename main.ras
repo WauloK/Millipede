@@ -24,6 +24,8 @@ var
 	const mushroomSpriteEnd : byte = 5;
 	const milliSprite : byte = 12;
 	const milliSpriteEnd : byte = 17;
+	const milliBody : byte = 5;
+	const milliHead : byte = 6;
 	const fleaDeathSprite : byte = 20;
 	const PlayerYMin : byte = 42;
 	const PlayerYMax : byte = 58;
@@ -36,15 +38,21 @@ var
 	const Sfx_Flea : byte = 3;
 	const Sfx_FleaDead : byte = 4;
 	const Sfx_PlayerDead : byte = 5;
+	// Millipede segment flags
+	const Flag_Direction : byte = 1;	// Left = 0. Right = 1
+	const Flag_Head : byte = 2;		// No = 0. Yes = 1.
+	const Flag_Vertical : byte = 4;	// Moving down = 0. Moving up = 1.
+	const Flag_Poisoned : byte = 8;	// No poison = 0. Poisoned = 1.
+	const Flag_Alive: byte = 16;		// This segment dead? No = 0. Yes = 1.
+	
 	// Other variables	
 	tempint : Integer;
 	mychar : string = "A";
 	myp, mym : pointer;
-	strpos : byte = 0;	
+	strpos : byte = 0;
+	Value, BitFlag: byte;
 	// Set up an array for the mushrooms
 	gameGrid : array[gridWidth*gridHeight] of byte;
-	// Make a small buffer for millipede to begin in before moving onto the screen
-	milliBuffer : array[milliLength] of byte;
 	// An array of random numbers 0-31 for putting mushrooms in the grid
 	gridRandoms : array[256] of byte = (24,4,29,22,26,24,26,19,21,8,23,20,20,1,30,27,19,2,16,20,11,2,18,17,1,9,14,9,29,29,17,8,7,5,2,0,31,10,22,24,8,19,1,29,7,25,29,20,4,15,12,25,0,11,23,6,6,31,21,2,26,29,10,15,20,23,30,30,31,9,6,2,14,12,28,22,7,21,6,1,20,31,4,25,30,8,11,24,17,24,27,14,20,9,18,18,30,4,28,6,18,4,20,9,26,12,4,12,26,19,18,12,25,30,5,15,14,5,23,24,4,27,13,4,26,11,26,20,22,16,5,28,1,2,18,31,20,20,17,21,6,11,24,0,10,24,31,2,27,12,19,31,20,8,13,19,4,18,6,7,30,2,27,19,16,7,1,18,17,31,6,24,17,1,16,6,6,20,0,29,16,23,3,16,18,1,28,28,21,12,17,25,18,0,22,21,15,5,10,18,24,17,6,31,5,23,12,1,17,20,12,30,25,3,10,26,30,5,30,11,0,26,19,16,11,23,11,18,14,27,26,20,25,23,28,17,13,31,15,19,29,25,9,3,29,27,1,14,14,30,15,16,31,31,18,21);
 	smallSprites: array[] of byte =(0,0,0,0,20,85,40,40,20,85,40,8,20,85,0,0,20,0,0,0,40,170,60,60,40,170,60,0,40,170,0,0,40,0,0,0,60,223,255,204,20,215,85,20,20,0,0,0,20,85,85,20,23,85,85,23,20,85,85,215,212,85,85,212,215,85,85,20,0,16,0,0,0,16,4,0,0,4,16,0,68,17,68,17,0,48,0,0,0,48,12,0,0,12,48,0,204,51,204,51);
@@ -57,10 +65,7 @@ var
 	strlen : byte = 210;
 	milliSegments_record = record
 		x,y : byte;
-		dir : boolean; // false = left. true = right
-		head : boolean; // false = body. true = head
-		down : boolean; // false = no. true = yes
-		up : boolean; // Moving up from bottom?
+		flags : byte;
 	end;
 	playerSnake_record = record
 		moveCount : byte;
@@ -84,15 +89,32 @@ var
 		score : Integer;
 		hiScore : Integer;
 		gameRunning : boolean;
-		milliPoisoned : boolean;
 	end;
 	playerBullet : playerBullet_record;
 	milliSegments : milliSegments_record;
 	playerSnake : playerSnake_record;
 	gameStats : gameStats_record;
 	fleaEnemy : flea_record;
+	// Make a small buffer for millipede to store info
+	milliArray : array[milliLength] of milliSegments_record;	
 
 // Procedures	
+
+// Bitwise functions
+function IsBitSet(Value, BitFlag: global byte): Boolean;
+begin
+	IsBitSet := Value & BitFlag;
+end;
+function SetBit(Value, BitFlag: global byte): Boolean;
+begin
+	SetBit := Value & BitFlag;
+end;
+function ResetBit(Value, BitFlag: global byte): Boolean;
+begin
+	ResetBit := Value | BitFlag;
+end;
+
+// Draw and manage Title Screen
 procedure TitleScreen();
 begin
 	myp := #mychar;
@@ -193,8 +215,14 @@ begin
 	// Initialise grid
 	for u := 0 to 255 do gameGrid[u] := 0;
 	for u := 0 to (gridWidth * gridHeight) - 255 do gameGrid[u+256] := 0;
-	// Millipede buffer array
-	for u := 0 to milliLength do milliBuffer[u] := 5;
+	// Initialise millipede
+	for u:= 0 to milliLength do
+	begin
+		milliArray[u].flags := 1;	// Initial direction set to right
+		milliArray[u].x := 16;
+		milliArray[u].y := 255;
+	end;
+	milliArray[0].flags := 3;	// Direction right and head segment.
 	// Initialise variables
 	gameStats.lives := 3;
 	gameStats.score := 0;
@@ -204,7 +232,6 @@ begin
 	playerSnake.moveCount := PlayerMoveCount;
 	playerBullet.moveCount := 4;
 	playerBullet.fired := false;
-	gameStats.milliPoisoned := false;
 	fleaEnemy.enabled := false;
 	fleaEnemy.shotCount := 0;
 	DrawHUD();
@@ -568,6 +595,46 @@ begin
 	end;
 end;
 
+// Move Millipede
+procedure MoveMillipede();
+begin
+	t := 0; // Keep track if segment already moved onto screen
+	for u:= 0 to milliLength do
+	begin
+		if (IsBitSet(milliArray[u].flags, Flag_Alive)) then do
+		begin
+			// Test if segment is not on grid
+			if (milliArray[u].y = 255) then do
+			begin
+				if (t = 0) then do
+				begin
+					milliArray[u].y = 0;
+					if (IsBitSet(milliArray[u].flags,Flag_Head)) then v := milliHead else v:= milliBody;
+					SetGridLocVal(milliArray[u].x,milliArray[u].y,v);
+					t := 1;
+				end;
+			end
+			// segment is already on the grid
+			else begin
+				// Delete sprite
+				DeleteSprite(milliArray[u].x,lookupGridY[milliArray[u].y]);
+				// Move millipede
+				if (milliArray[u].flags,Flag_Direction) then do
+					begin
+						u := GetGridLocVal(fleaEnemy.x + 1, fleaEnemy.y);
+						if (u = 0) then do
+						begin
+							milliArray[u].x = milliArray[u].x + 1;
+							if (IsBitSet(milliArray[u].flags, Flag_Head)) then v: = milliHead else v := milliBody;
+							SetGridLocVal(milliArray[u].x, milliArray[u].y, v);
+						end;
+					end;
+				end;
+			end;
+		end;
+	end;
+end;
+
 // Actual code start
 begin
 	gameStats.hiScore := 0;
@@ -611,6 +678,8 @@ begin
 			// Check if flea was shot
 			if (playerBullet.fired) then CheckFleaShot();
 		end;
+		// Move Millipede
+		MoveMillipede();
 		// Test if any enemies shot and if so, animate sprite
 		DoEnemyDeathAnim();
 	end;
