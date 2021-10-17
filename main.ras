@@ -31,6 +31,7 @@ var
 	const PlayerYMax : byte = 58;
 	const PlayerXMax : byte = 31;
 	const PlayerMoveCount : byte = 3;
+	const MilliMoveCount : byte = 14;
 	const fleaMovespeed : byte = 2;
 	const screenYOffset : byte = 6;
 	const Sfx_Gamestart : byte = 1;
@@ -39,11 +40,13 @@ var
 	const Sfx_FleaDead : byte = 4;
 	const Sfx_PlayerDead : byte = 5;
 	// Millipede segment flags
-	const Flag_Direction : byte = 1;	// Left = 0. Right = 1
-	const Flag_Head : byte = 2;		// No = 0. Yes = 1.
-	const Flag_Vertical : byte = 4;	// Moving down = 0. Moving up = 1.
-	const Flag_Poisoned : byte = 8;	// No poison = 0. Poisoned = 1.
-	const Flag_Alive: byte = 16;		// This segment dead? No = 0. Yes = 1.
+	const Flag_MovingLeft : byte = 1;	// No = 0. Yes = 1
+	const Flag_MovingRight : byte = 2; // No = 0. Yes = 1
+	const Flag_MovingUp : byte = 4;	// Moving Up. No = 0. Yes = 1.
+	const Flag_MovingDown : byte = 8; // Moving Down. No = 0. Yes = 1.
+	const Flag_Head : byte = 16;		// No = 0. Yes = 1.
+	const Flag_Poisoned : byte = 32;	// No poison = 0. Poisoned = 1.
+	const Flag_Alive: byte = 64;		// This segment alive? No = 0. Yes = 1.
 	
 	// Other variables	
 	tempint : Integer;
@@ -51,6 +54,7 @@ var
 	myp, mym : pointer;
 	strpos : byte = 0;
 	Value, BitFlag: byte;
+	milliMoveSpeed : byte;
 	// Set up an array for the mushrooms
 	gameGrid : array[gridWidth*gridHeight] of byte;
 	// An array of random numbers 0-31 for putting mushrooms in the grid
@@ -58,8 +62,8 @@ var
 	smallSprites: array[] of byte =(0,0,0,0,20,85,40,40,20,85,40,8,20,85,0,0,20,0,0,0,40,170,60,60,40,170,60,0,40,170,0,0,40,0,0,0,60,223,255,204,20,215,85,20,20,0,0,0,20,85,85,20,23,85,85,23,20,85,85,215,212,85,85,212,215,85,85,20,0,16,0,0,0,16,4,0,0,4,16,0,68,17,68,17,0,48,0,0,0,48,12,0,0,12,48,0,204,51,204,51);
 	bigSprites: array[] of byte = (0,0,48,12,199,211,15,240,48,12,48,12,48,12,204,51,7,208,15,24,0,48,12,192,3,240,15,12,48,7,208,63,252,192,3,0,0,48,12,204,51,7,208,15,24,0,48,12,192,3,0,0,204,204,48,48,55,124,15,255,3,252,0,0,204,204,48,48,55,115,15,255,3,252,0,0,48,48,48,48,55,124,15,255,3,252,0,0,204,204,48,48,55,115,15,255,3,252,0,0,51,51,12,12,61,220,255,240,63,192,0,0,51,51,12,12,205,220,255,240,63,192,0,0,12,12,12,12,61,220,255,240,63,192,0,0,51,51,12,12,205,220,255,240,63,192,204,51,55,220,208,67,193,7,55,220,204,51,0,0,204,51,55,204,51,220,204,51,0,0,0,4,16,0,0,0,0,0,0,0,0,0,0,0,1,192,3,64,0,0,0,0,0,0);
 	// Array to look up Y values to speed things up
-	lookupPlayerY : array[gridHeight] of integer = BuildTable("i*GRIDWIDTH");
-	lookupGridY : array[gridHeight] of integer = BuildTable("i*4");
+	lookupGridY : array[gridHeight] of Integer = BuildTable("i*GRIDWIDTH");
+	lookupScreenY : array[gridHeight] of Integer = BuildTable("i*4");
 	t, u, v, w, x, y : byte;
 	message : string = "Press 'S' to start! You can use either Joystick or Keys:QA = Up/Down and M, = Left/Right Space to fire. Millipede was developed by Jason Oakley / Blue Bilby using TRSE. Check out more stuff at BlueBilby.com ... ";
 	strlen : byte = 210;
@@ -107,11 +111,11 @@ begin
 end;
 function SetBit(Value, BitFlag: global byte): Boolean;
 begin
-	SetBit := Value & BitFlag;
+	SetBit := Value | BitFlag;
 end;
 function ResetBit(Value, BitFlag: global byte): Boolean;
 begin
-	ResetBit := Value | BitFlag;
+	ResetBit := Value - BitFlag;
 end;
 
 // Draw and manage Title Screen
@@ -218,11 +222,11 @@ begin
 	// Initialise millipede
 	for u:= 0 to milliLength do
 	begin
-		milliArray[u].flags := 1;	// Initial direction set to right
-		milliArray[u].x := 16;
+		milliArray[u].flags := 66;	// Initial direction set to right and set to alive body segment.
 		milliArray[u].y := 255;
 	end;
-	milliArray[0].flags := 3;	// Direction right and head segment.
+	milliArray[0].flags := 82;	// Alive, direction right and head segment.
+	milliMoveSpeed := MilliMoveCount;
 	// Initialise variables
 	gameStats.lives := 3;
 	gameStats.score := 0;
@@ -251,13 +255,13 @@ begin
 	for y := 0 to gridHeight - 1 do
 	begin
 		x := Functions::getRandFromArray(#gridRandoms);
-		tempint := lookupPlayerY[y] + x;
+		tempint := lookupGridY[y] + x;
 		gameGrid[tempint] := mushroomSprite;
 		Sprite::DrawAt(x,screenYOffset+y*4,mushroomSprite);
 		x := Functions::getRandFromArray(#gridRandoms);
-		tempint := lookupPlayerY[y] + x;
+		tempint := lookupGridY[y] + x;
 		gameGrid[tempint] := mushroomSprite;
-		Sprite::DrawAt(x,screenYOffset+y*4,mushroomSprite);
+		Sprite::DrawAt(x,screenYOffset+lookupScreenY[y],mushroomSprite);
 	end;
 end;
 
@@ -266,7 +270,7 @@ end;
 function GetGridLocVal(v,w : global byte):byte;
 begin
 	w := (w - screenYOffset) / 4 + 1;
-	tempint := lookupPlayerY[w]+v;
+	tempint := lookupGridY[w]+v;
 	// Return value from function call
 	GetGridLocVal := gameGrid[tempint];
 end;
@@ -275,14 +279,14 @@ end;
 procedure SetGridLocVal(v,w,t : global byte);
 begin
 	w := (w - screenYOffset) / 4 + 1;
-	tempint := lookupPlayerY[w]+v;
+	tempint := lookupGridY[w]+v;
 	// Delete sprite at this location on screen
 	u := gameGrid[tempint];
-	Sprite::DrawAt(v,lookupGridY[w]+screenYOffset,u);
+	Sprite::DrawAt(v,lookupScreenY[w]+screenYOffset,u);
 	// Update grid value
 	gameGrid[tempint] := t;
 	// Draw new grid sprite
-	Sprite::DrawAt(v,lookupGridY[w]+screenYOffset,t);
+	Sprite::DrawAt(v,lookupScreenY[w]+screenYOffset,t);
 end;
 
 // Update Lives HUD
@@ -599,39 +603,63 @@ end;
 procedure MoveMillipede();
 begin
 	t := 0; // Keep track if segment already moved onto screen
-	for u:= 0 to milliLength do
+	for u:= 0 to 1 do // milliLength
 	begin
-		if (IsBitSet(milliArray[u].flags, Flag_Alive)) then do
+		if (IsBitSet(milliArray[u].flags, Flag_Alive)) then
 		begin
 			// Test if segment is not on grid
-			if (milliArray[u].y = 255) then do
+			if (milliArray[u].y = 255) then
 			begin
-				if (t = 0) then do
+				if (t = 0) then
 				begin
-					milliArray[u].y = 0;
+					milliArray[u].y := 0;
+					milliArray[u].x := 16;
 					if (IsBitSet(milliArray[u].flags,Flag_Head)) then v := milliHead else v:= milliBody;
 					SetGridLocVal(milliArray[u].x,milliArray[u].y,v);
 					t := 1;
 				end;
 			end
-			// segment is already on the grid
-			else begin
+			// Segment is already on the grid
+			else
+				begin
 				// Delete sprite
-				DeleteSprite(milliArray[u].x,lookupGridY[milliArray[u].y]);
-				// Move millipede
-				if (milliArray[u].flags,Flag_Direction) then do
+				DeleteSprite(milliArray[u].x,screenYOffset+lookupScreenY[milliArray[u].y]);
+				SetGridLocVal(milliArray[u].x,milliArray[u].y,0);
+				// Move millipede right?
+				if (IsBitSet(milliArray[u].flags,Flag_MovingRight)) then
 					begin
-						u := GetGridLocVal(fleaEnemy.x + 1, fleaEnemy.y);
-						if (u = 0) then do
-						begin
-							milliArray[u].x = milliArray[u].x + 1;
-							if (IsBitSet(milliArray[u].flags, Flag_Head)) then v: = milliHead else v := milliBody;
-							SetGridLocVal(milliArray[u].x, milliArray[u].y, v);
-						end;
+						v := GetGridLocVal(milliArray[u].x+1, milliArray[u].y);
+						if (milliArray[u].x = PlayerXMax+1) then v := 1; // A hack for edge of screen.
+						// Will we collide with a mushroom on the grid or screen edge?
+						if (v = 0) then
+							begin
+								// Move one right
+								milliArray[u].x := milliArray[u].x + 1;
+								if (IsBitSet(milliArray[u].flags, Flag_Head)) then v := milliHead else v := milliBody;
+								SetGridLocVal(milliArray[u].x, milliArray[u].y, v);
+							end
+						else
+							begin
+								milliArray[u].flags := SetBit(milliArray[u].flags,Flag_MovingDown);		// Set going down
+								milliArray[u].flags := ResetBit(milliArray[u].flags,Flag_MovingRight);	// Disable going right
+								milliArray[u].flags := SetBit(milliArray[u].flags,Flag_MovingLeft);	// Set Left direction
+								if (IsBitSet(milliArray[u].flags, Flag_Head)) then v := milliHead else v := milliBody;
+								SetGridLocVal(milliArray[u].x, milliArray[u].y, v);
+							end;
 					end;
 				end;
+			// Draw Millipede head sprite
+			if (IsBitSet(milliArray[u].flags,Flag_Head)) then
+				begin
+					if (IsBitSet(milliArray[u].flags,Flag_MovingRight)) then v := milliSprite+1;
+					if (IsBitSet(milliArray[u].flags,Flag_MovingLeft)) then v := milliSprite+3;
+					if (IsBitSet(milliArray[u].flags,Flag_MovingUp)) then v := milliSprite+4;
+					if (IsBitSet(milliArray[u].flags,Flag_MovingDown)) then v := milliSprite+2;
+					Sprite::DrawAt(milliArray[u].x,screenYOffset+lookupScreenY[milliArray[u].y], v);
+				end
+				// Millipede body
+				else Sprite::DrawAt(milliArray[u].x,screenYOffset+lookupScreenY[milliArray[u].y], milliSprite);
 			end;
-		end;
 	end;
 end;
 
@@ -679,7 +707,12 @@ begin
 			if (playerBullet.fired) then CheckFleaShot();
 		end;
 		// Move Millipede
-		MoveMillipede();
+		milliMoveSpeed := milliMoveSpeed - 1;
+		if (milliMoveSpeed = 0) then
+		begin
+			milliMoveSpeed := MilliMoveCount;
+			MoveMillipede();
+		end;
 		// Test if any enemies shot and if so, animate sprite
 		DoEnemyDeathAnim();
 	end;
