@@ -3707,11 +3707,37 @@ MoveBullet_ConditionalTrueBlock771: ;Main true block ;keep :
 	; Compare with pure num / var optimization
 	ld a,[t]
 	cp $5
-	jr nc,MoveBullet_elsedoneblock804
+	jp nc,MoveBullet_elsedoneblock804
 MoveBullet_ConditionalTrueBlock802: ;Main true block ;keep :
 	
 ; // Test for mushies
 ; // Mushy at this grid loc
+	; generic assign 
+	ld a,[v]
+	ld [x], a
+	; generic assign 
+	; Generic 16-bit binop
+	ld hl,$6
+	ex de,hl
+	push de
+	ld a,[w]
+	ld e,a ; variable is 8-bit
+	ld d,0
+	ld hl,lookupScreenY
+	add hl,de
+	add hl,de
+	ld a,[hl]
+	; LoadVar Testing if 'lookupScreenY' is word : 1
+	ld e,a
+	inc hl
+	ld a,[hl]
+	ld d,a
+	ex de,hl
+	pop de
+	add hl,de
+	ld a,l ; word assigned to byte
+	ld [y], a
+	call DeleteSprite
 	; 'a:=a + const'  optimization 
 	ld a,[t]
 	add  a,$1
@@ -3794,7 +3820,7 @@ MoveBullet_ConditionalTrueBlock808: ;Main true block ;keep :
 ; // Draw new grid sprite
 	; generic assign 
 	ld a,[v]
-	ld [Sprite_spritex], a
+	ld [x], a
 	; generic assign 
 	; Generic 16-bit binop
 	ld hl,$6
@@ -3816,11 +3842,8 @@ MoveBullet_ConditionalTrueBlock808: ;Main true block ;keep :
 	pop de
 	add hl,de
 	ld a,l ; word assigned to byte
-	ld [Sprite_spritey], a
-	; generic assign 
-	ld a,[t]
-	ld [Sprite_no], a
-	call Sprite_DrawAt
+	ld [y], a
+	call DeleteSprite
 	ld a, $1
 	ld [t], a
 	call AddScore
@@ -4351,12 +4374,6 @@ MoveMillipede_forloop997:
 MoveMillipede_ConditionalTrueBlock1363: ;Main true block ;keep :
 	; Binary clause core: EQUALS
 	; Compare with pure num / var optimization
-	ld a,[varPrefixed_p]
-	cp $0
-	jp nz,MoveMillipede_elseblock1546
-MoveMillipede_ConditionalTrueBlock1545: ;Main true block ;keep :
-	; Binary clause core: EQUALS
-	; Compare with pure num / var optimization
 	ld a,[s]
 	ld e,a ; variable is 8-bit
 	ld d,0
@@ -4365,6 +4382,12 @@ MoveMillipede_ConditionalTrueBlock1545: ;Main true block ;keep :
 	ld a,[hl]
 	; LoadVar Testing if 'milliSegments_milliSegments_record_milliSegments_record_y' is word : 0
 	cp $ff
+	jp nz,MoveMillipede_elseblock1546
+MoveMillipede_ConditionalTrueBlock1545: ;Main true block ;keep :
+	; Binary clause core: EQUALS
+	; Compare with pure num / var optimization
+	ld a,[varPrefixed_p]
+	cp $0
 	jp nz,MoveMillipede_elsedoneblock1610
 MoveMillipede_ConditionalTrueBlock1608: ;Main true block ;keep :
 	

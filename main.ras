@@ -454,6 +454,7 @@ begin
 			// Mushy at this grid loc
 			if (t < mushroomSpriteEnd) then
 			begin
+				DeleteSprite(v,lookupScreenY[w]+screenYOffset);	
 				t := t + 1;
 				// Update value in grid location
 				SetGridLocVal(playerBullet.x,screenYtogridY[playerBullet.y - screenYOffset],t);
@@ -463,9 +464,9 @@ begin
 			if (t = mushroomSpriteEnd) then 
 			begin
 				// Delete mushy
-				SetGridLocVal(playerBullet.x,screenYtogridY[playerBullet.y-screenYOffset],mushroomSprite - 1);
+				SetGridLocVal(playerBullet.x,screenYtogridY[playerBullet.y-screenYOffset],0);
 				// Draw new grid sprite
-				Sprite::DrawAt(v,lookupScreenY[w]+screenYOffset,t);				
+				DeleteSprite(v,lookupScreenY[w]+screenYOffset);				
 				AddScore(1);
 				// See if number of mushies in player area needs updating
 				if (fleaEnemy.enabled = false) then DoFleaCheck();
@@ -611,9 +612,9 @@ begin
 	if (IsBitSet(milliSegments[s].flags, Flag_Alive)<>false) then
 	begin
 		// Test if segment is not on grid
-		if (p = 0) then
+		if (milliSegments[s].y = 255) then
 		begin
-		  if (milliSegments[s].y = 255) then
+		  if (p = 0) then
 			begin
 				milliSegments[s].y := 0;
 				milliSegments[s].x := 16;
