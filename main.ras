@@ -31,7 +31,7 @@ var
 	const PlayerYMax : byte = 58;
 	const PlayerXMax : byte = 31;
 	const PlayerMoveCount : byte = 3;
-	const MilliMoveCount : byte = 4;
+	const MilliMoveCount : byte = 14;
 	const fleaMovespeed : byte = 2;
 	const screenYOffset : byte = 6;
 	const Sfx_Gamestart : byte = 1;
@@ -603,6 +603,27 @@ begin
 	end;
 end;
 
+// Drawing Millipede sprite
+procedure DrawMilliSprite();
+begin
+	// Draw Millipede head sprite
+	if (IsBitSet(milliSegments[s].flags,Flag_Head)<>false) then
+		begin
+			if (IsBitSet(milliSegments[s].flags,Flag_MovingRight)<>false) then v := milliSprite+1;
+			if (IsBitSet(milliSegments[s].flags,Flag_MovingLeft)<>false) then v := milliSprite+3;
+			if (IsBitSet(milliSegments[s].flags,Flag_MovingUp)<>false) then v := milliSprite+4;
+			if (IsBitSet(milliSegments[s].flags,Flag_MovingDown)<>false) then v := milliSprite+2;
+			Sprite::DrawAt(milliSegments[s].x, screenYOffset+lookupScreenY[milliSegments[s].y], v);
+			SetGridLocVal(milliSegments[s].x, milliSegments[s].y, milliHead);
+		end
+		// Millipede body
+		else
+		begin
+			Sprite::DrawAt(milliSegments[s].x,screenYOffset+lookupScreenY[milliSegments[s].y], milliSprite);
+			SetGridLocVal(milliSegments[s].x, milliSegments[s].y, milliBody);
+		end;
+end;
+
 // Move Millipede
 procedure MoveMillipede();
 begin
@@ -614,7 +635,7 @@ begin
 		// Test if segment is not on grid
 		if (milliSegments[s].y = 255) then
 		begin
-		  if (p = 0) then
+			if (p = 0) then
 			begin
 				milliSegments[s].y := 0;
 				milliSegments[s].x := 16;
@@ -635,47 +656,79 @@ begin
 		// Segment is already on the grid
 		else
 		begin
+		if (IsBitSet(milliSegments[s].flags,Flag_MovingDown) = false and (IsBitSet(milliSegments[s].flags,Flag_MovingUp) = false)) then
 			// Delete sprite
 			DeleteSprite(milliSegments[s].x,screenYOffset+lookupScreenY[milliSegments[s].y]);
 			SetGridLocVal(milliSegments[s].x,milliSegments[s].y,0);
 			// Move millipede right?
 			if (IsBitSet(milliSegments[s].flags,Flag_MovingRight)<>false) then
+			begin
+				q := GetGridLocVal((milliSegments[s].x)+1, milliSegments[s].y);
+				if (milliSegments[s].x = PlayerXMax) then q := 1; // A hack for edge of screen.
+				// Will we collide with a mushroom on the grid or screen edge?
+				if (q = 0) then
 				begin
-					q := GetGridLocVal((milliSegments[s].x)+1, milliSegments[s].y);
-					if (milliSegments[s].x = PlayerXMax) then q := 1; // A hack for edge of screen.
-					// Will we collide with a mushroom on the grid or screen edge?
-					if (q = 0) then
-						begin
-							// Move one right
-							Inc(milliSegments[s].x);
-						end
-					else
-						begin
-							milliSegments[s].flags := SetBit(milliSegments[s].flags,Flag_MovingDown);		// Set going down
-							milliSegments[s].flags := ResetBit(milliSegments[s].flags,Flag_MovingRight);	// Disable going right
-							milliSegments[s].flags := SetBit(milliSegments[s].flags,Flag_MovingLeft);	// Set Left direction
-						end;
-				end;
-			end;	// End moving right
-			
-			// Draw Millipede head sprite
-			if (IsBitSet(milliSegments[s].flags,Flag_Head)<>false) then
-				begin
-					if (IsBitSet(milliSegments[s].flags,Flag_MovingRight)<>false) then v := milliSprite+1;
-					if (IsBitSet(milliSegments[s].flags,Flag_MovingLeft)<>false) then v := milliSprite+3;
-					if (IsBitSet(milliSegments[s].flags,Flag_MovingUp)<>false) then v := milliSprite+4;
-					if (IsBitSet(milliSegments[s].flags,Flag_MovingDown)<>false) then v := milliSprite+2;
-					Sprite::DrawAt(milliSegments[s].x, screenYOffset+lookupScreenY[milliSegments[s].y], v);
-					SetGridLocVal(milliSegments[s].x, milliSegments[s].y, milliHead);
+					// Move one right
+					DrawMilliSprite();
+					Inc(milliSegments[s].x);
 				end
-				// Millipede body
 				else
 				begin
-					Sprite::DrawAt(milliSegments[s].x,milliSegments[s].y, milliSprite);
-					SetGridLocVal(milliSegments[s].x, milliSegments[s].y, milliBody);
+					DrawMilliSprite();
+					milliSegments[s].flags := SetBit(milliSegments[s].flags,Flag_MovingDown);		// Set going down
+					milliSegments[s].flags := ResetBit(milliSegments[s].flags,Flag_MovingRight);	// Disable going right
+					milliSegments[s].flags := SetBit(milliSegments[s].flags,Flag_MovingLeft);	// Set Left direction
 				end;
-			end;
+			end;	// End moving right
+			// Move millipede left?
+			if (IsBitSet(milliSegments[s].flags,Flag_MovingLeft)<>false) then
+			begin
+				q := GetGridLocVal((milliSegments[s].x)-1, milliSegments[s].y);
+				if (milliSegments[s].x = 0) then q := 1; // A hack for edge of screen.
+				// Will we collide with a mushroom on the grid or screen edge?
+				if (q = 0) then
+				begin
+					// Move one right
+					DrawMilliSprite();
+					Dec(milliSegments[s].x);
+				end
+				else
+				begin
+					DrawMilliSprite();
+					milliSegments[s].flags := SetBit(milliSegments[s].flags,Flag_MovingDown);		// Set going down
+					milliSegments[s].flags := ResetBit(milliSegments[s].flags,Flag_MovingRight);	// Disable going right
+					milliSegments[s].flags := SetBit(milliSegments[s].flags,Flag_MovingLeft);	// Set Left direction
+				end;
+			end;	// End moving right
 		end;
+		// Move millipede down?
+		if (IsBitSet(milliSegments[s].flags,Flag_MovingDown)<>false) then
+		begin
+			if (milliSegments[s].y = PlayerYMax) then
+			begin
+				milliSegments[s].flags := SetBit(milliSegments[s].flags,Flag_MovingUp);
+			end
+			else
+			begin
+				milliSegments[s].y := milliSegments[s].y + 4;
+				milliSegments[s].flags := ResetBit(milliSegments[s].flags,Flag_MovingDown);
+			end;
+		end;	// End moving down
+		// Move millipede down?
+		if (IsBitSet(milliSegments[s].flags,Flag_MovingUp)<>false) then
+		begin
+			if (milliSegments[s].y = PlayerYMin) then 
+			begin
+				milliSegments[s].flags := SetBit(milliSegments[s].flags,Flag_MovingDown);
+			end
+			else
+			begin
+				milliSegments[s].y := milliSegments[s].y - 4;
+				milliSegments[s].flags := ResetBit(milliSegments[s].flags,Flag_MovingUp);
+			end;
+		end;	// End moving down	
+		DrawMilliSprite();
+	end;
 end;
 
 // Actual code start
