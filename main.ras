@@ -64,7 +64,8 @@ var
 	// Array to look up Y values to speed things up
 	lookupGridY : array[gridHeight] of Integer = BuildTable("i*GRIDWIDTH");
 	lookupScreenY : array[gridHeight] of Integer = BuildTable("i*4");
-	q, s, t, u, v, w, x, y : byte;
+	screenYtogridY : array[56] of byte = (0,0,0,0,1,1,1,1,2,2,2,2,3,3,3,3,4,4,4,4,5,5,5,5,6,6,6,6,7,7,7,7,8,8,8,8,9,9,9,9,10,10,10,10,11,11,11,11,12,12,12,12,13,13,13,13);
+	p, q, s, t, u, v, w, x, y : byte;
 	message : string = "Press 'S' to start! You can use either Joystick or Keys:QA = Up/Down and M, = Left/Right Space to fire. Millipede was developed by Jason Oakley / Blue Bilby using TRSE. Check out more stuff at BlueBilby.com ... ";
 	strlen : byte = 210;
 	milliSegments_record = record
@@ -255,7 +256,7 @@ begin
 		x := Functions::getRandFromArray(#gridRandoms);
 		tempint := lookupGridY[y] + x;
 		gameGrid[tempint] := mushroomSprite;
-		Sprite::DrawAt(x,screenYOffset+y*4,mushroomSprite);
+		Sprite::DrawAt(x,screenYOffset+lookupScreenY[y],mushroomSprite);
 		x := Functions::getRandFromArray(#gridRandoms);
 		tempint := lookupGridY[y] + x;
 		gameGrid[tempint] := mushroomSprite;
@@ -267,7 +268,7 @@ end;
 // to compare if colliding with mushrooms or millipede
 function GetGridLocVal(v,w : global byte):byte;
 begin
-	w := (w - screenYOffset) / 4 + 1;
+	//w := (w - screenYOffset) / 4 + 1;
 	tempint := lookupGridY[w]+v;
 	// Return value from function call
 	GetGridLocVal := gameGrid[tempint];
@@ -276,11 +277,8 @@ end;
 // Update value at grid location
 procedure SetGridLocVal(v,w,t : global byte);
 begin
-	w := (w - screenYOffset) / 4 + 1;
+	//w := (w - screenYOffset) / 4 + 1;
 	tempint := lookupGridY[w]+v;
-	// Delete sprite at this location on screen
-	u := gameGrid[tempint];
-	Sprite::DrawAt(v,lookupScreenY[w]+screenYOffset,u);
 	// Update grid value
 	gameGrid[tempint] := t;
 end;
@@ -373,7 +371,7 @@ begin
 			// Move player y pos
 			playerSnake.y := playerSnake.y - 2;
 			// Test if we're colliding with a mushroom. If so, move player y back
-			if (GetGridLocVal(playerSnake.x,playerSnake.y) > 0) then playerSnake.y := playerSnake.y + 1;
+			if (GetGridLocVal(playerSnake.x,screenYtogridY[playerSnake.y - screenYOffset]) > 0) then playerSnake.y := playerSnake.y + 1;
 		end;
 	end;
 	if (u = Input::Joy_Down or (v = Input::Joy_Down or (w = Input::Key_A))) then
@@ -383,7 +381,7 @@ begin
 			// Due to player sprite being 4 pixels high we need to check 4 below the Y value.
 			playerSnake.y := playerSnake.y + 4;
 			// If a mushroom is below the player, move the y back to where it was, otherwise move one pixel down
-			if (GetGridLocVal(playerSnake.x,playerSnake.y) > 0) then playerSnake.y := playerSnake.y - 4 else playerSnake.y := playerSnake.y - 3;
+			if (GetGridLocVal(playerSnake.x,screenYtogridY[playerSnake.y - screenYOffset]) > 0) then playerSnake.y := playerSnake.y - 4 else playerSnake.y := playerSnake.y - 3;
 		end;
 	end;	
 	if (u = Input::Joy_Left or (v = Input::Joy_Left or (w = Input::Key_M))) then
@@ -391,9 +389,9 @@ begin
 		if (playerSnake.x > 0) then
 		begin
 			playerSnake.x := playerSnake.x - 1;
-			if (GetGridLocVal(playerSnake.x,playerSnake.y) > 0) then playerSnake.x := playerSnake.x + 1;
+			if (GetGridLocVal(playerSnake.x,screenYtogridY[playerSnake.y - screenYOffset]) > 0) then playerSnake.x := playerSnake.x + 1;
 			// Test bottom of sprite
-			if (GetGridLocVal(playerSnake.x,playerSnake.y + 3) > 0) then playerSnake.x := playerSnake.x + 1;
+			if (GetGridLocVal(playerSnake.x,screenYtogridY[playerSnake.y + 3 - screenYOffset]) > 0) then playerSnake.x := playerSnake.x + 1;
 		end;
 	end;
 	if (u = Input::Joy_Right or (v = Input::Joy_Right or (w = Input::Key_COMMA))) then
@@ -401,9 +399,9 @@ begin
 		if (playerSnake.x < PlayerXMax) then
 		begin
 			playerSnake.x := playerSnake.x + 1;
-			if (GetGridLocVal(playerSnake.x,playerSnake.y) > 0) then playerSnake.x := playerSnake.x - 1;		
+			if (GetGridLocVal(playerSnake.x,screenYtogridY[playerSnake.y - screenYOffset]) > 0) then playerSnake.x := playerSnake.x - 1;		
 			// Test bottom of sprite
-			if (GetGridLocVal(playerSnake.x,playerSnake.y + 3) > 0) then playerSnake.x := playerSnake.x - 1;			
+			if (GetGridLocVal(playerSnake.x,screenYtogridY[playerSnake.y + 3 - screenYOffset]) > 0) then playerSnake.x := playerSnake.x - 1;			
 		end;
 	end;
 	// Draw player sprite at new location
@@ -444,7 +442,7 @@ begin
 	// Reset movement counter
 	playerBullet.moveCount := 4;
 	// Find out any values in the grid at the bullet location
-	t := GetGridLocVal(playerBullet.x,playerBullet.y);
+	t := GetGridLocVal(playerBullet.x,screenYtogridY[playerBullet.y - screenYOffset]);
 	// Collided with something on the grid
 	if (t > 0) then
 	begin
@@ -458,14 +456,14 @@ begin
 			begin
 				t := t + 1;
 				// Update value in grid location
-				SetGridLocVal(playerBullet.x,playerBullet.y,t);
+				SetGridLocVal(playerBullet.x,screenYtogridY[playerBullet.y - screenYOffset],t);
 				// Draw new grid sprite
 				Sprite::DrawAt(v,lookupScreenY[w]+screenYOffset,t);				
 			end;
 			if (t = mushroomSpriteEnd) then 
 			begin
 				// Delete mushy
-				SetGridLocVal(playerBullet.x,playerBullet.y,mushroomSprite - 1);
+				SetGridLocVal(playerBullet.x,screenYtogridY[playerBullet.y-screenYOffset],mushroomSprite - 1);
 				// Draw new grid sprite
 				Sprite::DrawAt(v,lookupScreenY[w]+screenYOffset,t);				
 				AddScore(1);
@@ -593,10 +591,10 @@ begin
 		t := Functions::getRandFromArray(#gridRandoms);
 		if (t > 15) then
 		begin
-			u := GetGridLocVal(fleaEnemy.x, fleaEnemy.y);
+			u := GetGridLocVal(fleaEnemy.x, screenYtogridY[fleaEnemy.y - screenYOffset]);
 			if (u = 0) then
 			begin
-				SetGridLocVal(fleaEnemy.x, fleaEnemy.y - 4, mushroomSprite);
+				SetGridLocVal(fleaEnemy.x, screenYtogridY[fleaEnemy.y - 4 - screenYOffset], mushroomSprite);
 				// Draw new grid sprite
 				Sprite::DrawAt(v,lookupScreenY[w]+screenYOffset,t);				
 			end;
@@ -607,19 +605,19 @@ end;
 // Move Millipede
 procedure MoveMillipede();
 begin
-q := 0; // Keep track if segment already moved onto screen
+p := 0; // Keep track if segment already moved onto screen
 for s := 0 to milliLength do
 begin
 	if (IsBitSet(milliSegments[s].flags, Flag_Alive)<>false) then
 	begin
 		// Test if segment is not on grid
-		if (q = 0) then
+		if (p = 0) then
 		begin
 		  if (milliSegments[s].y = 255) then
 			begin
 				milliSegments[s].y := 0;
 				milliSegments[s].x := 16;
-				q := 1;
+				p := 1;
 				if (IsBitSet(milliSegments[s].flags,Flag_Head)<>false) then
 				begin
 					v := milliHead;
@@ -643,16 +641,12 @@ begin
 			if (IsBitSet(milliSegments[s].flags,Flag_MovingRight)<>false) then
 				begin
 					q := GetGridLocVal((milliSegments[s].x)+1, milliSegments[s].y);
-					
-										Functions::ByteToString(q);
-	Font::DrawTextAt(#Functions_s,6,30,false);
-					Loop();
 					if (milliSegments[s].x = PlayerXMax) then q := 1; // A hack for edge of screen.
 					// Will we collide with a mushroom on the grid or screen edge?
 					if (q = 0) then
 						begin
 							// Move one right
-							milliSegments[s].x := milliSegments[s].x + 1;
+							Inc(milliSegments[s].x);
 						end
 					else
 						begin
@@ -660,8 +654,6 @@ begin
 							milliSegments[s].flags := ResetBit(milliSegments[s].flags,Flag_MovingRight);	// Disable going right
 							milliSegments[s].flags := SetBit(milliSegments[s].flags,Flag_MovingLeft);	// Set Left direction
 						end;
-						if (IsBitSet(milliSegments[s].flags, Flag_Head)<>false) then v := milliHead else v := milliBody;
-						SetGridLocVal(milliSegments[s].x, milliSegments[s].y, v);
 				end;
 			end;	// End moving right
 			
@@ -672,13 +664,13 @@ begin
 					if (IsBitSet(milliSegments[s].flags,Flag_MovingLeft)<>false) then v := milliSprite+3;
 					if (IsBitSet(milliSegments[s].flags,Flag_MovingUp)<>false) then v := milliSprite+4;
 					if (IsBitSet(milliSegments[s].flags,Flag_MovingDown)<>false) then v := milliSprite+2;
-					Sprite::DrawAt(milliSegments[s].x,screenYOffset+lookupScreenY[milliSegments[s].y], v);
+					Sprite::DrawAt(milliSegments[s].x, screenYOffset+lookupScreenY[milliSegments[s].y], v);
 					SetGridLocVal(milliSegments[s].x, milliSegments[s].y, milliHead);
 				end
 				// Millipede body
 				else
 				begin
-					Sprite::DrawAt(milliSegments[s].x,screenYOffset+lookupScreenY[milliSegments[s].y], milliSprite);
+					Sprite::DrawAt(milliSegments[s].x,milliSegments[s].y, milliSprite);
 					SetGridLocVal(milliSegments[s].x, milliSegments[s].y, milliBody);
 				end;
 			end;
