@@ -33,7 +33,7 @@ var
 	const MilliYMin : byte = 10;
 	const MilliYMax : byte = 12;
 	const PlayerMoveCount : byte = 3;
-	const MilliMoveCount : byte = 4;
+	const MilliMoveCount : byte = 14;
 	const fleaMovespeed : byte = 2;
 	const screenYOffset : byte = 6;
 	const Sfx_Gamestart : byte = 1;
@@ -259,7 +259,9 @@ begin
 		tempint := lookupGridY[y] + x;
 		gameGrid[tempint] := mushroomSprite;
 		Sprite::DrawAt(x,screenYOffset+lookupScreenY[y],mushroomSprite);
-		x := Functions::getRandFromArray(#gridRandoms);
+		p := Functions::getRandFromArray(#gridRandoms);
+		while (p = x) do p := Functions::getRandFromArray(#gridRandoms);
+		x := p;
 		tempint := lookupGridY[y] + x;
 		gameGrid[tempint] := mushroomSprite;
 		Sprite::DrawAt(x,screenYOffset+lookupScreenY[y],mushroomSprite);
