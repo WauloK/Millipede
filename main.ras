@@ -30,8 +30,10 @@ var
 	const PlayerYMin : byte = 42;
 	const PlayerYMax : byte = 58;
 	const PlayerXMax : byte = 31;
+	const MilliYMin : byte = 10;
+	const MilliYMax : byte = 12;
 	const PlayerMoveCount : byte = 3;
-	const MilliMoveCount : byte = 14;
+	const MilliMoveCount : byte = 4;
 	const fleaMovespeed : byte = 2;
 	const screenYOffset : byte = 6;
 	const Sfx_Gamestart : byte = 1;
@@ -657,6 +659,7 @@ begin
 			if (IsBitSet(milliSegments[s].flags,Flag_MovingRight)<>false) then
 			begin
 				q := GetGridLocVal(milliSegments[s].x+1, milliSegments[s].y);
+				if (q > milliBody - 1) then q := 0; // Don't detect millipede segments
 				if (milliSegments[s].x = PlayerXMax) then q := 123; // A hack for edge of screen.
 				// Will we collide with a mushroom on the grid or screen edge?
 				if (q = 0) then
@@ -686,6 +689,7 @@ begin
 			if (IsBitSet(milliSegments[s].flags,Flag_MovingLeft)<>false and (p = 0)) then
 			begin
 				q := GetGridLocVal(milliSegments[s].x-1, milliSegments[s].y);
+				if (q > milliBody - 1) then q := 0; // Don't detect millipede segments
 				if (milliSegments[s].x = 0) then q := 123; // A hack for edge of screen.
 				//Loop();
 				// Will we collide with a mushroom on the grid or screen edge?
@@ -712,20 +716,20 @@ begin
 			end;	// End moving left
 			
 			// Test if reached top or bottom of area
+			p := 0;
 			if (IsBitSet(milliSegments[s].flags,Flag_MovingDown)<>false) then
 			begin
-				if (milliSegments[s].y > PlayerYMax) then 
+				if (milliSegments[s].y > MilliYMax) then 
 				begin
-					milliSegments[s].y := milliSegments[s].y - 1;
 					milliSegments[s].flags := SetBit(milliSegments[s].flags,Flag_MovingUp); // Set moving up	
 					milliSegments[s].flags := ResetBit(milliSegments[s].flags,Flag_MovingDown);		
+					p := 1;
 				end;	
 			end;	
-			if (IsBitSet(milliSegments[s].flags,Flag_MovingUp)<>false) then
+			if (IsBitSet(milliSegments[s].flags,Flag_MovingUp)<>false and (p = 0)) then
 			begin
-				if (milliSegments[s].y < PlayerYMin) then 
+				if (milliSegments[s].y < MilliYMin) then 
 				begin
-					milliSegments[s].y := milliSegments[s].y + 1;
 					milliSegments[s].flags := SetBit(milliSegments[s].flags,Flag_MovingDown); // Set moving up
 					milliSegments[s].flags := ResetBit(milliSegments[s].flags,Flag_MovingUp);			
 				end;	
