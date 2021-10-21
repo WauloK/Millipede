@@ -16,12 +16,12 @@ var
 	// Constants to make code easier to read
 	const gridWidth : byte = 32;
 	const gridHeight : byte = 14;
-	const milliLength : byte = 12;
 	const fleaSprite : byte = 9;
 	const snakeSprite : byte = 10;
 	const snakeDeathSprite : byte = 20;
 	const mushroomSprite : byte = 1;
 	const mushroomSpriteEnd : byte = 5;
+	const milliLength : byte = 12;	
 	const milliSprite : byte = 12;
 	const milliSpriteEnd : byte = 17;
 	const milliBody : byte = 5;
@@ -41,6 +41,7 @@ var
 	const Sfx_Flea : byte = 3;
 	const Sfx_FleaDead : byte = 4;
 	const Sfx_PlayerDead : byte = 5;
+	const Sfx_MilliDead : byte = 6;
 	// Millipede segment flags
 	const Flag_MovingLeft : byte = 1;	// No = 0. Yes = 1
 	const Flag_MovingRight : byte = 2; // No = 0. Yes = 1
@@ -171,6 +172,11 @@ begin
 		Sfx_PlayerDead:
 			begin
 				Sound::Explode();
+			end;
+		Sfx_MilliDead:
+			begin
+				Sound::Play(20,30);
+				Sound::Play(30,30);
 			end;
 	end;
 end;
@@ -446,26 +452,26 @@ begin
 	// Reset movement counter
 	playerBullet.moveCount := 4;
 	// Find out any values in the grid at the bullet location
-	t := GetGridLocVal(playerBullet.x,screenYtogridY[playerBullet.y - screenYOffset]);
+	s := GetGridLocVal(playerBullet.x,screenYtogridY[playerBullet.y - screenYOffset]);
 	// Collided with something on the grid
-	if (t > 0) then
+	if (s > 0) then
 	begin
 		// Turn bullet off
 		playerBullet.fired := false;
 		// Test for mushies
-		if (t > mushroomSprite - 1 and (t < mushroomSpriteEnd)) then
+		if (s > mushroomSprite - 1 and (s < mushroomSpriteEnd)) then
 		begin
 			// Mushy at this grid loc
-			if (t < mushroomSpriteEnd) then
+			if (s < mushroomSpriteEnd) then
 			begin
 				DeleteSprite(v,lookupScreenY[w]+screenYOffset);	
-				t := t + 1;
+				s := s + 1;
 				// Update value in grid location
-				SetGridLocVal(playerBullet.x,screenYtogridY[playerBullet.y - screenYOffset],t);
+				SetGridLocVal(playerBullet.x,screenYtogridY[playerBullet.y - screenYOffset],s);
 				// Draw new grid sprite
-				Sprite::DrawAt(v,lookupScreenY[w]+screenYOffset,t);				
+				Sprite::DrawAt(v,lookupScreenY[w]+screenYOffset,s);				
 			end;
-			if (t = mushroomSpriteEnd) then 
+			if (s = mushroomSpriteEnd) then 
 			begin
 				// Delete mushy
 				SetGridLocVal(playerBullet.x,screenYtogridY[playerBullet.y-screenYOffset],0);
@@ -474,6 +480,34 @@ begin
 				AddScore(1);
 				// See if number of mushies in player area needs updating
 				if (fleaEnemy.enabled = false) then DoFleaCheck();
+			end;
+		end;
+	end;
+	// Check for shot millipede segment
+	if (s = milliBody or (s = milliHead)) then
+	begin
+		// Update value in grid location
+		q := screenYtogridY[playerBullet.y - screenYOffset];
+		for p := 0 to milliLength do
+		begin
+			if (milliSegments[p].y = q) then
+			begin
+				if (milliSegments[p].x = playerBullet.x) then // bullet and millipede are same Grid Location
+				begin
+					if (IsBitSet(milliSegments[p].flags,Flag_Alive)) then
+					begin
+						milliSegments[p].flags := ResetBit(milliSegments[p].flags,Flag_Alive);	
+						if (s = milliBody) then AddScore(5) else AddScore(50);
+						if (p < milliLength) then
+						begin
+							milliSegments[p+1].flags := SetBit(milliSegments[p+1].flags,Flag_Head);
+						end;	
+						PlaySound(Sfx_MilliDead);
+						DeleteSprite(milliSegments[p].x,lookupScreenY[milliSegments[p].y]+screenYOffset);					
+						SetGridLocVal(playerBullet.x,q,mushroomSprite);
+						Sprite::DrawAt(playerBullet.x,lookupScreenY[milliSegments[p].y]+screenYOffset,mushroomSprite);
+					end;
+				end;
 			end;
 		end;
 	end;
@@ -615,8 +649,6 @@ begin
 	begin
 		if (IsBitSet(milliSegments[s].flags,Flag_MovingRight)<>false) then v := milliSprite+1;
 		if (IsBitSet(milliSegments[s].flags,Flag_MovingLeft)<>false) then v := milliSprite+3;
-//		if (IsBitSet(milliSegments[s].flags,Flag_MovingUp)<>false) then v := milliSprite+4;
-//		if (IsBitSet(milliSegments[s].flags,Flag_MovingDown)<>false) then v := milliSprite+2;
 		Sprite::DrawAt(milliSegments[s].x, screenYOffset+lookupScreenY[milliSegments[s].y], v);
 		SetGridLocVal(milliSegments[s].x, milliSegments[s].y, milliHead);
 	end
