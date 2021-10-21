@@ -74,6 +74,7 @@ var
 	milliSegments_record = record
 		x,y : byte;
 		flags : byte;
+		lastValue : byte;
 	end;
 	playerSnake_record = record
 		moveCount : byte;
@@ -231,6 +232,7 @@ begin
 	begin
 		milliSegments[u].flags := 74;	 // Initial direction set to right, down and set to alive body segment.
 		milliSegments[u].y := 255; // A large number to note the segment is not on the grid yet.
+		milliSegments[u].lastValue := 0;
 	end;
 	milliSegments[0].flags := 90;	 // Alive, direction right, down and head segment.
 	milliMoveSpeed := MilliMoveCount;
@@ -660,6 +662,12 @@ begin
 	end;
 end;
 
+procedure ReDrawSprite(x, y, t : global byte);
+begin
+	if (t = 0) then return;
+	if (t < mushroomSpriteEnd) then Sprite::DrawAt(x,screenYOffset+lookupScreenY[y],mushroomSprite-1+t);
+end;
+
 // Move Millipede
 procedure MoveMillipede();
 begin
@@ -686,8 +694,9 @@ begin
 			else
 			begin
 			// Delete sprite
-			DrawMilliSprite(s);
-			SetGridLocVal(milliSegments[s].x,milliSegments[s].y,0);		
+			DeleteSprite(milliSegments[s].x,screenYOffset+lookupScreenY[milliSegments[s].y]);
+			ReDrawSprite(milliSegments[s].x,milliSegments[s].y,milliSegments[s].lastValue);
+			SetGridLocVal(milliSegments[s].x,milliSegments[s].y,milliSegments[s].lastValue);		
 			p := 0; // Did we already switch R/L?
 			// Move millipede right?
 			if (IsBitSet(milliSegments[s].flags,Flag_MovingRight)<>false) then
@@ -700,12 +709,14 @@ begin
 				begin
 					// Move one right
 					milliSegments[s].x := milliSegments[s].x + 1;
+					milliSegments[s].lastValue := GetGridLocVal(milliSegments[s].x,milliSegments[s].y);
 				end
 				else
 				begin
 					if (IsBitSet(milliSegments[s].flags,Flag_MovingDown)<>false) then
 					begin
 						milliSegments[s].y := milliSegments[s].y + 1;
+						milliSegments[s].lastValue := GetGridLocVal(milliSegments[s].x,milliSegments[s].y);
 						milliSegments[s].flags := ResetBit(milliSegments[s].flags,Flag_MovingRight);	// Disable going right
 						milliSegments[s].flags := SetBit(milliSegments[s].flags,Flag_MovingLeft);	// Set Left direction
 						p := 1;
@@ -713,6 +724,7 @@ begin
 					if (IsBitSet(milliSegments[s].flags,Flag_MovingUp)<>false) then
 					begin
 						milliSegments[s].y := milliSegments[s].y - 1;
+						milliSegments[s].lastValue := GetGridLocVal(milliSegments[s].x,milliSegments[s].y);
 						milliSegments[s].flags := ResetBit(milliSegments[s].flags,Flag_MovingRight);	// Disable going right
 						milliSegments[s].flags := SetBit(milliSegments[s].flags,Flag_MovingLeft);	// Set Left direction
 						p := 1;
@@ -731,18 +743,21 @@ begin
 				begin
 					// Move one left
 					milliSegments[s].x := milliSegments[s].x - 1;
+					milliSegments[s].lastValue := GetGridLocVal(milliSegments[s].x,milliSegments[s].y);
 				end
 				else
 				begin
 				if (IsBitSet(milliSegments[s].flags,Flag_MovingDown)<>false) then
 					begin
 						milliSegments[s].y := milliSegments[s].y + 1;
+						milliSegments[s].lastValue := GetGridLocVal(milliSegments[s].x,milliSegments[s].y);
 						milliSegments[s].flags := SetBit(milliSegments[s].flags,Flag_MovingRight);	// Disable going right
 						milliSegments[s].flags := ResetBit(milliSegments[s].flags,Flag_MovingLeft);	// Set Left direction
 					end;
 					if (IsBitSet(milliSegments[s].flags,Flag_MovingUp)<>false) then
 					begin
 						milliSegments[s].y := milliSegments[s].y - 1;
+						milliSegments[s].lastValue := GetGridLocVal(milliSegments[s].x,milliSegments[s].y);
 						milliSegments[s].flags := SetBit(milliSegments[s].flags,Flag_MovingRight);	// Disable going right
 						milliSegments[s].flags := ResetBit(milliSegments[s].flags,Flag_MovingLeft);	// Set Left direction
 					end;
