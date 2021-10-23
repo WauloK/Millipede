@@ -74,6 +74,7 @@ var
 	milliSegments_record = record
 		x,y : byte;
 		lastX,lastY : byte;
+		lastGridVal : byte;
 		flags : byte;
 		end;
 	mushroomJustShot_record = record
@@ -705,6 +706,7 @@ begin
 				begin
 					milliSegments[s].y := 0;
 					milliSegments[s].x := 16;
+					milliSegments[s].lastGridVal := 0;
 					p := 1;
 					if (IsBitSet(milliSegments[s].flags,Flag_Head)<>false) then v := milliHead else v := milliBody;
 					DrawMilliSprite(s);					
@@ -715,9 +717,18 @@ begin
 			else
 			begin
 			// Delete sprite
-			DeleteSprite(milliSegments[s].x,screenYOffset+lookupScreenY[milliSegments[s].y]);		
-			SetGridLocVal(milliSegments[s].x,milliSegments[s].y,0);		
-      // Only direction changing logic in millipede heads
+			DeleteSprite(milliSegments[s].x,screenYOffset+lookupScreenY[milliSegments[s].y]);
+     // Millipede body segments
+			if (milliSegments[s].lastGridVal < milliBody) then begin
+				SetGridLocVal(milliSegments[s].x,milliSegments[s].y,milliSegments[s].lastGridVal);	
+				Sprite::DrawAt(milliSegments[s].x,screenYOffset+lookupScreenY[milliSegments[s].y],milliSegments[s].lastGridVal,false);										
+			end
+			else
+			begin
+				SetGridLocVal(milliSegments[s].x,milliSegments[s].y,0);	
+				milliSegments[s].lastGridVal := 0;
+			end;	
+     // Only direction changing logic in millipede heads
       if IsBitSet(milliSegments[s].flags, Flag_Head) then
 				begin
 					// Check if the millipede segment is on top of the snake. If so, redraw snake so it doesn't vanish
@@ -727,7 +738,6 @@ begin
 						begin
 							if (	milliSegments[s].x = playerSnake.x) then
 							begin
-								DeleteSprite(playerSnake.x,playerSnake.y);
 								Sprite::DrawAt(playerSnake.x,playerSnake.y,snakeSprite,false);	
 							end;				
 						end;
@@ -745,6 +755,7 @@ begin
 						begin
 							// Save current position
 							milliSegments[s].lastX := milliSegments[s].x; milliSegments[s].lastY := milliSegments[s].y;
+							if (GetGridLocVal(milliSegments[s].x, milliSegments[s].y) < milliBody) then milliSegments[s].lastGridVal := GetGridLocVal(milliSegments[s].x, milliSegments[s].y);						
 							// Move one right
 							milliSegments[s].x := milliSegments[s].x + 1;
 						end
@@ -755,6 +766,7 @@ begin
 								// Save current position
 								milliSegments[s].lastX := milliSegments[s].x; milliSegments[s].lastY := milliSegments[s].y;								
 								milliSegments[s].y := milliSegments[s].y + 1;
+								milliSegments[s].lastGridVal := GetGridLocVal(milliSegments[s].x, milliSegments[s].y);
 								milliSegments[s].flags := ResetBit(milliSegments[s].flags,Flag_MovingRight);	// Disable going right
 								milliSegments[s].flags := SetBit(milliSegments[s].flags,Flag_MovingLeft);	// Set Left direction
 								p := 1;
@@ -764,6 +776,7 @@ begin
 								// Save current position
 								milliSegments[s].lastX := milliSegments[s].x; milliSegments[s].lastY := milliSegments[s].y;								
 								milliSegments[s].y := milliSegments[s].y - 1;
+								if (GetGridLocVal(milliSegments[s].x, milliSegments[s].y) < milliBody) then milliSegments[s].lastGridVal := GetGridLocVal(milliSegments[s].x, milliSegments[s].y);
 								milliSegments[s].flags := ResetBit(milliSegments[s].flags,Flag_MovingRight);	// Disable going right
 								milliSegments[s].flags := SetBit(milliSegments[s].flags,Flag_MovingLeft);	// Set Left direction
 								p := 1;
@@ -777,12 +790,12 @@ begin
 						CheckMushroomShot();				
 						if (q > milliBody - 1) then q := 0; // Don't detect millipede segments
 						if (milliSegments[s].x = 0) then q := 123; // A hack for edge of screen.
-						//Loop();
 						// Will we collide with a mushroom on the grid or screen edge?
 						if (q = 0) then
 						begin
 							// Save current position
-							milliSegments[s].lastX := milliSegments[s].x; milliSegments[s].lastY := milliSegments[s].y;							
+							milliSegments[s].lastX := milliSegments[s].x; milliSegments[s].lastY := milliSegments[s].y;
+							if (GetGridLocVal(milliSegments[s].x, milliSegments[s].y) < milliBody) then milliSegments[s].lastGridVal := GetGridLocVal(milliSegments[s].x, milliSegments[s].y);						
 							// Move one left
 							milliSegments[s].x := milliSegments[s].x - 1;
 						end
@@ -791,16 +804,18 @@ begin
 						if (IsBitSet(milliSegments[s].flags,Flag_MovingDown)<>false) then
 							begin
 								// Save current position
-								milliSegments[s].lastX := milliSegments[s].x; milliSegments[s].lastY := milliSegments[s].y;								
+								milliSegments[s].lastX := milliSegments[s].x; milliSegments[s].lastY := milliSegments[s].y;					
 								milliSegments[s].y := milliSegments[s].y + 1;
+								milliSegments[s].lastGridVal := GetGridLocVal(milliSegments[s].x, milliSegments[s].y);
 								milliSegments[s].flags := SetBit(milliSegments[s].flags,Flag_MovingRight);	// Disable going right
 								milliSegments[s].flags := ResetBit(milliSegments[s].flags,Flag_MovingLeft);	// Set Left direction
 							end;
 							if (IsBitSet(milliSegments[s].flags,Flag_MovingUp)<>false) then
 							begin
 								// Save current position
-								milliSegments[s].lastX := milliSegments[s].x; milliSegments[s].lastY := milliSegments[s].y;								
+								milliSegments[s].lastX := milliSegments[s].x; milliSegments[s].lastY := milliSegments[s].y;															
 								milliSegments[s].y := milliSegments[s].y - 1;
+								if (GetGridLocVal(milliSegments[s].x, milliSegments[s].y) < milliBody) then milliSegments[s].lastGridVal := GetGridLocVal(milliSegments[s].x, milliSegments[s].y);
 								milliSegments[s].flags := SetBit(milliSegments[s].flags,Flag_MovingRight);	// Disable going right
 								milliSegments[s].flags := ResetBit(milliSegments[s].flags,Flag_MovingLeft);	// Set Left direction
 							end;
@@ -826,11 +841,10 @@ begin
 							milliSegments[s].flags := ResetBit(milliSegments[s].flags,Flag_MovingUp);
 						end;
 					end;	
-				DrawMilliSprite(s);
+						DrawMilliSprite(s);
         end
         else
-        begin
-          // Millipede body segments
+        begin          
           milliSegments[s].lastX := milliSegments[s].x;
           milliSegments[s].lastY := milliSegments[s].y;
           milliSegments[s].x := milliSegments[s-1].lastX;
@@ -839,6 +853,9 @@ begin
         end;
 			end;
 		end;
+		// Reset mushroom just shot storage
+		mushroomJustShot.x := 0;
+		mushroomJustShot.y := 0;
 	end;
 end;
 
