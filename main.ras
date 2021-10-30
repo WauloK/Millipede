@@ -361,7 +361,7 @@ begin
 	u := Input::GetJoystick(1);
 	v := Input::GetJoystick(2);
 	w := Input::GetPressedKey();
-	
+	Sprite::DrawAt(playerSnake.x,playerSnake.y,snakeSprite,false);
 	// Test for player movement
 	if (u = Input::Joy_None and (v = Input::Joy_None and (w = Input::Key_None))) then return;
 	// Player shooting
@@ -726,7 +726,6 @@ begin
 			else
 			begin
 				SetGridLocVal(milliSegments[s].x,milliSegments[s].y,0);	
-				milliSegments[s].lastGridVal := 0;
 			end;	
      // Only direction changing logic in millipede heads
       if IsBitSet(milliSegments[s].flags, Flag_Head) then
@@ -755,9 +754,9 @@ begin
 						begin
 							// Save current position
 							milliSegments[s].lastX := milliSegments[s].x; milliSegments[s].lastY := milliSegments[s].y;
-							if (GetGridLocVal(milliSegments[s].x, milliSegments[s].y) < milliBody) then milliSegments[s].lastGridVal := GetGridLocVal(milliSegments[s].x, milliSegments[s].y);						
 							// Move one right
 							milliSegments[s].x := milliSegments[s].x + 1;
+							if (GetGridLocVal(milliSegments[s].x, milliSegments[s].y) < milliBody) then milliSegments[s].lastGridVal := GetGridLocVal(milliSegments[s].x, milliSegments[s].y);
 						end
 						else
 						begin
@@ -766,7 +765,7 @@ begin
 								// Save current position
 								milliSegments[s].lastX := milliSegments[s].x; milliSegments[s].lastY := milliSegments[s].y;								
 								milliSegments[s].y := milliSegments[s].y + 1;
-								milliSegments[s].lastGridVal := GetGridLocVal(milliSegments[s].x, milliSegments[s].y);
+								if (GetGridLocVal(milliSegments[s].x, milliSegments[s].y) < milliBody) then milliSegments[s].lastGridVal := GetGridLocVal(milliSegments[s].x, milliSegments[s].y);
 								milliSegments[s].flags := ResetBit(milliSegments[s].flags,Flag_MovingRight);	// Disable going right
 								milliSegments[s].flags := SetBit(milliSegments[s].flags,Flag_MovingLeft);	// Set Left direction
 								p := 1;
@@ -782,7 +781,7 @@ begin
 								p := 1;
 							end;
 						end;
-					end;	// End moving right
+					end;	// End moving down
 					// Move millipede left?
 					if (IsBitSet(milliSegments[s].flags,Flag_MovingLeft)<>false and (p = 0)) then
 					begin
@@ -795,9 +794,9 @@ begin
 						begin
 							// Save current position
 							milliSegments[s].lastX := milliSegments[s].x; milliSegments[s].lastY := milliSegments[s].y;
-							if (GetGridLocVal(milliSegments[s].x, milliSegments[s].y) < milliBody) then milliSegments[s].lastGridVal := GetGridLocVal(milliSegments[s].x, milliSegments[s].y);						
 							// Move one left
 							milliSegments[s].x := milliSegments[s].x - 1;
+							if (GetGridLocVal(milliSegments[s].x, milliSegments[s].y) < milliBody) then milliSegments[s].lastGridVal := GetGridLocVal(milliSegments[s].x, milliSegments[s].y);						
 						end
 						else
 						begin
@@ -881,12 +880,6 @@ begin
 	begin
 		// Sync everything so the speed is correct
 		Screen::WaitForVerticalBlank();
-		playerSnake.moveCount := playerSnake.moveCount - 1;
-		if (playerSnake.moveCount = 0) then
-		begin
-			playerSnake.moveCount := PlayerMoveCount;
-			ControlPlayer();
-		end;
 		if (fleaEnemy.enabled) then
 		begin
 			// Only move flea if it's not dead.
@@ -903,6 +896,12 @@ begin
 			milliMoveSpeed := MilliMoveCount;
 			MoveMillipede();
 		end;
+		playerSnake.moveCount := playerSnake.moveCount - 1;
+		if (playerSnake.moveCount = 0) then
+		begin
+			playerSnake.moveCount := PlayerMoveCount;
+			ControlPlayer();
+		end;		
 		if (playerBullet.fired) then
 		begin
 			MoveBullet();
