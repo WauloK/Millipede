@@ -247,10 +247,8 @@ begin
 	playerSnake.x := 16;
 	playerSnake.y := 58;
 	playerSnake.moveCount := PlayerMoveCount;
-	playerBullet.moveCount := 4;
 	playerBullet.fired := false;
 	fleaEnemy.enabled := false;
-	fleaEnemy.shotCount := 0;
 	DrawHUD();
 	// Draw player sprite
 	Sprite::SetData(#smallSprites);
@@ -284,7 +282,6 @@ end;
 // to compare if colliding with mushrooms or millipede
 function GetGridLocVal(v,w : global byte):byte;
 begin
-	//w := (w - screenYOffset) / 4 + 1;
 	tempint := lookupGridY[w]+v;
 	// Return value from function call
 	GetGridLocVal := gameGrid[tempint];
@@ -293,7 +290,6 @@ end;
 // Update value at grid location
 procedure SetGridLocVal(v,w,t : global byte);
 begin
-	//w := (w - screenYOffset) / 4 + 1;
 	tempint := lookupGridY[w]+v;
 	// Update grid value
 	gameGrid[tempint] := t;
@@ -372,7 +368,7 @@ begin
 		playerBullet.fired := true;
 		PlaySound(Sfx_Playershoot);
 		playerBullet.x := playerSnake.x;
-		playerBullet.y := playerSnake.y - 1;
+		playerBullet.y := playerSnake.y + 1;
 		DrawBullet(playerBullet.x,playerBullet.y);
 		return;
 	end;		
@@ -385,7 +381,7 @@ begin
 		if (playerSnake.y > PlayerYMin) then 
 		begin
 			// Move player y pos
-			playerSnake.y := playerSnake.y - 2;
+			playerSnake.y := playerSnake.y - 1;
 			// Test if we're colliding with a mushroom. If so, move player y back
 			if (GetGridLocVal(playerSnake.x,screenYtogridY[playerSnake.y - screenYOffset]) > 0) then playerSnake.y := playerSnake.y + 1;
 		end;
@@ -396,6 +392,8 @@ begin
 		begin
 			// Due to player sprite being 4 pixels high we need to check 4 below the Y value.
 			playerSnake.y := playerSnake.y + 4;
+			u := GetGridLocVal(playerSnake.x,screenYtogridY[playerSnake.y + 3 - screenYOffset]);
+			
 			// If a mushroom is below the player, move the y back to where it was, otherwise move one pixel down
 			if (GetGridLocVal(playerSnake.x,screenYtogridY[playerSnake.y - screenYOffset]) > 0) then playerSnake.y := playerSnake.y - 4 else playerSnake.y := playerSnake.y - 3;
 		end;
@@ -425,7 +423,7 @@ begin
 end;
 
 // Check if we need to put a flea on the screen
-procedure DoFleaCheck();
+procedure ShouldFleaDrop();
 begin
 	t := 0;
 	for u := 0 to 160 do
@@ -439,6 +437,7 @@ begin
 	fleaEnemy.y := screenYOffset + 4;
 	fleaEnemy.moveSpeed := fleaMovespeed;
 	fleaEnemy.shotCount := 0;
+	fleaEnemy.dropCount := 0;
 	Sprite::DrawAt(fleaEnemy.x, fleaEnemy.y, fleaSprite,false);
 end;
 
@@ -453,10 +452,6 @@ begin
 		playerBullet.fired := false;
 		return;
 	end;
-	// Only check every 4 pixels moved
-	playerBullet.moveCount := playerBullet.moveCount - 1;
-	// Reset movement counter
-	playerBullet.moveCount := 4;
 	// Find out any values in the grid at the bullet location
 	s := GetGridLocVal(playerBullet.x,screenYtogridY[playerBullet.y - screenYOffset]);
 	// Collided with something on the grid
@@ -487,7 +482,7 @@ begin
 				mushroomJustShot.x := playerBullet.x;
 				mushroomJustShot.y := screenYtogridY[playerBullet.y-screenYOffset];
 				// See if number of mushies in player area needs updating
-				if (fleaEnemy.enabled = false) then DoFleaCheck();
+				if (fleaEnemy.enabled = false) then ShouldFleaDrop();
 			end;
 		end;
 	end;
@@ -584,8 +579,10 @@ begin
 		Sprite::DrawAt(fleaEnemy.x, fleaEnemy.y, fleaDeathSprite + fleaEnemy.animFrame,false);
 		if (fleaEnemy.animFrame = 4) then
 		begin
+			DeleteSprite(fleaEnemy.x,fleaEnemy.y);
 			fleaEnemy.shotCount := 0;
 			fleaEnemy.y := 0;
+			ShouldFleaDrop();
 			return;
 		end;
 		fleaEnemy.animFrame := fleaEnemy.animFrame + 1;
@@ -625,7 +622,7 @@ begin
 	begin
 		fleaEnemy.enabled := false;
 		DeleteSprite(fleaEnemy.x,fleaEnemy.y - 1);
-		DoFleaCheck();
+		ShouldFleaDrop();
 		return;
 	end;
 	Sprite::DrawAt(fleaEnemy.x, fleaEnemy.y, fleaSprite,false);
@@ -638,18 +635,18 @@ begin
 		t := Functions::getRandFromArray(#gridRandoms);
 		if (t > 15) then
 		begin
-			u := GetGridLocVal(fleaEnemy.x, screenYtogridY[fleaEnemy.y - screenYOffset]);
+			u := GetGridLocVal(fleaEnemy.x, screenYtogridY[fleaEnemy.y - 4 - screenYOffset]);
 			if (u = 0) then
 			begin
 				SetGridLocVal(fleaEnemy.x, screenYtogridY[fleaEnemy.y - 4 - screenYOffset], mushroomSprite);
 				// Draw new grid sprite
-				Sprite::DrawAt(v,lookupScreenY[w]+screenYOffset,t,false);
-			end
+				Sprite::DrawAt(fleaEnemy.x, fleaEnemy.y  - 4, mushroomSprite, false);  //HERE!
+			end;
+		end
 			else
 			begin
-				Sprite::DrawAt(fleaEnemy.x, screenYtogridY[fleaEnemy.y - 4 - screenYOffset],mushroomSprite+u,false);		
+				SetGridLocVal(fleaEnemy.x, screenYtogridY[fleaEnemy.y - 4 - screenYOffset], 0);	
 			end;
-		end;
 	end;
 end;
 
