@@ -618,6 +618,7 @@ begin
 	// Erase flea sprite
 	Sprite::DrawAt(fleaEnemy.x, fleaEnemy.y, 0,false);
 	fleaEnemy.y := fleaEnemy.y + 1;
+	// Disable if reached bottom of screen
 	if (fleaEnemy.y > PlayerYMax) then
 	begin
 		fleaEnemy.enabled := false;
@@ -631,22 +632,18 @@ begin
 	// Only update every 4 pixels down
 	if (fleaEnemy.dropCount = 4) then
 	begin
-		fleaEnemy.dropCount := 0;
-		t := Functions::getRandFromArray(#gridRandoms);
-		if (t > 15) then
+	fleaEnemy.dropCount := 0;
+	t := Functions::getRandFromArray(#gridRandoms);
+	if (t > 15) then
 		begin
-			u := GetGridLocVal(fleaEnemy.x, screenYtogridY[fleaEnemy.y - 4 - screenYOffset]);
-			if (u = 0) then
-			begin
-				SetGridLocVal(fleaEnemy.x, screenYtogridY[fleaEnemy.y - 4 - screenYOffset], mushroomSprite);
-				// Draw new grid sprite
-				Sprite::DrawAt(fleaEnemy.x, fleaEnemy.y  - 4, mushroomSprite, false);  //HERE!
-			end;
+			SetGridLocVal(fleaEnemy.x, screenYtogridY[fleaEnemy.y - 4 - screenYOffset], mushroomSprite);
+			// Draw new grid sprite
+			Sprite::DrawAt(fleaEnemy.x, fleaEnemy.y  - 4, mushroomSprite, false);  //HERE!
 		end
-			else
-			begin
-				SetGridLocVal(fleaEnemy.x, screenYtogridY[fleaEnemy.y - 4 - screenYOffset], 0);	
-			end;
+		else
+		begin
+			SetGridLocVal(fleaEnemy.x, screenYtogridY[fleaEnemy.y - 4 - screenYOffset], 0);	
+		end;
 	end;
 end;
 
