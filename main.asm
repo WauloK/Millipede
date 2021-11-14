@@ -232,6 +232,13 @@ screenYtogridY:	db $00, $00, $00, $00, $01, $01, $01, $01
 	db $08, $08, $08, $08, $09, $09, $09, $09
 	db $0a, $0a, $0a, $0a, $0b, $0b, $0b, $0b
 	db $0c, $0c, $0c, $0c, $0d, $0d, $0d, $0d
+bulletYConstrain:	db $026, $02a, $02a, $02a, $02a, $02e, $02e, $02e
+	db $02e, $032, $032, $032, $032, $036, $036, $036
+	db $036, $03a, 0, 0, 0, 0, 0, 0
+	db 0, 0, 0, 0, 0, 0, 0, 0
+	db 0, 0, 0, 0, 0, 0, 0, 0
+	db 0, 0, 0, 0, 0, 0, 0, 0
+	db 0, 0, 0, 0, 0, 0, 0, 0
 varPrefixed_p:	db	0
 q:	db	0
 s:	db	0
@@ -3258,8 +3265,19 @@ ControlPlayer_elsedoneblock451:
 	ld a,[playerSnake_playerSnake_record_playerSnake_record_x]
 	ld [playerBullet_playerBullet_record_playerBullet_record_x], a
 	; generic assign 
-	ld b,$1
+	ld b,$2a
 	ld a,[playerSnake_playerSnake_record_playerSnake_record_y]
+	sub  b
+	ld e,a ; variable is 8-bit
+	ld d,0
+	ld hl,bulletYConstrain
+	add hl,de
+	ld a,[hl]
+	; LoadVar Testing if 'bulletYConstrain' is word : 0
+	push af
+	ld a,$3
+	ld b,a
+	pop af
 	add  a, b
 	ld [playerBullet_playerBullet_record_playerBullet_record_y], a
 	; generic assign 

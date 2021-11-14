@@ -68,6 +68,7 @@ var
 	lookupGridY : array[gridHeight] of Integer = BuildTable("i*GRIDWIDTH");
 	lookupScreenY : array[gridHeight] of Integer = BuildTable("i*4");
 	screenYtogridY : array[56] of byte = (0,0,0,0,1,1,1,1,2,2,2,2,3,3,3,3,4,4,4,4,5,5,5,5,6,6,6,6,7,7,7,7,8,8,8,8,9,9,9,9,10,10,10,10,11,11,11,11,12,12,12,12,13,13,13,13);
+	bulletYConstrain : array[56] of byte = (41,45,45,45,45,49,49,49,49,53,53,53,53,57,57,57,57,61);
 	p, q, s, t, u, v, w, x, y : byte;
 	message : string = "Press 'S' to start! You can use either Joystick or Keys:QA = Up/Down and M, = Left/Right Space to fire. Millipede was developed by Jason Oakley / Blue Bilby using TRSE. Check out more stuff at BlueBilby.com ... ";
 	strlen : byte = 210;
@@ -368,7 +369,7 @@ begin
 		playerBullet.fired := true;
 		PlaySound(Sfx_Playershoot);
 		playerBullet.x := playerSnake.x;
-		playerBullet.y := playerSnake.y + 1;
+		playerBullet.y := bulletYConstrain[playerSnake.y - PlayerYMin ];
 		DrawBullet(playerBullet.x,playerBullet.y);
 		return;
 	end;		
