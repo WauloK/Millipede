@@ -28,6 +28,7 @@ var
 	const milliBody : byte = 9;
 	const milliHead : byte = 10;
 	const fleaDeathSprite : byte = 20;
+	const enemyDeathSprite : byte = 12;
 	const PlayerYMin : byte = 42;
 	const PlayerYMax : byte = 58;
 	const PlayerXMax : byte = 31;
@@ -112,6 +113,7 @@ var
 		direction : boolean;
 		animFrame : byte;
 		moveSpeed : byte;
+		dead : boolean;
 	end;
 	playerBullet : playerBullet_record;
 	playerSnake : playerSnake_record;
@@ -500,7 +502,7 @@ begin
 			begin
 				DeleteSprite(v,lookupScreenY[w]+screenYOffset);	
 				s := s - 1;
-				if (s = 4) then s := 0; // Bad mushroom shot
+				if (s = 4) then s := 0; // Bad mushroom shot completely
 				// Update value in grid location
 				SetGridLocVal(playerBullet.x,screenYtogridY[playerBullet.y - screenYOffset],s);
 				// Draw new grid sprite
@@ -579,6 +581,31 @@ begin
 	end;
 end;
 
+// Update grid from scorpion
+procedure ScorpionGridUpdate();
+begin
+	if (u < mushroomSpriteEnd and (u > 0)) then
+	begin
+		u := u + 4;
+	end;
+end;
+// Reset mushrooms, etc under scorpion
+procedure 	ResetScorpionGrid();
+begin
+	u := GetGridLocVal(scorpionEnemy.x,screenYtogridY[scorpionEnemy.y - screenYOffset]);
+	ScorpionGridUpdate();
+	SetGridLocVal(scorpionEnemy.x,screenYtogridY[scorpionEnemy.y - screenYOffset],u);	
+	Sprite::DrawAt(scorpionEnemy.x,scorpionEnemy.y,u,false);
+	u := GetGridLocVal(scorpionEnemy.x+1,screenYtogridY[scorpionEnemy.y - screenYOffset]);
+	ScorpionGridUpdate();
+	SetGridLocVal(scorpionEnemy.x,screenYtogridY[scorpionEnemy.y - screenYOffset],u);	
+	Sprite::DrawAt(scorpionEnemy.x+1,scorpionEnemy.y,u,false);
+	u := GetGridLocVal(scorpionEnemy.x+2,screenYtogridY[scorpionEnemy.y - screenYOffset]);
+	ScorpionGridUpdate();
+	SetGridLocVal(scorpionEnemy.x,screenYtogridY[scorpionEnemy.y - screenYOffset],u);		
+	Sprite::DrawAt(scorpionEnemy.x+2,scorpionEnemy.y,u,false);	
+end;
+
 // Player death sequence
 procedure DoPlayerDeathAnim();
 begin
@@ -595,6 +622,26 @@ end;
 // All enemy death sequences
 procedure DoEnemyDeathAnim();
 begin
+	// Scorpion death
+	if (scorpionEnemy.enabled and (scorpionEnemy.dead)) then
+	begin
+		// Update sprite data
+		Sprite::SetData(#bigSprites);
+		Sprite::SetSize(3,4);	
+		// Draw scorpion sprite
+		Sprite::DrawAt(scorpionEnemy.x,scorpionEnemy.y, enemyDeathSprite + scorpionEnemy.animFrame,false);
+		// Reset sprite data
+		Sprite::SetData(#smallSprites);
+		Sprite::SetSize(1,4);
+		scorpionEnemy.animFrame := scorpionEnemy.animFrame + 1;
+		if (scorpionEnemy.animFrame = 4) then
+		begin
+			Sprite::DrawAt(scorpionEnemy.x+1,scorpionEnemy.y, 0, false);
+			ResetScorpionGrid();
+			scorpionEnemy.enabled := false;
+		end;
+	end;
+	
 	// Test for flea death occurring
 	if (fleaEnemy.shotCount < 2) then return;
 	// Do flea stuff
@@ -713,29 +760,18 @@ begin
 	end;
 end;
 
-// Update grid from scorpion
-procedure ScorpionGridUpdate();
+// Did player shoot scorpion?
+procedure CheckScorpionShot();
 begin
-	if (u < mushroomSpriteEnd and (u > 0)) then
-	begin
-		u := u + 4;
-	end;
-end;
-// Reset mushrooms, etc under scorpion
-procedure 	ResetScorpionGrid();
-begin
-	u := GetGridLocVal(scorpionEnemy.x,screenYtogridY[scorpionEnemy.y - screenYOffset]);
-	ScorpionGridUpdate();
-	SetGridLocVal(scorpionEnemy.x,screenYtogridY[scorpionEnemy.y - screenYOffset],u);	
-	Sprite::DrawAt(scorpionEnemy.x,scorpionEnemy.y,u,false);
-	u := GetGridLocVal(scorpionEnemy.x+1,screenYtogridY[scorpionEnemy.y - screenYOffset]);
-	ScorpionGridUpdate();
-	SetGridLocVal(scorpionEnemy.x,screenYtogridY[scorpionEnemy.y - screenYOffset],u);	
-	Sprite::DrawAt(scorpionEnemy.x+1,scorpionEnemy.y,u,false);
-	u := GetGridLocVal(scorpionEnemy.x+2,screenYtogridY[scorpionEnemy.y - screenYOffset]);
-	ScorpionGridUpdate();
-	SetGridLocVal(scorpionEnemy.x,screenYtogridY[scorpionEnemy.y - screenYOffset],u);		
-	Sprite::DrawAt(scorpionEnemy.x+2,scorpionEnemy.y,u,false);	
+	// Check fail conditions first as it's faster.
+	if (playerBullet.fired = false) then return;
+	if (	playerBullet.x < scorpionEnemy.x or (playerBullet.x > scorpionEnemy.x + 2)) then return;
+	if (playerBullet.y > scorpionEnemy.y + 3 or (playerBullet.y < scorpionEnemy.y)) then return;
+	// Passed these  conditions so bullet is touching part of the scorpion
+	scorpionEnemy.dead := true;
+	scorpionEnemy.animFrame := 0;
+	PlaySound(Sfx_FleaDead);
+	AddScore(100);
 end;
 
 // Move scorpion
@@ -813,7 +849,7 @@ begin
 		Sprite::DrawAt(scorpionEnemy.x,scorpionEnemy.y,p + scorpionEnemy.animFrame,false);
 		// Reset sprite data
 		Sprite::SetData(#smallSprites);
-		Sprite::SetSize(1,4);	
+		Sprite::SetSize(1,4);
 	end;
 end;
 
@@ -844,6 +880,7 @@ begin
 			scorpionEnemy.direction := true;
 		end;	
 		scorpionEnemy.enabled := true;
+		scorpionEnemy.dead := false;
 		scorpionEnemy.animFrame := 0;
 		scorpionEnemy.moveSpeed := ScorpionMoveSpeed;
 	end;
@@ -1077,7 +1114,11 @@ begin
 		// Sync everything so the speed is correct
 		Screen::WaitForVerticalBlank();
 		// Try spawning scorpion
-		if (scorpionEnemy.enabled <> false) then MoveScorpion();
+		if (scorpionEnemy.enabled <> false) then
+		begin
+			MoveScorpion();
+			CheckScorpionShot();
+		end;
 		if (fleaEnemy.enabled) then
 		begin
 			// Only move flea if it's not dead.
