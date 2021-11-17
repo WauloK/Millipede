@@ -25,8 +25,8 @@ var
 	const milliLength : byte = 12;	
 	const milliSprite : byte = 12;
 	const milliSpriteEnd : byte = 17;
-	const milliBody : byte = 5;
-	const milliHead : byte = 6;
+	const milliBody : byte = 9;
+	const milliHead : byte = 10;
 	const fleaDeathSprite : byte = 20;
 	const PlayerYMin : byte = 42;
 	const PlayerYMax : byte = 58;
@@ -738,13 +738,12 @@ begin
 	begin
 		// Set start sprite
 		p := scorpionSpriteLeft + 4;
-		// Check for mushrooms under scorpion sprite left half
+		// Check for mushrooms under scorpion sprite left part
 		u := GetGridLocVal(scorpionEnemy.x,screenYtogridY[scorpionEnemy.y - screenYOffset]);
-		if (u < mushroomSpriteEnd) then
+		if (u < mushroomSpriteEnd and (u > 0)) then
 		begin
 			u := u + 4;
 			Sprite::DrawAt(scorpionEnemy.x,scorpionEnemy.y,u,false);
-			u := u + 2;
 			SetGridLocVal(scorpionEnemy.x,screenYtogridY[scorpionEnemy.y - screenYOffset],u);	
 		end
 		else
@@ -766,13 +765,12 @@ begin
 	begin
 		// Set start sprite
 		p := scorpionSpriteLeft;
-		// Check for mushrooms under scorpion sprite right half
+		// Check for mushrooms under scorpion sprite right part
 		u := GetGridLocVal(scorpionEnemy.x + 2,screenYtogridY[scorpionEnemy.y - screenYOffset]);
-		if (u < mushroomSpriteEnd) then
+		if (u < mushroomSpriteEnd and (u > 0)) then
 		begin
 			u := u + 4;
 			Sprite::DrawAt(scorpionEnemy.x + 2,scorpionEnemy.y,u,false);
-			u := u + 2;
 			SetGridLocVal(scorpionEnemy.x + 2,screenYtogridY[scorpionEnemy.y - screenYOffset],u);	
 		end
 		else
@@ -811,22 +809,22 @@ begin
 	t := Functions::getRandomByte(100);	
 	
 	// Spawn on the random side
-	if (t > 70) then	
+	if (t > 7) then	
 	begin
 		// Pick a random side of the screen to spawn a scorpion
-		t := Functions::getRandomByte(31);
+		t := Functions::getRandomByte(100);
 		// Spawn on the random side
-		if (t > 15) then	
+		if (t > 50) then	
 		begin
 			scorpionEnemy.x := PlayerXMax - 2;
-			t := Functions::getRandomByte(7);	
+			t := Functions::getRandomByte(9);	
 			scorpionEnemy.y := t * 4 + screenYOffset;
 			scorpionEnemy.direction := false;
 		end
 		else
 		begin
 			scorpionEnemy.x := 0;
-			t := Functions::getRandomByte(7);	
+			t := Functions::getRandomByte(9);	
 			scorpionEnemy.y := t * 4 + screenYOffset;
 			scorpionEnemy.direction := true;
 		end;	
