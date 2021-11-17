@@ -355,27 +355,6 @@ begin
 	DrawHUD();
 end;
 
-// Delete a sprite - is redundant now but useful to show inline assembly
-procedure DeleteSprite(x, y : global byte);
-begin
-	tempint := #screen + Screen::tab32[y] + x;
-	asm("
-	ld a,[tempint+1]
-	ld h,a
-	ld a,[tempint]
-	ld l,a
-	ld de,#0020
-	ld (hl),#00
-	add hl,de
-	ld (hl),#00
-	add hl,de
-	ld (hl),#00
-	add hl,de
-	ld (hl),#00
-	add hl,de	
-	");
-end;
-
 // Draw Bullet
 procedure DrawBullet(x,y : global byte);
 begin
@@ -413,7 +392,7 @@ begin
 		return;
 	end;		
   // Erase player sprite
-	DeleteSprite(playerSnake.x,playerSnake.y);
+	Sprite::DrawAt(playerSnake.x,playerSnake.y,0,false);
 	// Check if player wants to move UP
 	if (u = Input::Joy_Up or (v = Input::Joy_Up or (w = Input::Key_Q))) then
 	begin
@@ -463,13 +442,13 @@ begin
 end;
 
 // Check if we need to put a flea on the screen
-procedure ShouldFleaDrop();
+procedure SpawnFlea();
 begin
 	t := 0;
 	for u := 0 to 160 do
 	begin
 		v := gameGrid[u+256];
-		if (v > mushroomSprite - 1 and (v < mushroomSpriteEnd)) then t := t + 1;
+		if (v > mushroomSprite - 1 and (v < mushroomSpriteEnd + 4)) then t := t + 1;
 		if (t > 5) then return;
 	end;
 	fleaEnemy.enabled := true;
@@ -505,7 +484,7 @@ begin
 			// Mushy at this grid loc
 			if (s < mushroomSpriteEnd + 4) then
 			begin
-				DeleteSprite(v,lookupScreenY[w]+screenYOffset);	
+				Sprite::DrawAt(v,lookupScreenY[w]+screenYOffset,0,false);	
 				s := s - 1;
 				if (s = 4) then s := 0; // Bad mushroom shot completely
 				// Update value in grid location
@@ -518,12 +497,12 @@ begin
 				// Delete mushy
 				SetGridLocVal(playerBullet.x,screenYtogridY[playerBullet.y-screenYOffset],0);
 				// Draw new grid sprite
-				DeleteSprite(v,lookupScreenY[w]+screenYOffset);				
+				Sprite::DrawAt(v,lookupScreenY[w]+screenYOffset,0,false);				
 				AddScore(1);
 				mushroomJustShot.x := playerBullet.x;
 				mushroomJustShot.y := screenYtogridY[playerBullet.y-screenYOffset];
 				// See if number of mushies in player area needs updating
-				if (fleaEnemy.enabled = false) then ShouldFleaDrop();
+				if (fleaEnemy.enabled = false) then SpawnFlea();
 			end;
 		end;
 	end;
@@ -547,7 +526,7 @@ begin
 							milliSegments[p+1].flags := SetBit(milliSegments[p+1].flags,Flag_Head);
 						end;	
 						PlaySound(Sfx_MilliDead);
-						DeleteSprite(milliSegments[p].x,lookupScreenY[milliSegments[p].y]+screenYOffset);					
+						Sprite::DrawAt(milliSegments[p].x,lookupScreenY[milliSegments[p].y]+screenYOffset,0,false);					
 						SetGridLocVal(playerBullet.x,q,mushroomSprite);
 						Sprite::DrawAt(playerBullet.x,lookupScreenY[milliSegments[p].y]+screenYOffset,mushroomSprite,false);
 					end;
@@ -612,23 +591,25 @@ begin
 end;
 
 // Player death sequence
-procedure DoPlayerDeathAnim();
+procedure DoPlayerDeath();
 begin
 	for v:= 1 to 5 do
 	begin
 		Sprite::DrawAt(playerSnake.x,playerSnake.y,snakeDeathSprite + v,false);
 		PlaySound(Sfx_PlayerDead);	
-		DeleteSprite(playerSnake.x,playerSnake.y);
+		Sprite::DrawAt(playerSnake.x,playerSnake.y,0,false);
 	end;
 	playerSnake.x := 16;
 	Sprite::DrawAt(playerSnake.x,playerSnake.y,snakeSprite,false);
+	// Reset scorpion 
+	ResetScorpionGrid();
+	scorpionEnemy.enabled := false;	
 	// Reset millipede
 	for s := 0 to milliLength do
 	begin
-		// Reset millipede
 		if (IsBitSet(milliSegments[s].flags, Flag_Alive)<>false) then
 		begin
-			DeleteSprite(milliSegments[s].x,screenYOffset+lookupScreenY[milliSegments[s].y]);
+			Sprite::DrawAt(milliSegments[s].x,screenYOffset+lookupScreenY[milliSegments[s].y],0,false);
 			SetGridLocVal(milliSegments[s].x,milliSegments[s].y,0);	
 		end;
 		milliSegments[s].flags := 74;	 // Initial direction set to right, down and set to alive body segment.
@@ -641,13 +622,16 @@ begin
 	  	for x := 0 to gridWidth do
 		begin
 			u := GetGridLocVal(x,y);
-			if (u > 0 and (u < mushroomSpriteEnd + 4)) then if (u <> mushroomSprite) then 
+			if (u < mushroomSpriteEnd + 4) then
 			begin
-				SetGridLocVal(x,y,mushroomSprite);
-				Sprite::DrawAt(x,screenYOffset+lookupScreenY[y],mushroomSprite,false);
-				AddScore(1);
-				PlaySound(Sfx_ResetMushrooms);
-				for u := 0 to 200 do wait(20);
+				if (u <> mushroomSprite and (u <> 0)) then 
+				begin
+					SetGridLocVal(x,y,mushroomSprite);
+					Sprite::DrawAt(x,screenYOffset+lookupScreenY[y],mushroomSprite,false);
+					AddScore(1);
+					PlaySound(Sfx_ResetMushrooms);
+					for u := 0 to 200 do wait(20);
+				end;
 			end;
 		end;
 	end;
@@ -684,7 +668,7 @@ begin
 		// Flea death - erase flea
 		if (fleaEnemy.animFrame = 0) then 
 		begin
-			DeleteSprite(fleaEnemy.x, fleaEnemy.y);
+			Sprite::DrawAt(fleaEnemy.x, fleaEnemy.y,0,false);
 			fleaEnemy.animFrame := 1;
 			return;
 		end
@@ -695,10 +679,10 @@ begin
 		Sprite::DrawAt(fleaEnemy.x, fleaEnemy.y, fleaDeathSprite + fleaEnemy.animFrame,false);
 		if (fleaEnemy.animFrame = 4) then
 		begin
-			DeleteSprite(fleaEnemy.x,fleaEnemy.y);
+			Sprite::DrawAt(fleaEnemy.x,fleaEnemy.y,0,false);
 			fleaEnemy.shotCount := 0;
 			fleaEnemy.y := 0;
-			ShouldFleaDrop();
+			SpawnFlea();
 			return;
 		end;
 		fleaEnemy.animFrame := fleaEnemy.animFrame + 1;
@@ -714,12 +698,12 @@ begin
 	if (fleaEnemy.y < playerSnake.y) then return;
 	// Passed the above, so flea and snake are touching
 	fleaEnemy.enabled := false;
-	DeleteSprite(fleaEnemy.x,fleaEnemy.y);
-	DeleteSprite(playerSnake.x,playerSnake.y);
+	Sprite::DrawAt(fleaEnemy.x,fleaEnemy.y,0,false);
+	Sprite::DrawAt(playerSnake.x,playerSnake.y,0,false);
 	playerBullet.fired := false;
-	DeleteSprite(playerBullet.x,playerBullet.y);
+	Sprite::DrawAt(playerBullet.x,playerBullet.y,0,false);
 	SubtractLife();
-	DoPlayerDeathAnim();
+	DoPlayerDeath();
 end;
 
 // Move the flea down the screen, dropping mushies on the way
@@ -738,8 +722,8 @@ begin
 	if (fleaEnemy.y > PlayerYMax) then
 	begin
 		fleaEnemy.enabled := false;
-		DeleteSprite(fleaEnemy.x,fleaEnemy.y - 1);
-		ShouldFleaDrop();
+		Sprite::DrawAt(fleaEnemy.x,fleaEnemy.y - 1,0,false);
+		SpawnFlea();
 		return;
 	end;
 	Sprite::DrawAt(fleaEnemy.x, fleaEnemy.y, fleaSprite,false);
@@ -754,7 +738,7 @@ begin
 		begin
 			SetGridLocVal(fleaEnemy.x, screenYtogridY[fleaEnemy.y - 4 - screenYOffset], mushroomSprite);
 			// Draw new grid sprite
-			Sprite::DrawAt(fleaEnemy.x, fleaEnemy.y  - 4, mushroomSprite, false);  //HERE!
+			Sprite::DrawAt(fleaEnemy.x, fleaEnemy.y  - 4, mushroomSprite, false); 
 		end
 		else
 		begin
@@ -804,6 +788,8 @@ begin
 	// Passed these  conditions so bullet is touching part of the scorpion
 	scorpionEnemy.dead := true;
 	scorpionEnemy.animFrame := 0;
+	DeleteBullet(playerBullet.x,playerBullet.y);
+	playerBullet.fired := false;	
 	PlaySound(Sfx_FleaDead);
 	AddScore(100);
 end;
@@ -814,9 +800,9 @@ begin
 	scorpionEnemy.moveSpeed := scorpionEnemy.moveSpeed - 1;
 	if (scorpionEnemy.moveSpeed = 0) then scorpionEnemy.moveSpeed := ScorpionMoveSpeed else return;
 	// Erase scorpion sprite
-	DeleteSprite(scorpionEnemy.x,scorpionEnemy.y);
-	DeleteSprite(scorpionEnemy.x+1,scorpionEnemy.y);
-	DeleteSprite(scorpionEnemy.x+2,scorpionEnemy.y);
+	Sprite::DrawAt(scorpionEnemy.x,scorpionEnemy.y,0,false);
+	Sprite::DrawAt(scorpionEnemy.x+1,scorpionEnemy.y,0,false);
+	Sprite::DrawAt(scorpionEnemy.x+2,scorpionEnemy.y,0,false);
 	scorpionEnemy.animFrame := scorpionEnemy.animFrame + 1;
 	if (scorpionEnemy.animFrame = 4) then scorpionEnemy.animFrame := 0;
 	if (scorpionEnemy.direction) then // Moving Right
@@ -893,16 +879,16 @@ begin
 	// Pick a random number to see if we spawn it
 	t := Functions::getRandomByte(100);	
 	
-	// Spawn on the random side
+	// Spawn or not
 	if (t > 7) then	
 	begin
 		// Pick a random side of the screen to spawn a scorpion
-		t := Functions::getRandomByte(100);
+		t := Functions::getRandomByte(100); t := 70;
 		// Spawn on the random side
 		if (t > 50) then	
 		begin
 			scorpionEnemy.x := PlayerXMax - 2;
-			t := Functions::getRandomByte(9);	
+			t := Functions::getRandomByte(9);	 t := 5;
 			scorpionEnemy.y := t * 4 + screenYOffset;
 			scorpionEnemy.direction := false;
 		end
@@ -978,7 +964,7 @@ begin
 			else
 			begin
 			// Delete sprite
-			DeleteSprite(milliSegments[s].x,screenYOffset+lookupScreenY[milliSegments[s].y]);
+			Sprite::DrawAt(milliSegments[s].x,screenYOffset+lookupScreenY[milliSegments[s].y],0,false);
      // Millipede body segments
 			if (milliSegments[s].lastGridVal < milliBody) then begin
 				SetGridLocVal(milliSegments[s].x,milliSegments[s].y,milliSegments[s].lastGridVal);	
