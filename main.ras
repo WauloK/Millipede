@@ -493,13 +493,14 @@ begin
 		// Turn bullet off
 		playerBullet.fired := false;
 		// Test for mushies
-		if (s > 0 and (s < mushroomSpriteEnd)) then
+		if (s > 0 and (s < mushroomSpriteEnd + 4)) then
 		begin
 			// Mushy at this grid loc
-			if (s < mushroomSpriteEnd) then
+			if (s < mushroomSpriteEnd + 4) then
 			begin
 				DeleteSprite(v,lookupScreenY[w]+screenYOffset);	
 				s := s - 1;
+				if (s = 4) then s := 0; // Bad mushroom shot
 				// Update value in grid location
 				SetGridLocVal(playerBullet.x,screenYtogridY[playerBullet.y - screenYOffset],s);
 				// Draw new grid sprite
@@ -712,14 +713,28 @@ begin
 	end;
 end;
 
+// Update grid from scorpion
+procedure ScorpionGridUpdate();
+begin
+	if (u < mushroomSpriteEnd and (u > 0)) then
+	begin
+		u := u + 4;
+	end;
+end;
 // Reset mushrooms, etc under scorpion
 procedure 	ResetScorpionGrid();
 begin
 	u := GetGridLocVal(scorpionEnemy.x,screenYtogridY[scorpionEnemy.y - screenYOffset]);
+	ScorpionGridUpdate();
+	SetGridLocVal(scorpionEnemy.x,screenYtogridY[scorpionEnemy.y - screenYOffset],u);	
 	Sprite::DrawAt(scorpionEnemy.x,scorpionEnemy.y,u,false);
 	u := GetGridLocVal(scorpionEnemy.x+1,screenYtogridY[scorpionEnemy.y - screenYOffset]);
+	ScorpionGridUpdate();
+	SetGridLocVal(scorpionEnemy.x,screenYtogridY[scorpionEnemy.y - screenYOffset],u);	
 	Sprite::DrawAt(scorpionEnemy.x+1,scorpionEnemy.y,u,false);
 	u := GetGridLocVal(scorpionEnemy.x+2,screenYtogridY[scorpionEnemy.y - screenYOffset]);
+	ScorpionGridUpdate();
+	SetGridLocVal(scorpionEnemy.x,screenYtogridY[scorpionEnemy.y - screenYOffset],u);		
 	Sprite::DrawAt(scorpionEnemy.x+2,scorpionEnemy.y,u,false);	
 end;
 
