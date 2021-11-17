@@ -46,6 +46,7 @@ var
 	const Sfx_PlayerDead : byte = 5;
 	const Sfx_MilliDead : byte = 6;
 	const Sfx_Scorpion : byte = 7;
+	const Sfx_ResetMushrooms : byte = 8;
 	// Millipede segment flags
 	const Flag_MovingLeft : byte = 1;	// No = 0. Yes = 1
 	const Flag_MovingRight : byte = 2; // No = 0. Yes = 1
@@ -196,6 +197,10 @@ begin
 			begin
 				Sound::Play(20,30);
 				Sound::Play(30,30);
+			end;
+		Sfx_ResetMushrooms:
+			begin
+				Sound::Play(50,30);
 			end;
 		Sfx_Scorpion:
 			begin
@@ -617,6 +622,35 @@ begin
 	end;
 	playerSnake.x := 16;
 	Sprite::DrawAt(playerSnake.x,playerSnake.y,snakeSprite,false);
+	// Reset millipede
+	for s := 0 to milliLength do
+	begin
+		// Reset millipede
+		if (IsBitSet(milliSegments[s].flags, Flag_Alive)<>false) then
+		begin
+			DeleteSprite(milliSegments[s].x,screenYOffset+lookupScreenY[milliSegments[s].y]);
+			SetGridLocVal(milliSegments[s].x,milliSegments[s].y,0);	
+		end;
+		milliSegments[s].flags := 74;	 // Initial direction set to right, down and set to alive body segment.
+		milliSegments[s].y := 255; // A large number to note the segment is not on the grid yet.
+	end;
+	milliSegments[0].flags := 90;	 // Alive, direction right, down and head segment.		
+	// Reset mushrooms
+  for y := 0 to gridHeight - 1 do
+  begin
+	  	for x := 0 to gridWidth do
+		begin
+			u := GetGridLocVal(x,y);
+			if (u > 0 and (u < mushroomSpriteEnd + 4)) then if (u <> mushroomSprite) then 
+			begin
+				SetGridLocVal(x,y,mushroomSprite);
+				Sprite::DrawAt(x,screenYOffset+lookupScreenY[y],mushroomSprite,false);
+				AddScore(1);
+				PlaySound(Sfx_ResetMushrooms);
+				for u := 0 to 200 do wait(20);
+			end;
+		end;
+	end;
 end;
 
 // All enemy death sequences
