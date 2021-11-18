@@ -573,20 +573,22 @@ begin
 		u := u + 4;
 	end;
 end;
+
 // Reset mushrooms, etc under scorpion
 procedure 	ResetScorpionGrid();
 begin
-	u := GetGridLocVal(scorpionEnemy.x,screenYtogridY[scorpionEnemy.y - screenYOffset]);
+	p := screenYtogridY[scorpionEnemy.y - screenYOffset];
+	u := GetGridLocVal(scorpionEnemy.x,p);
 	ScorpionGridUpdate();
-	SetGridLocVal(scorpionEnemy.x,screenYtogridY[scorpionEnemy.y - screenYOffset],u);	
+	SetGridLocVal(scorpionEnemy.x,p,u);	
 	Sprite::DrawAt(scorpionEnemy.x,scorpionEnemy.y,u,false);
-	u := GetGridLocVal(scorpionEnemy.x+1,screenYtogridY[scorpionEnemy.y - screenYOffset]);
+	u := GetGridLocVal(scorpionEnemy.x+1,p);
 	ScorpionGridUpdate();
-	SetGridLocVal(scorpionEnemy.x,screenYtogridY[scorpionEnemy.y - screenYOffset],u);	
+	SetGridLocVal(scorpionEnemy.x+1,p,u);	
 	Sprite::DrawAt(scorpionEnemy.x+1,scorpionEnemy.y,u,false);
-	u := GetGridLocVal(scorpionEnemy.x+2,screenYtogridY[scorpionEnemy.y - screenYOffset]);
+	u := GetGridLocVal(scorpionEnemy.x+2,p);
 	ScorpionGridUpdate();
-	SetGridLocVal(scorpionEnemy.x,screenYtogridY[scorpionEnemy.y - screenYOffset],u);		
+	SetGridLocVal(scorpionEnemy.x+2,p,u);		
 	Sprite::DrawAt(scorpionEnemy.x+2,scorpionEnemy.y,u,false);	
 end;
 
@@ -736,6 +738,7 @@ begin
 	t := Functions::getRandomByte(31);
 	if (t > 15) then
 		begin
+			// Update grid info
 			SetGridLocVal(fleaEnemy.x, screenYtogridY[fleaEnemy.y - 4 - screenYOffset], mushroomSprite);
 			// Draw new grid sprite
 			Sprite::DrawAt(fleaEnemy.x, fleaEnemy.y  - 4, mushroomSprite, false); 
@@ -799,10 +802,6 @@ procedure MoveScorpion();
 begin
 	scorpionEnemy.moveSpeed := scorpionEnemy.moveSpeed - 1;
 	if (scorpionEnemy.moveSpeed = 0) then scorpionEnemy.moveSpeed := ScorpionMoveSpeed else return;
-	// Erase scorpion sprite
-	Sprite::DrawAt(scorpionEnemy.x,scorpionEnemy.y,0,false);
-	Sprite::DrawAt(scorpionEnemy.x+1,scorpionEnemy.y,0,false);
-	Sprite::DrawAt(scorpionEnemy.x+2,scorpionEnemy.y,0,false);
 	scorpionEnemy.animFrame := scorpionEnemy.animFrame + 1;
 	if (scorpionEnemy.animFrame = 4) then scorpionEnemy.animFrame := 0;
 	if (scorpionEnemy.direction) then // Moving Right
@@ -883,12 +882,12 @@ begin
 	if (t > 7) then	
 	begin
 		// Pick a random side of the screen to spawn a scorpion
-		t := Functions::getRandomByte(100); t := 70;
+		t := Functions::getRandomByte(100);
 		// Spawn on the random side
 		if (t > 50) then	
 		begin
 			scorpionEnemy.x := PlayerXMax - 2;
-			t := Functions::getRandomByte(9);	 t := 5;
+			t := Functions::getRandomByte(9);
 			scorpionEnemy.y := t * 4 + screenYOffset;
 			scorpionEnemy.direction := false;
 		end
