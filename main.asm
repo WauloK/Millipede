@@ -156,8 +156,8 @@ smallSprites:	db $00, $00, $00, $00, $028, $080, $00, $00
 	db $03c, $0f3, $020, $00, $03c, $0ff, $028, $020
 	db $03c, $0ff, $028, $028, $03c, $0df, $0ff, $0cc
 	db $014, $0d7, $055, $014, $014, $00, $00, $00
-	db $014, $055, $055, $014, $017, $055, $055, $017
-	db $014, $055, $055, $0d7, $0d4, $055, $055, $0d4
+	db $014, $055, $055, $014, $05c, $055, $055, $05c
+	db $014, $055, $055, $0d7, $035, $055, $055, $035
 	db $0d7, $055, $055, $014, $00, $010, $00, $00
 	db $00, $010, $04, $00, $00, $04, $010, $00
 	db $044, $011, $044, $011, $00, $030, $00, $00
@@ -5928,7 +5928,7 @@ SpawnScorpion:
 	ld [t], a
 	; Binary clause core: GREATER
 	; Compare with pure num / var optimization
-	cp $7
+	cp $46
 	jp c, SpawnScorpion_elsedoneblock2152
 	jp z, SpawnScorpion_elsedoneblock2152
 SpawnScorpion_ConditionalTrueBlock2150: ;Main true block ;keep :
