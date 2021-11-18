@@ -6322,7 +6322,7 @@ MoveMillipede_elseblock8673:
 	jp nc,MoveMillipede_elseblock9769
 MoveMillipede_ConditionalTrueBlock9768: ;Main true block ;keep :
 	
-; // Millipede body segments
+; // Millipede segments - draw whatever was on the grid before the segment was there.
 	; generic assign 
 	ld a,[s]
 	ld e,a ; variable is 8-bit
@@ -6436,17 +6436,6 @@ MoveMillipede_elsedoneblock9770:
 MoveMillipede_ConditionalTrueBlock9776: ;Main true block ;keep :
 	
 ; // Only direction changing logic in millipede heads
-; // Check if the millipede segment is on top of the snake. If so, redraw snake so it doesn't vanish
-; //					if(screenYOffset+lookupScreenY[milliSegments[s].y] > playerSnake.y - 4) then
-; //					begin
-; //						if(screenYOffset+lookupScreenY[milliSegments[s].y] < playerSnake.y + 3) then
-; //						begin
-; //							if(	milliSegments[s].x = playerSnake.x) then
-; //							begin
-; //								Sprite::DrawAt(playerSnake.x,playerSnake.y,snakeSprite,false);	
-; //							end;				
-; //						end;
-; //					end;
 	ld a, $0
 	ld [varPrefixed_p], a
 	; Binary clause core: NOTEQUALS
@@ -7713,6 +7702,32 @@ MoveMillipede_elseblock9777:
 	ld a,[s]
 	ld e,a
 	ld hl,milliSegments_milliSegments_record_milliSegments_record_y
+	add hl,de
+	pop af
+	ld [hl],a
+	; Storing to array
+	; generic assign 
+	ld a,[s]
+	ld e,a ; variable is 8-bit
+	ld hl,milliSegments_milliSegments_record_milliSegments_record_x
+	add hl,de
+	ld a,[hl]
+	; LoadVar Testing if 'milliSegments_milliSegments_record_milliSegments_record_x' is word : 0
+	ld [v], a
+	; generic assign 
+	ld a,[s]
+	ld e,a ; variable is 8-bit
+	ld hl,milliSegments_milliSegments_record_milliSegments_record_y
+	add hl,de
+	ld a,[hl]
+	; LoadVar Testing if 'milliSegments_milliSegments_record_milliSegments_record_y' is word : 0
+	ld [w], a
+	call GetGridLocVal
+	push af
+	ld a,[s]
+	ld e,a
+	ld d,0
+	ld hl,milliSegments_milliSegments_record_milliSegments_record_lastGridVal
 	add hl,de
 	pop af
 	ld [hl],a
