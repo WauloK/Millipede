@@ -592,6 +592,21 @@ begin
 	Sprite::DrawAt(scorpionEnemy.x+2,scorpionEnemy.y,u,false);	
 end;
 
+// Reset millipede data ingame
+procedure ResetMillipedeToStart();
+begin
+	for s := 0 to milliLength do
+	begin
+		if (IsBitSet(milliSegments[s].flags, Flag_Alive)<>false) then
+		begin
+			Sprite::DrawAt(milliSegments[s].x,screenYOffset+lookupScreenY[milliSegments[s].y],0,false);
+			SetGridLocVal(milliSegments[s].x,milliSegments[s].y,0);	
+		end;
+		milliSegments[s].flags := 74;	 // Initial direction set to right, down and set to alive body segment.
+		milliSegments[s].y := 255; // A large number to note the segment is not on the grid yet.
+	end;
+end;
+
 // Player death sequence
 procedure DoPlayerDeath();
 begin
@@ -607,16 +622,7 @@ begin
 	ResetScorpionGrid();
 	scorpionEnemy.enabled := false;	
 	// Reset millipede
-	for s := 0 to milliLength do
-	begin
-		if (IsBitSet(milliSegments[s].flags, Flag_Alive)<>false) then
-		begin
-			Sprite::DrawAt(milliSegments[s].x,screenYOffset+lookupScreenY[milliSegments[s].y],0,false);
-			SetGridLocVal(milliSegments[s].x,milliSegments[s].y,0);	
-		end;
-		milliSegments[s].flags := 74;	 // Initial direction set to right, down and set to alive body segment.
-		milliSegments[s].y := 255; // A large number to note the segment is not on the grid yet.
-	end;
+	ResetMillipedeToStart();
 	milliSegments[0].flags := 90;	 // Alive, direction right, down and head segment.		
 	// Reset mushrooms
   for y := 0 to gridHeight - 1 do
@@ -964,7 +970,7 @@ begin
 			begin
 			// Delete sprite
 			Sprite::DrawAt(milliSegments[s].x,screenYOffset+lookupScreenY[milliSegments[s].y],0,false);
-     // Millipede body segments
+      // Millipede body segments
 			if (milliSegments[s].lastGridVal < milliBody) then begin
 				SetGridLocVal(milliSegments[s].x,milliSegments[s].y,milliSegments[s].lastGridVal);	
 				Sprite::DrawAt(milliSegments[s].x,screenYOffset+lookupScreenY[milliSegments[s].y],milliSegments[s].lastGridVal,false);										
@@ -976,17 +982,17 @@ begin
      // Only direction changing logic in millipede heads
       if IsBitSet(milliSegments[s].flags, Flag_Head) then
 				begin
-					// Check if the millipede segment is on top of the snake. If so, redraw snake so it doesn't vanish
-					if (screenYOffset+lookupScreenY[milliSegments[s].y] > playerSnake.y - 4) then
-					begin
-						if (screenYOffset+lookupScreenY[milliSegments[s].y] < playerSnake.y + 3) then
-						begin
-							if (	milliSegments[s].x = playerSnake.x) then
-							begin
-								Sprite::DrawAt(playerSnake.x,playerSnake.y,snakeSprite,false);	
-							end;				
-						end;
-					end;
+			// Check if the millipede segment is on top of the snake. If so, redraw snake so it doesn't vanish
+//					if (screenYOffset+lookupScreenY[milliSegments[s].y] > playerSnake.y - 4) then
+//					begin
+//						if (screenYOffset+lookupScreenY[milliSegments[s].y] < playerSnake.y + 3) then
+//						begin
+//							if (	milliSegments[s].x = playerSnake.x) then
+//							begin
+//								Sprite::DrawAt(playerSnake.x,playerSnake.y,snakeSprite,false);	
+//							end;				
+//						end;
+//					end;
 					p := 0; // Did we already switch R/L?
 					// Move millipede right?
 					if (IsBitSet(milliSegments[s].flags,Flag_MovingRight)<>false) then
