@@ -37,16 +37,16 @@ var
 	const MilliYMax : byte = 13;
 	const SpiderYMin : byte = 35;
 	const SpiderYMax : byte = 58;
-	const PlayerMoveSpeed : byte = 3;
+	const PlayerMoveSpeed : byte = 2;
 	const MilliMoveSpeed : byte = 4;
-	const ScorpionMoveSpeed : byte = 4;
-	const SpiderMoveSpeed : byte = 1;
+	const ScorpionMoveSpeed : byte = 3;
+	const SpiderMoveSpeed : byte = 2;
 	const fleaMovespeed : byte = 2;
 	const screenYOffset : byte = 6;
 	const Sfx_Gamestart : byte = 1;
 	const Sfx_Playershoot : byte = 2;
 	const Sfx_Flea : byte = 3;
-	const Sfx_FleaDead : byte = 4;
+	const Sfx_EnemyDead : byte = 4;
 	const Sfx_PlayerDead : byte = 5;
 	const Sfx_MilliDead : byte = 6;
 	const Sfx_Scorpion : byte = 7;
@@ -100,6 +100,7 @@ var
 	end;
 	flea_record = record
 		enabled : boolean;
+		dead : boolean;
 		dropCount : byte;
 		shotCount : byte;
 		moveSpeed : byte;
@@ -115,30 +116,30 @@ var
 	end;
 	scorpion_record = record
 		enabled : boolean;
+		dead : boolean;
 		x,y : byte;
 		direction : boolean;
 		animFrame : byte;
 		moveSpeed : byte;
-		dead : boolean;
 	end;
 	spider_record = record
 		enabled : boolean;
+		dead : boolean;
 		x,y : byte;
 		direction : boolean;
 		vertical : boolean;
 		vertcount : byte;
 		animFrame : byte;
 		moveSpeed : byte;
-		dead : boolean;
 	end;	
 	playerBullet : playerBullet_record;
 	playerSnake : playerSnake_record;
 	gameStats : gameStats_record;
 	fleaEnemy : flea_record;
-	milliSegments : array[milliLength] of milliSegments_record;
-  mushroomJustShot : mushroomJustShot_record;
   scorpionEnemy : scorpion_record;
   spiderEnemy : spider_record;
+	milliSegments : array[milliLength] of milliSegments_record;
+  mushroomJustShot : mushroomJustShot_record;
 
 // Procedures	
 
@@ -201,7 +202,7 @@ begin
 			begin
 				Sound::Play(fleaEnemy.y * 5,3);
 			end;
-		Sfx_FleaDead:
+		Sfx_EnemyDead:
 			begin
 				Sound::Shoot(450,200);
 			end;
@@ -326,6 +327,10 @@ begin
 	playerBullet.fired := false;
 	fleaEnemy.enabled := false;
 	scorpionEnemy.enabled := false;
+	spiderEnemy.enabled := false;
+	fleaEnemy.dead := false;
+	scorpionEnemy.dead := false;
+	spiderEnemy.dead := false;	
 	DrawHUD();
 	// Draw player sprite
 	Sprite::SetData(#smallSprites);
@@ -492,8 +497,9 @@ begin
 		if (t > 5) then return;
 	end;
 	fleaEnemy.enabled := true;
+	fleaEnemy.dead := false;
 	fleaEnemy.x := Functions::getRandomByte(31);
-	fleaEnemy.y := screenYOffset + 4;
+	fleaEnemy.y := screenYOffset + 8;
 	fleaEnemy.moveSpeed := fleaMovespeed;
 	fleaEnemy.shotCount := 0;
 	fleaEnemy.dropCount := 0;
@@ -589,6 +595,7 @@ begin
 		// Erase bullet
 		DeleteBullet(playerBullet.x,playerBullet.y);
 		playerBullet.fired := false;
+		playerBullet.y := 0;
 		if (fleaEnemy.shotCount = 0) then
 		begin
 			fleaEnemy.shotCount := 1;
@@ -599,7 +606,7 @@ begin
 		AddScore(20);
 		fleaEnemy.shotCount := 2;
 		fleaEnemy.animFrame := 0;
-		fleaEnemy.enabled := false;
+		fleaEnemy.dead := true;
 	end;
 end;
 
@@ -659,6 +666,11 @@ begin
 	// Reset scorpion 
 	ResetScorpionGrid();
 	scorpionEnemy.enabled := false;	
+	scorpionEnemy.dead := false;	
+	spiderEnemy.enabled := false;	
+	spiderEnemy.dead := false;	
+	fleaEnemy.enabled := false;	
+	fleaEnemy.dead := false;		
 	// Reset millipede
 	ResetMillipedeToStart();
 	milliSegments[0].flags := 90;	 // Alive, direction right, down and head segment.		
@@ -687,69 +699,60 @@ end;
 procedure DoEnemyDeathAnim();
 begin
 	// Scorpion death
-	if (scorpionEnemy.enabled and (scorpionEnemy.dead)) then
+	if (scorpionEnemy.enabled = true and (scorpionEnemy.dead = true)) then
 	begin
 		// Update sprite data
 		Sprite::SetData(#bigSprites);
 		Sprite::SetSize(3,4);	
-		// Draw scorpion sprite
+		// Draw scorpion death
 		Sprite::DrawAt(scorpionEnemy.x,scorpionEnemy.y, enemyDeathSprite + scorpionEnemy.animFrame,false);
 		// Reset sprite data
 		Sprite::SetData(#smallSprites);
 		Sprite::SetSize(1,4);
 		scorpionEnemy.animFrame := scorpionEnemy.animFrame + 1;
-		PlaySound(Sfx_FleaDead);
+		PlaySound(Sfx_EnemyDead);
 		if (scorpionEnemy.animFrame = 4) then
 		begin
 			Sprite::DrawAt(scorpionEnemy.x+1,scorpionEnemy.y, 0, false);
 			ResetScorpionGrid();
 			scorpionEnemy.enabled := false;
+			scorpionEnemy.dead := false;
 		end;
 	end;
 
 	// Spider death
-	if (spiderEnemy.enabled and (spiderEnemy.dead)) then
+	if (spiderEnemy.enabled = true and (spiderEnemy.dead = true)) then
 	begin
 		// Update sprite data
 		Sprite::SetData(#bigSprites);
 		Sprite::SetSize(3,4);	
-		// Draw scorpion sprite
+		// Draw spider death
 		Sprite::DrawAt(spiderEnemy.x,spiderEnemy.y, enemyDeathSprite + spiderEnemy.animFrame,false);
 		// Reset sprite data
 		Sprite::SetData(#smallSprites);
 		Sprite::SetSize(1,4);
 		spiderEnemy.animFrame := spiderEnemy.animFrame + 1;
-		PlaySound(Sfx_FleaDead);
+		PlaySound(Sfx_EnemyDead);
 		if (spiderEnemy.animFrame = 4) then
 		begin
 			Sprite::DrawAt(spiderEnemy.x+1,spiderEnemy.y, 0, false);
 			spiderEnemy.enabled := false;
+			spiderEnemy.dead := false;
 		end;
 	end;
-	
-	// Test for flea death occurring
-	if (fleaEnemy.shotCount < 2) then return;
+
 	// Do flea stuff
 	if (fleaEnemy.shotCount = 2) then
 	begin
-		// Flea death - erase flea
-		if (fleaEnemy.animFrame = 0) then 
-		begin
-			Sprite::DrawAt(fleaEnemy.x, fleaEnemy.y,0,false);
-			fleaEnemy.animFrame := 1;
-			return;
-		end
-		else begin
-			Sprite::DrawAt(fleaEnemy.x, fleaEnemy.y, fleaDeathSprite + fleaEnemy.animFrame,false);	
-		end;
-		PlaySound(Sfx_FleaDead);
+		PlaySound(Sfx_EnemyDead);
 		Sprite::DrawAt(fleaEnemy.x, fleaEnemy.y, fleaDeathSprite + fleaEnemy.animFrame,false);
 		if (fleaEnemy.animFrame = 4) then
 		begin
 			Sprite::DrawAt(fleaEnemy.x,fleaEnemy.y,0,false);
 			fleaEnemy.shotCount := 0;
 			fleaEnemy.y := 0;
-			SpawnFlea();
+			fleaEnemy.enabled := false;
+			fleaEnemy.dead := false;
 			return;
 		end;
 		fleaEnemy.animFrame := fleaEnemy.animFrame + 1;
@@ -800,8 +803,8 @@ begin
 	if (fleaEnemy.dropCount = 4) then
 	begin
 	fleaEnemy.dropCount := 0;
-	t := Functions::getRandomByte(31);
-	if (t > 15) then
+	t := Functions::getRandomByte(100);
+	if (t > 30) then
 		begin
 			// Update grid info
 			SetGridLocVal(fleaEnemy.x, screenYtogridY[fleaEnemy.y - 4 - screenYOffset], mushroomSprite);
@@ -851,11 +854,13 @@ procedure CheckScorpionShot();
 begin
 	// Check fail conditions first as it's faster.
 	if (playerBullet.fired = false) then return;
+	if (scorpionEnemy.dead) then return;
 	if (	playerBullet.x < scorpionEnemy.x or (playerBullet.x > scorpionEnemy.x + 2)) then return;
 	if (playerBullet.y > scorpionEnemy.y + 3 or (playerBullet.y < scorpionEnemy.y)) then return;
 	// Passed these  conditions so bullet is touching part of the scorpion
 	scorpionEnemy.dead := true;
 	scorpionEnemy.animFrame := 0;
+	playerBullet.y := 0;
 	DeleteBullet(playerBullet.x,playerBullet.y);
 	playerBullet.fired := false;	
 	AddScore(100);
@@ -866,10 +871,12 @@ procedure CheckSpiderShot();
 begin
 	// Check fail conditions first as it's faster.
 	if (playerBullet.fired = false) then return;
+	if (spiderEnemy.dead) then return;
 	if (	playerBullet.x < spiderEnemy.x or (playerBullet.x > spiderEnemy.x + 2)) then return;
 	if (playerBullet.y > spiderEnemy.y + 3 or (playerBullet.y < spiderEnemy.y)) then return;
 	// Passed these  conditions so bullet is touching part of the scorpion
 	spiderEnemy.dead := true;
+	playerBullet.y := 0;
 	spiderEnemy.animFrame := 0;
 	DeleteBullet(playerBullet.x,playerBullet.y);
 	playerBullet.fired := false;
@@ -1035,7 +1042,7 @@ begin
 	t := Functions::getRandomByte(100);	
 	
 	// Spawn or not
-	if (t > 70) then	
+	if (t > 90) then	
 	begin
 		// Pick a random side of the screen to spawn a scorpion
 		t := Functions::getRandomByte(100);
@@ -1067,7 +1074,7 @@ begin
 	// Pick a random number to see if we spawn it
 	t := Functions::getRandomByte(200);	
 	// Spawn or not
-	if (t < 190) then return;
+	if (t < 199) then return;
 	// Pick a random side of the screen to spawn a scorpion
 	t := Functions::getRandomByte(100);
 	// Spawn on the random side
@@ -1186,8 +1193,6 @@ begin
 						begin
 							if (IsBitSet(milliSegments[s].flags,Flag_MovingDown)<>false) then
 							begin
-								// Try spawning the scorpion
-								if (scorpionEnemy.enabled = false and (fleaEnemy.enabled = false)) then SpawnScorpion();
 								// Save current position
 								milliSegments[s].lastX := milliSegments[s].x; milliSegments[s].lastY := milliSegments[s].y;								
 								milliSegments[s].y := milliSegments[s].y + 1;
@@ -1229,9 +1234,7 @@ begin
 						else
 						begin
 						if (IsBitSet(milliSegments[s].flags,Flag_MovingDown)<>false) then
-							begin
-								// Try spawning the scorpion
-								if (scorpionEnemy.enabled = false and (fleaEnemy.enabled = false)) then SpawnScorpion();								
+							begin							
 								// Save current position
 								milliSegments[s].lastX := milliSegments[s].x; milliSegments[s].lastY := milliSegments[s].y;					
 								milliSegments[s].y := milliSegments[s].y + 1;
@@ -1313,42 +1316,47 @@ begin
 	begin
 		// Sync everything so the speed is correct
 		Screen::WaitForVerticalBlank();
+
+
+		// Try spawning the scorpion
+		if (scorpionEnemy.enabled = false and (fleaEnemy.enabled = false and (scorpionEnemy.dead = false))) then SpawnScorpion();		
 		// Move scorpion
-		if (scorpionEnemy.enabled) then
+		if (scorpionEnemy.enabled and (scorpionEnemy.dead = false)) then
 		begin
 			MoveScorpion();
 			CheckScorpionShot();
 		end;
+
+		
+		// SPIDER
+		if (spiderEnemy.enabled = false and (spiderEnemy.dead = false)) then SpawnSpider();	
 		// Move spider
-		if (spiderEnemy.enabled) then
+		if (spiderEnemy.enabled = true and (spiderEnemy.dead = false)) then
 		begin
 			MoveSpider();
 			CheckSpiderShot();
-		end
-		else
-		begin
-			SpawnSpider();	
 		end;
+
 		// Move flea if enabled
-		if (fleaEnemy.enabled) then
+		if (fleaEnemy.enabled and (fleaEnemy.dead = false)) then
 		begin
 			// Only move flea if it's not dead.
-			if (fleaEnemy.shotCount < 2) then MoveFlea();
-			// Check if flea collided with player
-			CheckFleaCollide();
-			// Check if flea was shot
-			if (playerBullet.fired) then CheckFleaShot();
-		end
-		else
-		begin
-			SpawnFlea();
+			if (fleaEnemy.shotCount < 2) then
+			begin
+				MoveFlea();
+				CheckFleaShot();
+				// Check if flea collided with player
+				CheckFleaCollide();
+			end;
 		end;
+		// Spawn Flea
+		if (fleaEnemy.enabled = false and (spiderEnemy.enabled = false)) then SpawnFlea();
 		// Move Millipede
 		gameStats.milliSpeed := gameStats.milliSpeed - 1;
 		if (gameStats.milliSpeed = 0) then
 		begin
 			gameStats.milliSpeed := MilliMoveSpeed;
-			//MoveMillipede();
+			MoveMillipede();
 		end;
 		playerSnake.moveCount := playerSnake.moveCount - 1;
 		if (playerSnake.moveCount = 0) then
@@ -1359,7 +1367,6 @@ begin
 		if (playerBullet.fired) then
 		begin
 			MoveBullet();
-			if (fleaEnemy.enabled) then CheckFleaShot();
 			MoveBullet();
 		end;		
 		// Test if any enemies shot and if so, animate sprite
