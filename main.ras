@@ -35,10 +35,12 @@ var
 	const PlayerXMax : byte = 31;
 	const MilliYMin : byte = 10;
 	const MilliYMax : byte = 13;
+	const SpiderYMin : byte = 35;
+	const SpiderYMax : byte = 58;
 	const PlayerMoveSpeed : byte = 3;
-	const MilliMoveSpeed : byte = 7;
+	const MilliMoveSpeed : byte = 4;
 	const ScorpionMoveSpeed : byte = 4;
-	const SpiderMoveSpeed : byte = 2;
+	const SpiderMoveSpeed : byte = 1;
 	const fleaMovespeed : byte = 2;
 	const screenYOffset : byte = 6;
 	const Sfx_Gamestart : byte = 1;
@@ -124,6 +126,7 @@ var
 		x,y : byte;
 		direction : boolean;
 		vertical : boolean;
+		vertcount : byte;
 		animFrame : byte;
 		moveSpeed : byte;
 		dead : boolean;
@@ -220,19 +223,19 @@ begin
 				case scorpionEnemy.animFrame of
 					0:
 						begin
-							Sound::Play(50,20)
+							Sound::Play(50,10)
 						end;
 					1:
 						begin
-							Sound::Play(60,20)
+							Sound::Play(60,10)
 						end;
 					2:
 						begin
-							Sound::Play(70,20)
+							Sound::Play(70,10)
 						end;						
 					3:
 						begin
-							Sound::Play(60,20)
+							Sound::Play(60,10)
 						end;						
 				end;
 			end;
@@ -538,8 +541,6 @@ begin
 				AddScore(1);
 				mushroomJustShot.x := playerBullet.x;
 				mushroomJustShot.y := screenYtogridY[playerBullet.y-screenYOffset];
-				// See if number of mushies in player area needs updating
-				if (fleaEnemy.enabled = false) then SpawnFlea();
 			end;
 		end;
 	end;
@@ -697,11 +698,32 @@ begin
 		Sprite::SetData(#smallSprites);
 		Sprite::SetSize(1,4);
 		scorpionEnemy.animFrame := scorpionEnemy.animFrame + 1;
+		PlaySound(Sfx_FleaDead);
 		if (scorpionEnemy.animFrame = 4) then
 		begin
 			Sprite::DrawAt(scorpionEnemy.x+1,scorpionEnemy.y, 0, false);
 			ResetScorpionGrid();
 			scorpionEnemy.enabled := false;
+		end;
+	end;
+
+	// Spider death
+	if (spiderEnemy.enabled and (spiderEnemy.dead)) then
+	begin
+		// Update sprite data
+		Sprite::SetData(#bigSprites);
+		Sprite::SetSize(3,4);	
+		// Draw scorpion sprite
+		Sprite::DrawAt(spiderEnemy.x,spiderEnemy.y, enemyDeathSprite + spiderEnemy.animFrame,false);
+		// Reset sprite data
+		Sprite::SetData(#smallSprites);
+		Sprite::SetSize(1,4);
+		spiderEnemy.animFrame := spiderEnemy.animFrame + 1;
+		PlaySound(Sfx_FleaDead);
+		if (spiderEnemy.animFrame = 4) then
+		begin
+			Sprite::DrawAt(spiderEnemy.x+1,spiderEnemy.y, 0, false);
+			spiderEnemy.enabled := false;
 		end;
 	end;
 	
@@ -836,8 +858,25 @@ begin
 	scorpionEnemy.animFrame := 0;
 	DeleteBullet(playerBullet.x,playerBullet.y);
 	playerBullet.fired := false;	
-	PlaySound(Sfx_FleaDead);
 	AddScore(100);
+end;
+
+// Did player shoot spider?
+procedure CheckSpiderShot();
+begin
+	// Check fail conditions first as it's faster.
+	if (playerBullet.fired = false) then return;
+	if (	playerBullet.x < spiderEnemy.x or (playerBullet.x > spiderEnemy.x + 2)) then return;
+	if (playerBullet.y > spiderEnemy.y + 3 or (playerBullet.y < spiderEnemy.y)) then return;
+	// Passed these  conditions so bullet is touching part of the scorpion
+	spiderEnemy.dead := true;
+	spiderEnemy.animFrame := 0;
+	DeleteBullet(playerBullet.x,playerBullet.y);
+	playerBullet.fired := false;
+	p := 30;
+	if (playerSnake.y - spiderEnemy.y  < 20) then p := 60;
+	if (playerSnake.y - spiderEnemy.y  < 10) then p := 90;
+	AddScore(p);
 end;
 
 // Move scorpion
@@ -849,37 +888,40 @@ begin
 	Sprite::DrawAt(spiderEnemy.x,spiderEnemy.y,0,false);
 	Sprite::DrawAt(spiderEnemy.x+1,spiderEnemy.y,0,false);
 	Sprite::DrawAt(spiderEnemy.x+2,spiderEnemy.y,0,false);
-	p := screenYtogridY[spiderEnemy.y - screenYOffset+2];
+	p := screenYtogridY[spiderEnemy.y - screenYOffset];
 	SetGridLocVal(spiderEnemy.x,p,0);
 	Sprite::DrawAt(spiderEnemy.x,screenYOffset+lookupScreenY[p],0,false);
-	SetGridLocVal(spiderEnemy.x+1,screenYtogridY[spiderEnemy.y - screenYOffset],0);
+	SetGridLocVal(spiderEnemy.x+1,p,0);
 	Sprite::DrawAt(spiderEnemy.x+1,screenYOffset+lookupScreenY[p],0,false);
-	SetGridLocVal(spiderEnemy.x+2,screenYtogridY[spiderEnemy.y - screenYOffset],0);
+	SetGridLocVal(spiderEnemy.x+2,p,0);
 	Sprite::DrawAt(spiderEnemy.x+2,screenYOffset+lookupScreenY[p],0,false);
+
+	// Move spider up and down
+	if (spiderEnemy.vertical) then spiderEnemy.y := spiderEnemy.y + 1;
+	if (spiderEnemy.vertical = false) then spiderEnemy.y := spiderEnemy.y - 1;
+	spiderEnemy.vertcount := spiderEnemy.vertcount + 1;
+	if (spiderEnemy.vertcount = 4) then spiderEnemy.vertcount := 0;
+	if (spiderEnemy.y > SpiderYMax) then
+	begin
+		spiderEnemy.y := SpiderYMax;
+		spiderEnemy.vertical := false;
+	end;
+	if (spiderEnemy.y < SpiderYMin) then
+	begin
+		spiderEnemy.y := SpiderYMin;
+		spiderEnemy.vertical := true;
+	end;
+	// Move spider left and right
 	if (spiderEnemy.direction) then // Moving Right
 	begin	
 		if (spiderEnemy.x < PlayerXMax - 2) then
 		begin
 			t := Functions::getRandomByte(100);	
-			if (t > 30) then if (spiderEnemy.animFrame = 0) then spiderEnemy.x := spiderEnemy.x + 1;
-			if (spiderEnemy.vertical) then spiderEnemy.y := spiderEnemy.y + 1;
-			if (spiderEnemy.vertical = false) then spiderEnemy.y := spiderEnemy.y - 1;
-			if (spiderEnemy.y > PlayerYMax) then
-			begin
-				spiderEnemy.y := PlayerYMax;
-				spiderEnemy.vertical := false;
-			end;
-			if (spiderEnemy.y < PlayerYMin - 12) then
-			begin
-				spiderEnemy.y := PlayerYmin - 12;
-				spiderEnemy.vertical := true;
-			end;
+			if (t > 30) then if (spiderEnemy.vertcount = 0) then spiderEnemy.x := spiderEnemy.x + 1;
 		end
 		else
 		begin
 			spiderEnemy.enabled := false;
-			// See if number of mushies in player area needs updating
-			if (fleaEnemy.enabled = false) then SpawnFlea();			
 		end;
 	end;
 	if (spiderEnemy.direction = false) then // Moving Left
@@ -887,25 +929,11 @@ begin
 		if (spiderEnemy.x > 0) then
 		begin
 			t := Functions::getRandomByte(100);	
-			if (t > 30) then if (spiderEnemy.animFrame = 0) then spiderEnemy.x := spiderEnemy.x - 1;
-			if (spiderEnemy.vertical) then spiderEnemy.y := spiderEnemy.y + 1;
-			if (spiderEnemy.vertical = false) then spiderEnemy.y := spiderEnemy.y - 1;
-			if (spiderEnemy.y > PlayerYMax) then
-			begin
-				spiderEnemy.y := PlayerYMax;
-				spiderEnemy.vertical := false;
-			end;
-			if (spiderEnemy.y < PlayerYMin - 12) then
-			begin
-				spiderEnemy.y := PlayerYmin - 12;
-				spiderEnemy.vertical := true;
-			end;
+			if (t > 30) then  if (spiderEnemy.vertcount = 0) then spiderEnemy.x := spiderEnemy.x - 1;
 		end
 		else
 		begin
 			spiderEnemy.enabled := false;
-			// See if number of mushies in player area needs updating
-			if (fleaEnemy.enabled = false) then SpawnFlea();						
 		end;
 	end;	
 	// Play sound effect
@@ -1039,27 +1067,28 @@ begin
 	// Pick a random number to see if we spawn it
 	t := Functions::getRandomByte(200);	
 	// Spawn or not
-	if (t < 199) then return;
+	if (t < 190) then return;
 	// Pick a random side of the screen to spawn a scorpion
 	t := Functions::getRandomByte(100);
 	// Spawn on the random side
 	if (t > 50) then	
 	begin
 		spiderEnemy.x := PlayerXMax - 2;
-		spiderEnemy.y := PlayerYMin - 12;
+		spiderEnemy.y := SpiderYMin;
 		spiderEnemy.direction := false;
 		spiderEnemy.vertical := true; // Going down
 	end
 	else
 	begin
 		spiderEnemy.x := 0;
-		spiderEnemy.y := PlayerYMin - 12;
+		spiderEnemy.y := SpiderYMin;
 		spiderEnemy.direction := true;
 		spiderEnemy.vertical := true; // Going down
 	end;	
 	spiderEnemy.enabled := true;
 	spiderEnemy.dead := false;
 	spiderEnemy.animFrame := 0;
+	spiderEnemy.vertcount := 0;
 	spiderEnemy.moveSpeed := SpiderMoveSpeed;
 end;
 
@@ -1285,7 +1314,7 @@ begin
 		// Sync everything so the speed is correct
 		Screen::WaitForVerticalBlank();
 		// Move scorpion
-		if (scorpionEnemy.enabled <> false) then
+		if (scorpionEnemy.enabled) then
 		begin
 			MoveScorpion();
 			CheckScorpionShot();
@@ -1294,6 +1323,7 @@ begin
 		if (spiderEnemy.enabled) then
 		begin
 			MoveSpider();
+			CheckSpiderShot();
 		end
 		else
 		begin
@@ -1308,13 +1338,17 @@ begin
 			CheckFleaCollide();
 			// Check if flea was shot
 			if (playerBullet.fired) then CheckFleaShot();
+		end
+		else
+		begin
+			SpawnFlea();
 		end;
 		// Move Millipede
 		gameStats.milliSpeed := gameStats.milliSpeed - 1;
 		if (gameStats.milliSpeed = 0) then
 		begin
 			gameStats.milliSpeed := MilliMoveSpeed;
-			MoveMillipede();
+			//MoveMillipede();
 		end;
 		playerSnake.moveCount := playerSnake.moveCount - 1;
 		if (playerSnake.moveCount = 0) then
