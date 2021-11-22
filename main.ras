@@ -321,7 +321,7 @@ begin
 	// Initialise variables
 	gameStats.lives := 3;
 	gameStats.score := 0;
-	gameStats.level := 1;
+	gameStats.level := 0;
 	playerSnake.x := 16;
 	playerSnake.y := 58;
 	playerSnake.moveCount := PlayerMoveSpeed;
@@ -332,6 +332,7 @@ begin
 	fleaEnemy.dead := false;
 	scorpionEnemy.dead := false;
 	spiderEnemy.dead := false;	
+	game.milliSpeed := MilliMoveSpeed;
 	DrawHUD();
 	// Draw player sprite
 	Sprite::SetData(#smallSprites);
@@ -395,6 +396,7 @@ end;
 procedure AddScore(t : global byte);
 begin
 	gameStats.score := gameStats.score + t;
+	if (gameStats.score > gameStats.hiScore) then gameStats.hiScore := gameStats.score;
 	DrawHUD();
 end;
 
@@ -1353,7 +1355,10 @@ begin
 		gameStats.milliSpeed := gameStats.milliSpeed - 1;
 		if (gameStats.milliSpeed = 0) then
 		begin
-			gameStats.milliSpeed := MilliMoveSpeed;
+			if (gameStats.level < 15) then gameStats.milliSpeed := MilliMoveSpeed-2;
+			if (gameStats.level < 10) then gameStats.milliSpeed := MilliMoveSpeed-1;
+			if (gameStats.level < 5)  then gameStats.milliSpeed := MilliMoveSpeed;
+			if (gameStats.level > 14) then gameStats.milliSpeed := MilliMoveSpeed-3;
 			MoveMillipede();
 		end;
 		playerSnake.moveCount := playerSnake.moveCount - 1;
