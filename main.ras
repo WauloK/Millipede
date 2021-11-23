@@ -114,6 +114,7 @@ var
 		hiScore : Integer;
 		gameRunning : boolean;
 		milliSpeed : byte;
+		milliSegsAlive : byte;
 	end;
 	scorpion_record = record
 		enabled : boolean;
@@ -317,7 +318,6 @@ begin
 		milliSegments[u].y := 255; // A large number to note the segment is not on the grid yet.
 	end;
 	milliSegments[0].flags := 90;	 // Alive, direction right, down and head segment.
-	gameStats.milliSpeed := MilliMoveSpeed;
 	// Initialise variables
 	gameStats.lives := 3;
 	gameStats.score := 0;
@@ -332,7 +332,8 @@ begin
 	fleaEnemy.dead := false;
 	scorpionEnemy.dead := false;
 	spiderEnemy.dead := false;	
-	game.milliSpeed := MilliMoveSpeed;
+	gameStats.milliSpeed := MilliMoveSpeed;
+	gameStats.milliSegsAlive := milliLength;
 	DrawHUD();
 	// Draw player sprite
 	Sprite::SetData(#smallSprites);
@@ -576,6 +577,7 @@ begin
 						Sprite::DrawAt(milliSegments[p].x,lookupScreenY[milliSegments[p].y]+screenYOffset,0,false);					
 						SetGridLocVal(playerBullet.x,q,mushroomSprite);
 						Sprite::DrawAt(playerBullet.x,lookupScreenY[milliSegments[p].y]+screenYOffset,mushroomSprite,false);
+						gameStats.milliSegsAlive := gameStats.milliSegsAlive - 1;
 					end;
 				end;
 			end;
@@ -653,6 +655,9 @@ begin
 		milliSegments[s].flags := 74;	 // Initial direction set to right, down and set to alive body segment.
 		milliSegments[s].y := 255; // A large number to note the segment is not on the grid yet.
 	end;
+	milliSegments[0].flags := 90;	 // Alive, direction right, down and head segment.		
+	// Reset number of segments alive
+	gameStats.milliSegsAlive := milliLength;
 end;
 
 // Player death sequence
@@ -676,7 +681,7 @@ begin
 	fleaEnemy.dead := false;		
 	// Reset millipede
 	ResetMillipedeToStart();
-	milliSegments[0].flags := 90;	 // Alive, direction right, down and head segment.		
+
 	// Reset mushrooms
   for y := 0 to gridHeight - 1 do
   begin
@@ -1124,6 +1129,7 @@ begin
 			milliSegments[u].lastGridVal := 0;
 			SetGridLocVal(milliSegments[u].x,milliSegments[u].y,milliHead);
 			DrawMilliSprite(u);
+			gameStats.milliSegsAlive := gameStats.milliSegsAlive + 1;
 			return;
 		end;
 	end;
@@ -1294,12 +1300,23 @@ begin
 	end;
 end;
 
+// Check millipede segments left
+procedure CheckMillipedesLeft();
+begin
+	if (gameStats.milliSegsAlive > 0) then return;
+	// Reset millipede
+	ResetMillipedeToStart();
+	gameStats.level := gameStats.level + 1;
+	if (IsBitSet(gameStats.level,1) = true) then Screen::SetPaper(1) else Screen::SetPaper(0);
+end;
+
 // Actual code start
 begin
 	gameStats.hiScore := 0;
 	Memory::DisableInterrupts();
 	// Set Graphics mode
 	Screen::SetMode(1);
+	
 	// Decompress the image to the screen
 	Compression::Decompress(#data, #screen); 
 	// Set pen colour
@@ -1316,7 +1333,6 @@ begin
 	begin
 		// Sync everything so the speed is correct
 		Screen::WaitForVerticalBlank();
-
 
 		// Try spawning the scorpion
 		if (scorpionEnemy.enabled = false and (fleaEnemy.enabled = false and (scorpionEnemy.dead = false))) then SpawnScorpion();		
@@ -1374,6 +1390,8 @@ begin
 		end;		
 		// Test if any enemies shot and if so, animate sprite
 		DoEnemyDeathAnim();
+		// Check to see if the millipede is dead
+		CheckMillipedesLeft();
 	end;
 	Loop();
 
