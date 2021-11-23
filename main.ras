@@ -679,6 +679,10 @@ begin
 	spiderEnemy.dead := false;	
 	fleaEnemy.enabled := false;	
 	fleaEnemy.dead := false;		
+	// Delete spider sprite
+	Sprite::DrawAt(spiderEnemy.x,spiderEnemy.y,0,false);
+	Sprite::DrawAt(spiderEnemy.x+1,spiderEnemy.y,0,false);
+	Sprite::DrawAt(spiderEnemy.x+2,spiderEnemy.y,0,false);	
 	// Reset millipede
 	ResetMillipedeToStart();
 
@@ -1107,6 +1111,8 @@ end;
 // If Millipede reaches the bottom, see if a new head can be spawned
 procedure SpawnMillipedeHead();
 begin
+	u := Functions::getRandomByte(100);
+	if (u < 50) then return;
 	// Find unused millipede part in array
 	for u := 0 to milliLength do
 	begin	

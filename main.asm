@@ -4923,6 +4923,42 @@ DoPlayerDeath_loopend1576:
 	ld [fleaEnemy_flea_record_flea_record_enabled], a
 	ld [fleaEnemy_flea_record_flea_record_dead], a
 	
+; // Delete spider sprite
+	; generic assign 
+	ld a,[spiderEnemy_spider_record_spider_record_x]
+	ld [Sprite_spritex], a
+	; generic assign 
+	ld a,[spiderEnemy_spider_record_spider_record_y]
+	ld [Sprite_spritey], a
+	ld a, $0
+	ld [Sprite_no], a
+	ld [Sprite_tran], a
+	call Sprite_DrawAt
+	; generic assign 
+	ld b,$1
+	ld a,[spiderEnemy_spider_record_spider_record_x]
+	add  a, b
+	ld [Sprite_spritex], a
+	; generic assign 
+	ld a,[spiderEnemy_spider_record_spider_record_y]
+	ld [Sprite_spritey], a
+	ld a, $0
+	ld [Sprite_no], a
+	ld [Sprite_tran], a
+	call Sprite_DrawAt
+	; generic assign 
+	ld b,$2
+	ld a,[spiderEnemy_spider_record_spider_record_x]
+	add  a, b
+	ld [Sprite_spritex], a
+	; generic assign 
+	ld a,[spiderEnemy_spider_record_spider_record_y]
+	ld [Sprite_spritey], a
+	ld a, $0
+	ld [Sprite_no], a
+	ld [Sprite_tran], a
+	call Sprite_DrawAt
+	
 ; // Reset millipede
 	call ResetMillipedeToStart
 	ld a, $0
