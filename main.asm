@@ -283,8 +283,8 @@ DrawPadded_stringassignstr353: db "0",0
 DrawHUD_stringassignstr356: db "Score:",0
 DrawHUD_stringassignstr358: db "Lives:",0
 DrawHUD_stringassignstr360: db "Hi:",0
-MainProgram_stringassignstr11033: db "GAME OVER!",0
-MainProgram_stringassignstr11068: db "GAME OVER!",0
+MainProgram_stringassignstr11116: db "GAME OVER!",0
+MainProgram_stringassignstr11151: db "GAME OVER!",0
  ; Temp vars section ends
 Screen_Cls_block2:
 Screen_Cls:
@@ -2961,14 +2961,6 @@ InitialiseGame_loopend406:
 	ld a, $0
 	ld [Sprite_tran], a
 	call Sprite_DrawAt
-	; Binary clause core: EQUALS
-	; Compare with pure num / var optimization
-	ld a,[gameStats_gameStats_record_gameStats_record_level]
-	cp $1
-	jr nz,InitialiseGame_elsedoneblock412
-InitialiseGame_ConditionalTrueBlock410: ;Main true block ;keep :
-	ret
-InitialiseGame_elsedoneblock412:
 	ret
 	
 ; // Initialise the mushrooms in an array grid and display
@@ -2985,7 +2977,7 @@ DrawGrid:
 	call Sprite_SetSize
 	ld a, $0
 	ld [y], a
-DrawGrid_forloop416:
+DrawGrid_forloop410:
 	
 ; // Playfield grid array
 	; generic assign 
@@ -3065,16 +3057,16 @@ DrawGrid_forloop416:
 	ld [Functions_i],hl
 	call Functions_getRandomByte
 	ld [varPrefixed_p], a
-DrawGrid_while431:
-DrawGrid_loopstart435:
+DrawGrid_while425:
+DrawGrid_loopstart429:
 	; Binary clause core: EQUALS
 	; Compare two vars optimization
 	ld a,[x]
 	ld b,a
 	ld a,[varPrefixed_p]
 	cp b
-	jr nz,DrawGrid_elsedoneblock434
-DrawGrid_ConditionalTrueBlock432: ;Main true block ;keep :
+	jr nz,DrawGrid_elsedoneblock428
+DrawGrid_ConditionalTrueBlock426: ;Main true block ;keep :
 	; generic assign 
 	; generic assign 
 	ld hl,$1f
@@ -3083,9 +3075,9 @@ DrawGrid_ConditionalTrueBlock432: ;Main true block ;keep :
 	ld [Functions_i],hl
 	call Functions_getRandomByte
 	ld [varPrefixed_p], a
-	jr DrawGrid_while431
-DrawGrid_elsedoneblock434:
-DrawGrid_loopend436:
+	jr DrawGrid_while425
+DrawGrid_elsedoneblock428:
+DrawGrid_loopend430:
 	; generic assign 
 	ld a,[varPrefixed_p]
 	ld [x], a
@@ -3150,19 +3142,19 @@ DrawGrid_loopend436:
 	ld a, $0
 	ld [Sprite_tran], a
 	call Sprite_DrawAt
-DrawGrid_forloopcounter418:
-DrawGrid_loopstart419:
+DrawGrid_forloopcounter412:
+DrawGrid_loopstart413:
 	ld a,[y]
 	add a,1
 	ld [y],a
 	cp $d
-	jp nz,DrawGrid_forloop416
-DrawGrid_forloopend417:
-DrawGrid_loopend420:
+	jp nz,DrawGrid_forloop410
+DrawGrid_forloopend411:
+DrawGrid_loopend414:
 	ret
 	; ***********  Defining procedure : GetGridLocVal
 	;    Procedure type : User-defined procedure
-GetGridLocVal_block439:
+GetGridLocVal_block433:
 GetGridLocVal:
 	; generic assign 
 	; Generic 16-bit binop
@@ -3200,7 +3192,7 @@ GetGridLocVal:
 	ret
 	; ***********  Defining procedure : SetGridLocVal
 	;    Procedure type : User-defined procedure
-SetGridLocVal_block440:
+SetGridLocVal_block434:
 SetGridLocVal:
 	; generic assign 
 	; Generic 16-bit binop
@@ -3251,21 +3243,21 @@ SubtractLife:
 	; Binary clause core: EQUALS
 	; Compare with pure num / var optimization
 	cp $0
-	jr nz,SubtractLife_elsedoneblock445
-SubtractLife_ConditionalTrueBlock443: ;Main true block ;keep :
+	jr nz,SubtractLife_elsedoneblock439
+SubtractLife_ConditionalTrueBlock437: ;Main true block ;keep :
 	
 ; // Check if Game Over
 ; // Player dead. 
 	ld a, $0
 	ld [gameStats_gameStats_record_gameStats_record_gameRunning], a
-SubtractLife_elsedoneblock445:
+SubtractLife_elsedoneblock439:
 	call DrawHUD
 	ret
 	
 ; // Add points to player's score
 	; ***********  Defining procedure : AddScore
 	;    Procedure type : User-defined procedure
-AddScore_block448:
+AddScore_block442:
 AddScore:
 	; 16 bit BINOP
 	; RHS is pure 
@@ -3290,9 +3282,9 @@ AddScore:
 	pop de
 	xor a ; clear carry
 	sbc hl,de
-	jr c, AddScore_elsedoneblock452
-	jr z, AddScore_elsedoneblock452
-AddScore_ConditionalTrueBlock450: ;Main true block ;keep :
+	jr c, AddScore_elsedoneblock446
+	jr z, AddScore_elsedoneblock446
+AddScore_ConditionalTrueBlock444: ;Main true block ;keep :
 	; generic assign 
 	; Variable is 16-bit
 	; Integer
@@ -3300,12 +3292,12 @@ AddScore_ConditionalTrueBlock450: ;Main true block ;keep :
 	; Integer assignment 
 	; Loading pointer
 	ld [gameStats_gameStats_record_gameStats_record_hiScore],hl
-AddScore_elsedoneblock452:
+AddScore_elsedoneblock446:
 	call DrawHUD
 	ret
 	; ***********  Defining procedure : DrawBullet
 	;    Procedure type : User-defined procedure
-DrawBullet_block455:
+DrawBullet_block449:
 DrawBullet:
 	; generic assign 
 	; Generic 16-bit binop
@@ -3349,7 +3341,7 @@ DrawBullet:
 	ret
 	; ***********  Defining procedure : DeleteBullet
 	;    Procedure type : User-defined procedure
-DeleteBullet_block456:
+DeleteBullet_block450:
 DeleteBullet:
 	; generic assign 
 	; Generic 16-bit binop
@@ -3402,12 +3394,12 @@ ControlPlayer:
 	ld a, $1
 	ld [Input_c], a
 	call Input_GetJoystick
-	ld [u], a
+	ld [varPrefixed_p], a
 	; generic assign 
 	ld a, $2
 	ld [Input_c], a
 	call Input_GetJoystick
-	ld [v], a
+	ld [q], a
 	; generic assign 
 	; generic assign 
 	ld hl,$68ef
@@ -3415,7 +3407,7 @@ ControlPlayer:
 	; Loading pointer
 	ld [Screen_Loc],hl
 	call Screen_Peek
-	ld [w], a
+	ld [s], a
 	
 ; // Scan for key values separately
 	; generic assign 
@@ -3431,66 +3423,66 @@ ControlPlayer:
 	call Sprite_DrawAt
 	; Binary clause core: EQUALS
 	; Compare with pure num / var optimization
-	ld a,[u]
+	ld a,[varPrefixed_p]
 	cp $40
-	jr nz,ControlPlayer_elsedoneblock461
-ControlPlayer_localsuccess463: ;keep:
+	jr nz,ControlPlayer_elsedoneblock455
+ControlPlayer_localsuccess457: ;keep:
 	; ; logical AND, second requirement
 	; Binary clause core: EQUALS
 	; Compare with pure num / var optimization
-	ld a,[v]
+	ld a,[q]
 	cp $40
-	jr nz,ControlPlayer_elsedoneblock461
-ControlPlayer_localsuccess464: ;keep:
+	jr nz,ControlPlayer_elsedoneblock455
+ControlPlayer_localsuccess458: ;keep:
 	; ; logical AND, second requirement
 	; Binary clause core: EQUALS
 	; Compare with pure num / var optimization
-	ld a,[w]
+	ld a,[s]
 	cp $9
-	jr nz,ControlPlayer_elsedoneblock461
-ControlPlayer_ConditionalTrueBlock459: ;Main true block ;keep :
+	jr nz,ControlPlayer_elsedoneblock455
+ControlPlayer_ConditionalTrueBlock453: ;Main true block ;keep :
 	
 ; // Test for player movement
 	ret
-ControlPlayer_elsedoneblock461:
+ControlPlayer_elsedoneblock455:
 	; Binary clause core: EQUALS
 	; Compare with pure num / var optimization
-	ld a,[u]
+	ld a,[varPrefixed_p]
 	cp $d0
-	jr nz,ControlPlayer_localfailed477
-	jr ControlPlayer_ConditionalTrueBlock467
-ControlPlayer_localfailed477: ;keep:
+	jr nz,ControlPlayer_localfailed471
+	jr ControlPlayer_ConditionalTrueBlock461
+ControlPlayer_localfailed471: ;keep:
 	; ; logical OR, second chance
 	; Binary clause core: EQUALS
 	; Compare with pure num / var optimization
-	ld a,[v]
+	ld a,[q]
 	cp $d0
-	jr nz,ControlPlayer_localfailed478
-	jr ControlPlayer_ConditionalTrueBlock467
-ControlPlayer_localfailed478: ;keep:
+	jr nz,ControlPlayer_localfailed472
+	jr ControlPlayer_ConditionalTrueBlock461
+ControlPlayer_localfailed472: ;keep:
 	; ; logical OR, second chance
 	; Binary clause core: EQUALS
 	; Compare with pure num / var optimization
 	; generic assign 
-	ld a,[w]
+	ld a,[s]
 	ld [Value], a
 	ld a, $10
 	ld [BitFlag], a
 	call IsBitSet
 	cp $0
-	jr nz,ControlPlayer_elsedoneblock469
-ControlPlayer_ConditionalTrueBlock467: ;Main true block ;keep :
+	jr nz,ControlPlayer_elsedoneblock463
+ControlPlayer_ConditionalTrueBlock461: ;Main true block ;keep :
 	; Binary clause core: NOTEQUALS
 	; Compare with pure num / var optimization
 	ld a,[playerBullet_playerBullet_record_playerBullet_record_fired]
 	cp $0
-	jr z, ControlPlayer_elsedoneblock483
-ControlPlayer_ConditionalTrueBlock481: ;Main true block ;keep :
+	jr z, ControlPlayer_elsedoneblock477
+ControlPlayer_ConditionalTrueBlock475: ;Main true block ;keep :
 	
 ; // Player shooting
 ; // Test if a bullet already exists onscreen. Snake can only shoot once at a time
 	ret
-ControlPlayer_elsedoneblock483:
+ControlPlayer_elsedoneblock477:
 	ld a, $1
 	ld [playerBullet_playerBullet_record_playerBullet_record_fired], a
 	ld a, $2
@@ -3518,7 +3510,7 @@ ControlPlayer_elsedoneblock483:
 	ld [y], a
 	call DrawBullet
 	ret
-ControlPlayer_elsedoneblock469:
+ControlPlayer_elsedoneblock463:
 	
 ; // Erase player sprite
 	; generic assign 
@@ -3533,44 +3525,43 @@ ControlPlayer_elsedoneblock469:
 	call Sprite_DrawAt
 	; Binary clause core: EQUALS
 	; Compare with pure num / var optimization
-	ld a,[u]
+	ld a,[varPrefixed_p]
 	cp $42
-	jr nz,ControlPlayer_localfailed521
-	jr ControlPlayer_ConditionalTrueBlock487
-ControlPlayer_localfailed521: ;keep:
+	jp nz,ControlPlayer_localfailed519
+	jp ControlPlayer_ConditionalTrueBlock481
+ControlPlayer_localfailed519: ;keep:
 	; ; logical OR, second chance
 	; Binary clause core: EQUALS
 	; Compare with pure num / var optimization
-	ld a,[v]
+	ld a,[q]
 	cp $42
-	jr nz,ControlPlayer_localfailed522
-	jr ControlPlayer_ConditionalTrueBlock487
-ControlPlayer_localfailed522: ;keep:
+	jp nz,ControlPlayer_localfailed520
+	jp ControlPlayer_ConditionalTrueBlock481
+ControlPlayer_localfailed520: ;keep:
 	; ; logical OR, second chance
 	; Binary clause core: EQUALS
 	; Compare with pure num / var optimization
 	; generic assign 
-	ld a,[w]
+	ld a,[s]
 	ld [Value], a
 	ld a, $20
 	ld [BitFlag], a
 	call IsBitSet
 	cp $0
-	jr nz,ControlPlayer_elsedoneblock489
-ControlPlayer_ConditionalTrueBlock487: ;Main true block ;keep :
+	jp nz,ControlPlayer_elsedoneblock483
+ControlPlayer_ConditionalTrueBlock481: ;Main true block ;keep :
 	; Binary clause core: GREATER
 	; Compare with pure num / var optimization
 	ld a,[playerSnake_playerSnake_record_playerSnake_record_x]
 	cp $0
-	jr c, ControlPlayer_elsedoneblock527
-	jr z, ControlPlayer_elsedoneblock527
-ControlPlayer_ConditionalTrueBlock525: ;Main true block ;keep :
+	jp c, ControlPlayer_elsedoneblock525
+	jp z, ControlPlayer_elsedoneblock525
+ControlPlayer_ConditionalTrueBlock523: ;Main true block ;keep :
 	; 'a:=a + const'  optimization 
 	ld a,[playerSnake_playerSnake_record_playerSnake_record_x]
 	sub $1
 	ld [playerSnake_playerSnake_record_playerSnake_record_x], a
-	; Binary clause core: GREATER
-	; Compare with pure num / var optimization
+	; generic assign 
 	; generic assign 
 	ld [v], a
 	; generic assign 
@@ -3585,274 +3576,27 @@ ControlPlayer_ConditionalTrueBlock525: ;Main true block ;keep :
 	; LoadVar Testing if 'screenYtogridY' is word : 0
 	ld [w], a
 	call GetGridLocVal
+	ld [u], a
+	; Binary clause core: GREATER
+	; Compare with pure num / var optimization
 	cp $0
 	jr c, ControlPlayer_elsedoneblock545
 	jr z, ControlPlayer_elsedoneblock545
+ControlPlayer_localsuccess547: ;keep:
+	; ; logical AND, second requirement
+	; Binary clause core: LESS
+	; Compare with pure num / var optimization
+	ld a,[u]
+	cp $9
+	jr nc,ControlPlayer_elsedoneblock545
 ControlPlayer_ConditionalTrueBlock543: ;Main true block ;keep :
 	; 'a:=a + const'  optimization 
 	ld a,[playerSnake_playerSnake_record_playerSnake_record_x]
 	add  a,$1
 	ld [playerSnake_playerSnake_record_playerSnake_record_x], a
 ControlPlayer_elsedoneblock545:
-	; Binary clause core: GREATER
-	; Compare with pure num / var optimization
-	; generic assign 
-	ld a,[playerSnake_playerSnake_record_playerSnake_record_x]
-	ld [v], a
-	; generic assign 
-	ld b,$3
-	ld a,[playerSnake_playerSnake_record_playerSnake_record_y]
-	add  a, b
-	push af
-	ld a,$6
-	ld b,a
-	pop af
-	sub  b
-	ld e,a ; variable is 8-bit
-	ld d,0
-	ld hl,screenYtogridY
-	add hl,de
-	ld a,[hl]
-	; LoadVar Testing if 'screenYtogridY' is word : 0
-	ld [w], a
-	call GetGridLocVal
-	cp $0
-	jr c, ControlPlayer_elsedoneblock551
-	jr z, ControlPlayer_elsedoneblock551
-ControlPlayer_ConditionalTrueBlock549: ;Main true block ;keep :
 	
 ; // Test bottom of sprite
-	; 'a:=a + const'  optimization 
-	ld a,[playerSnake_playerSnake_record_playerSnake_record_x]
-	add  a,$1
-	ld [playerSnake_playerSnake_record_playerSnake_record_x], a
-ControlPlayer_elsedoneblock551:
-ControlPlayer_elsedoneblock527:
-ControlPlayer_elsedoneblock489:
-	; Binary clause core: EQUALS
-	; Compare with pure num / var optimization
-	ld a,[u]
-	cp $41
-	jr nz,ControlPlayer_localfailed589
-	jr ControlPlayer_ConditionalTrueBlock555
-ControlPlayer_localfailed589: ;keep:
-	; ; logical OR, second chance
-	; Binary clause core: EQUALS
-	; Compare with pure num / var optimization
-	ld a,[v]
-	cp $41
-	jr nz,ControlPlayer_localfailed590
-	jr ControlPlayer_ConditionalTrueBlock555
-ControlPlayer_localfailed590: ;keep:
-	; ; logical OR, second chance
-	; Binary clause core: EQUALS
-	; Compare with pure num / var optimization
-	; generic assign 
-	ld a,[w]
-	ld [Value], a
-	ld a, $8
-	ld [BitFlag], a
-	call IsBitSet
-	cp $0
-	jr nz,ControlPlayer_elsedoneblock557
-ControlPlayer_ConditionalTrueBlock555: ;Main true block ;keep :
-	; Binary clause core: LESS
-	; Compare with pure num / var optimization
-	ld a,[playerSnake_playerSnake_record_playerSnake_record_x]
-	cp $1f
-	jr nc,ControlPlayer_elsedoneblock595
-ControlPlayer_ConditionalTrueBlock593: ;Main true block ;keep :
-	; 'a:=a + const'  optimization 
-	ld a,[playerSnake_playerSnake_record_playerSnake_record_x]
-	add  a,$1
-	ld [playerSnake_playerSnake_record_playerSnake_record_x], a
-	; Binary clause core: GREATER
-	; Compare with pure num / var optimization
-	; generic assign 
-	ld [v], a
-	; generic assign 
-	ld b,$6
-	ld a,[playerSnake_playerSnake_record_playerSnake_record_y]
-	sub  b
-	ld e,a ; variable is 8-bit
-	ld d,0
-	ld hl,screenYtogridY
-	add hl,de
-	ld a,[hl]
-	; LoadVar Testing if 'screenYtogridY' is word : 0
-	ld [w], a
-	call GetGridLocVal
-	cp $0
-	jr c, ControlPlayer_elsedoneblock613
-	jr z, ControlPlayer_elsedoneblock613
-ControlPlayer_ConditionalTrueBlock611: ;Main true block ;keep :
-	; 'a:=a + const'  optimization 
-	ld a,[playerSnake_playerSnake_record_playerSnake_record_x]
-	sub $1
-	ld [playerSnake_playerSnake_record_playerSnake_record_x], a
-ControlPlayer_elsedoneblock613:
-	; Binary clause core: GREATER
-	; Compare with pure num / var optimization
-	; generic assign 
-	ld a,[playerSnake_playerSnake_record_playerSnake_record_x]
-	ld [v], a
-	; generic assign 
-	ld b,$3
-	ld a,[playerSnake_playerSnake_record_playerSnake_record_y]
-	add  a, b
-	push af
-	ld a,$6
-	ld b,a
-	pop af
-	sub  b
-	ld e,a ; variable is 8-bit
-	ld d,0
-	ld hl,screenYtogridY
-	add hl,de
-	ld a,[hl]
-	; LoadVar Testing if 'screenYtogridY' is word : 0
-	ld [w], a
-	call GetGridLocVal
-	cp $0
-	jr c, ControlPlayer_elsedoneblock619
-	jr z, ControlPlayer_elsedoneblock619
-ControlPlayer_ConditionalTrueBlock617: ;Main true block ;keep :
-	
-; // Test bottom of sprite
-	; 'a:=a + const'  optimization 
-	ld a,[playerSnake_playerSnake_record_playerSnake_record_x]
-	sub $1
-	ld [playerSnake_playerSnake_record_playerSnake_record_x], a
-ControlPlayer_elsedoneblock619:
-ControlPlayer_elsedoneblock595:
-ControlPlayer_elsedoneblock557:
-	; generic assign 
-	; generic assign 
-	ld hl,$68fe
-	; Integer assignment 
-	; Loading pointer
-	ld [Screen_Loc],hl
-	call Screen_Peek
-	ld [w], a
-	; Binary clause core: EQUALS
-	; Compare with pure num / var optimization
-	ld a,[u]
-	cp $48
-	jr nz,ControlPlayer_localfailed645
-	jr ControlPlayer_ConditionalTrueBlock623
-ControlPlayer_localfailed645: ;keep:
-	; ; logical OR, second chance
-	; Binary clause core: EQUALS
-	; Compare with pure num / var optimization
-	ld a,[v]
-	cp $48
-	jr nz,ControlPlayer_localfailed646
-	jr ControlPlayer_ConditionalTrueBlock623
-ControlPlayer_localfailed646: ;keep:
-	; ; logical OR, second chance
-	; Binary clause core: EQUALS
-	; Compare with pure num / var optimization
-	; generic assign 
-	ld a,[w]
-	ld [Value], a
-	ld a, $10
-	ld [BitFlag], a
-	call IsBitSet
-	cp $0
-	jr nz,ControlPlayer_elsedoneblock625
-ControlPlayer_ConditionalTrueBlock623: ;Main true block ;keep :
-	; Binary clause core: GREATER
-	; Compare with pure num / var optimization
-	ld a,[playerSnake_playerSnake_record_playerSnake_record_y]
-	cp $2a
-	jr c, ControlPlayer_elsedoneblock651
-	jr z, ControlPlayer_elsedoneblock651
-ControlPlayer_ConditionalTrueBlock649: ;Main true block ;keep :
-	
-; // Check if player wants to move UP
-; // Make sure we're not already at the top of the player area
-; // Move player y pos
-	; 'a:=a + const'  optimization 
-	ld a,[playerSnake_playerSnake_record_playerSnake_record_y]
-	sub $1
-	ld [playerSnake_playerSnake_record_playerSnake_record_y], a
-	; Binary clause core: GREATER
-	; Compare with pure num / var optimization
-	; generic assign 
-	ld a,[playerSnake_playerSnake_record_playerSnake_record_x]
-	ld [v], a
-	; generic assign 
-	ld b,$6
-	ld a,[playerSnake_playerSnake_record_playerSnake_record_y]
-	sub  b
-	ld e,a ; variable is 8-bit
-	ld d,0
-	ld hl,screenYtogridY
-	add hl,de
-	ld a,[hl]
-	; LoadVar Testing if 'screenYtogridY' is word : 0
-	ld [w], a
-	call GetGridLocVal
-	cp $0
-	jr c, ControlPlayer_elsedoneblock663
-	jr z, ControlPlayer_elsedoneblock663
-ControlPlayer_ConditionalTrueBlock661: ;Main true block ;keep :
-	
-; // Test if we're colliding with a mushroom. If so, move player y back
-	; 'a:=a + const'  optimization 
-	ld a,[playerSnake_playerSnake_record_playerSnake_record_y]
-	add  a,$1
-	ld [playerSnake_playerSnake_record_playerSnake_record_y], a
-ControlPlayer_elsedoneblock663:
-ControlPlayer_elsedoneblock651:
-ControlPlayer_elsedoneblock625:
-	; generic assign 
-	; generic assign 
-	ld hl,$68fd
-	; Integer assignment 
-	; Loading pointer
-	ld [Screen_Loc],hl
-	call Screen_Peek
-	ld [w], a
-	; Binary clause core: EQUALS
-	; Compare with pure num / var optimization
-	ld a,[u]
-	cp $44
-	jr nz,ControlPlayer_localfailed693
-	jr ControlPlayer_ConditionalTrueBlock667
-ControlPlayer_localfailed693: ;keep:
-	; ; logical OR, second chance
-	; Binary clause core: EQUALS
-	; Compare with pure num / var optimization
-	ld a,[v]
-	cp $44
-	jr nz,ControlPlayer_localfailed694
-	jr ControlPlayer_ConditionalTrueBlock667
-ControlPlayer_localfailed694: ;keep:
-	; ; logical OR, second chance
-	; Binary clause core: EQUALS
-	; Compare with pure num / var optimization
-	; generic assign 
-	ld a,[w]
-	ld [Value], a
-	ld a, $10
-	ld [BitFlag], a
-	call IsBitSet
-	cp $0
-	jr nz,ControlPlayer_elsedoneblock669
-ControlPlayer_ConditionalTrueBlock667: ;Main true block ;keep :
-	; Binary clause core: LESS
-	; Compare with pure num / var optimization
-	ld a,[playerSnake_playerSnake_record_playerSnake_record_y]
-	cp $3a
-	jr nc,ControlPlayer_elsedoneblock699
-ControlPlayer_ConditionalTrueBlock697: ;Main true block ;keep :
-	
-; // Due to player sprite being 4 pixels high we need to check 4 below the Y value.
-	; 'a:=a + const'  optimization 
-	ld a,[playerSnake_playerSnake_record_playerSnake_record_y]
-	add  a,$4
-	ld [playerSnake_playerSnake_record_playerSnake_record_y], a
 	; generic assign 
 	; generic assign 
 	ld a,[playerSnake_playerSnake_record_playerSnake_record_x]
@@ -3877,6 +3621,192 @@ ControlPlayer_ConditionalTrueBlock697: ;Main true block ;keep :
 	ld [u], a
 	; Binary clause core: GREATER
 	; Compare with pure num / var optimization
+	cp $0
+	jr c, ControlPlayer_elsedoneblock552
+	jr z, ControlPlayer_elsedoneblock552
+ControlPlayer_localsuccess554: ;keep:
+	; ; logical AND, second requirement
+	; Binary clause core: LESS
+	; Compare with pure num / var optimization
+	ld a,[u]
+	cp $9
+	jr nc,ControlPlayer_elsedoneblock552
+ControlPlayer_ConditionalTrueBlock550: ;Main true block ;keep :
+	; 'a:=a + const'  optimization 
+	ld a,[playerSnake_playerSnake_record_playerSnake_record_x]
+	add  a,$1
+	ld [playerSnake_playerSnake_record_playerSnake_record_x], a
+ControlPlayer_elsedoneblock552:
+ControlPlayer_elsedoneblock525:
+ControlPlayer_elsedoneblock483:
+	; Binary clause core: EQUALS
+	; Compare with pure num / var optimization
+	ld a,[varPrefixed_p]
+	cp $41
+	jp nz,ControlPlayer_localfailed595
+	jp ControlPlayer_ConditionalTrueBlock557
+ControlPlayer_localfailed595: ;keep:
+	; ; logical OR, second chance
+	; Binary clause core: EQUALS
+	; Compare with pure num / var optimization
+	ld a,[q]
+	cp $41
+	jp nz,ControlPlayer_localfailed596
+	jp ControlPlayer_ConditionalTrueBlock557
+ControlPlayer_localfailed596: ;keep:
+	; ; logical OR, second chance
+	; Binary clause core: EQUALS
+	; Compare with pure num / var optimization
+	; generic assign 
+	ld a,[s]
+	ld [Value], a
+	ld a, $8
+	ld [BitFlag], a
+	call IsBitSet
+	cp $0
+	jp nz,ControlPlayer_elsedoneblock559
+ControlPlayer_ConditionalTrueBlock557: ;Main true block ;keep :
+	; Binary clause core: LESS
+	; Compare with pure num / var optimization
+	ld a,[playerSnake_playerSnake_record_playerSnake_record_x]
+	cp $1f
+	jp nc,ControlPlayer_elsedoneblock601
+ControlPlayer_ConditionalTrueBlock599: ;Main true block ;keep :
+	; 'a:=a + const'  optimization 
+	ld a,[playerSnake_playerSnake_record_playerSnake_record_x]
+	add  a,$1
+	ld [playerSnake_playerSnake_record_playerSnake_record_x], a
+	; generic assign 
+	; generic assign 
+	ld [v], a
+	; generic assign 
+	ld b,$6
+	ld a,[playerSnake_playerSnake_record_playerSnake_record_y]
+	sub  b
+	ld e,a ; variable is 8-bit
+	ld d,0
+	ld hl,screenYtogridY
+	add hl,de
+	ld a,[hl]
+	; LoadVar Testing if 'screenYtogridY' is word : 0
+	ld [w], a
+	call GetGridLocVal
+	ld [u], a
+	; Binary clause core: GREATER
+	; Compare with pure num / var optimization
+	cp $0
+	jr c, ControlPlayer_elsedoneblock621
+	jr z, ControlPlayer_elsedoneblock621
+ControlPlayer_localsuccess623: ;keep:
+	; ; logical AND, second requirement
+	; Binary clause core: LESS
+	; Compare with pure num / var optimization
+	ld a,[u]
+	cp $9
+	jr nc,ControlPlayer_elsedoneblock621
+ControlPlayer_ConditionalTrueBlock619: ;Main true block ;keep :
+	; 'a:=a + const'  optimization 
+	ld a,[playerSnake_playerSnake_record_playerSnake_record_x]
+	sub $1
+	ld [playerSnake_playerSnake_record_playerSnake_record_x], a
+ControlPlayer_elsedoneblock621:
+	
+; // Test bottom of sprite
+	; generic assign 
+	; generic assign 
+	ld a,[playerSnake_playerSnake_record_playerSnake_record_x]
+	ld [v], a
+	; generic assign 
+	ld b,$3
+	ld a,[playerSnake_playerSnake_record_playerSnake_record_y]
+	add  a, b
+	push af
+	ld a,$6
+	ld b,a
+	pop af
+	sub  b
+	ld e,a ; variable is 8-bit
+	ld d,0
+	ld hl,screenYtogridY
+	add hl,de
+	ld a,[hl]
+	; LoadVar Testing if 'screenYtogridY' is word : 0
+	ld [w], a
+	call GetGridLocVal
+	ld [u], a
+	; Binary clause core: GREATER
+	; Compare with pure num / var optimization
+	cp $0
+	jr c, ControlPlayer_elsedoneblock628
+	jr z, ControlPlayer_elsedoneblock628
+ControlPlayer_localsuccess630: ;keep:
+	; ; logical AND, second requirement
+	; Binary clause core: LESS
+	; Compare with pure num / var optimization
+	ld a,[u]
+	cp $9
+	jr nc,ControlPlayer_elsedoneblock628
+ControlPlayer_ConditionalTrueBlock626: ;Main true block ;keep :
+	; 'a:=a + const'  optimization 
+	ld a,[playerSnake_playerSnake_record_playerSnake_record_x]
+	sub $1
+	ld [playerSnake_playerSnake_record_playerSnake_record_x], a
+ControlPlayer_elsedoneblock628:
+ControlPlayer_elsedoneblock601:
+ControlPlayer_elsedoneblock559:
+	; generic assign 
+	; generic assign 
+	ld hl,$68fe
+	; Integer assignment 
+	; Loading pointer
+	ld [Screen_Loc],hl
+	call Screen_Peek
+	ld [s], a
+	; Binary clause core: EQUALS
+	; Compare with pure num / var optimization
+	ld a,[varPrefixed_p]
+	cp $48
+	jr nz,ControlPlayer_localfailed657
+	jr ControlPlayer_ConditionalTrueBlock633
+ControlPlayer_localfailed657: ;keep:
+	; ; logical OR, second chance
+	; Binary clause core: EQUALS
+	; Compare with pure num / var optimization
+	ld a,[q]
+	cp $48
+	jr nz,ControlPlayer_localfailed658
+	jr ControlPlayer_ConditionalTrueBlock633
+ControlPlayer_localfailed658: ;keep:
+	; ; logical OR, second chance
+	; Binary clause core: EQUALS
+	; Compare with pure num / var optimization
+	; generic assign 
+	ld a,[s]
+	ld [Value], a
+	ld a, $10
+	ld [BitFlag], a
+	call IsBitSet
+	cp $0
+	jr nz,ControlPlayer_elsedoneblock635
+ControlPlayer_ConditionalTrueBlock633: ;Main true block ;keep :
+	; Binary clause core: GREATER
+	; Compare with pure num / var optimization
+	ld a,[playerSnake_playerSnake_record_playerSnake_record_y]
+	cp $2a
+	jr c, ControlPlayer_elsedoneblock663
+	jr z, ControlPlayer_elsedoneblock663
+ControlPlayer_ConditionalTrueBlock661: ;Main true block ;keep :
+	
+; // Check if player wants to move UP
+; // Make sure we're not already at the top of the player area
+; // Move player y pos
+	; 'a:=a + const'  optimization 
+	ld a,[playerSnake_playerSnake_record_playerSnake_record_y]
+	sub $1
+	ld [playerSnake_playerSnake_record_playerSnake_record_y], a
+	
+; // Test if we're colliding with a mushroom. If so, move player y back
+	; generic assign 
 	; generic assign 
 	ld a,[playerSnake_playerSnake_record_playerSnake_record_x]
 	ld [v], a
@@ -3892,25 +3822,119 @@ ControlPlayer_ConditionalTrueBlock697: ;Main true block ;keep :
 	; LoadVar Testing if 'screenYtogridY' is word : 0
 	ld [w], a
 	call GetGridLocVal
+	ld [u], a
+	; Binary clause core: GREATER
+	; Compare with pure num / var optimization
 	cp $0
-	jr c, ControlPlayer_elseblock712
-	jr z, ControlPlayer_elseblock712
-ControlPlayer_ConditionalTrueBlock711: ;Main true block ;keep :
+	jr c, ControlPlayer_elsedoneblock676
+	jr z, ControlPlayer_elsedoneblock676
+ControlPlayer_localsuccess678: ;keep:
+	; ; logical AND, second requirement
+	; Binary clause core: LESS
+	; Compare with pure num / var optimization
+	ld a,[u]
+	cp $9
+	jr nc,ControlPlayer_elsedoneblock676
+ControlPlayer_ConditionalTrueBlock674: ;Main true block ;keep :
+	; 'a:=a + const'  optimization 
+	ld a,[playerSnake_playerSnake_record_playerSnake_record_y]
+	add  a,$1
+	ld [playerSnake_playerSnake_record_playerSnake_record_y], a
+ControlPlayer_elsedoneblock676:
+ControlPlayer_elsedoneblock663:
+ControlPlayer_elsedoneblock635:
+	; generic assign 
+	; generic assign 
+	ld hl,$68fd
+	; Integer assignment 
+	; Loading pointer
+	ld [Screen_Loc],hl
+	call Screen_Peek
+	ld [s], a
+	; Binary clause core: EQUALS
+	; Compare with pure num / var optimization
+	ld a,[varPrefixed_p]
+	cp $44
+	jr nz,ControlPlayer_localfailed709
+	jr ControlPlayer_ConditionalTrueBlock681
+ControlPlayer_localfailed709: ;keep:
+	; ; logical OR, second chance
+	; Binary clause core: EQUALS
+	; Compare with pure num / var optimization
+	ld a,[q]
+	cp $44
+	jr nz,ControlPlayer_localfailed710
+	jr ControlPlayer_ConditionalTrueBlock681
+ControlPlayer_localfailed710: ;keep:
+	; ; logical OR, second chance
+	; Binary clause core: EQUALS
+	; Compare with pure num / var optimization
+	; generic assign 
+	ld a,[s]
+	ld [Value], a
+	ld a, $10
+	ld [BitFlag], a
+	call IsBitSet
+	cp $0
+	jr nz,ControlPlayer_elsedoneblock683
+ControlPlayer_ConditionalTrueBlock681: ;Main true block ;keep :
+	; Binary clause core: LESS
+	; Compare with pure num / var optimization
+	ld a,[playerSnake_playerSnake_record_playerSnake_record_y]
+	cp $3a
+	jr nc,ControlPlayer_elsedoneblock715
+ControlPlayer_ConditionalTrueBlock713: ;Main true block ;keep :
+	
+; // Due to player sprite being 4 pixels high we need to check 4 below the Y value.
+	; 'a:=a + const'  optimization 
+	ld a,[playerSnake_playerSnake_record_playerSnake_record_y]
+	add  a,$4
+	ld [playerSnake_playerSnake_record_playerSnake_record_y], a
+	; generic assign 
+	; generic assign 
+	ld a,[playerSnake_playerSnake_record_playerSnake_record_x]
+	ld [v], a
+	; generic assign 
+	ld b,$6
+	ld a,[playerSnake_playerSnake_record_playerSnake_record_y]
+	sub  b
+	ld e,a ; variable is 8-bit
+	ld d,0
+	ld hl,screenYtogridY
+	add hl,de
+	ld a,[hl]
+	; LoadVar Testing if 'screenYtogridY' is word : 0
+	ld [w], a
+	call GetGridLocVal
+	ld [u], a
+	; Binary clause core: GREATER
+	; Compare with pure num / var optimization
+	cp $0
+	jr c, ControlPlayer_elseblock729
+	jr z, ControlPlayer_elseblock729
+ControlPlayer_localsuccess733: ;keep:
+	; ; logical AND, second requirement
+	; Binary clause core: LESS
+	; Compare with pure num / var optimization
+	ld a,[u]
+	cp $9
+	jr nc,ControlPlayer_elseblock729
+ControlPlayer_ConditionalTrueBlock728: ;Main true block ;keep :
 	
 ; // If a mushroom is below the player, move the y back to where it was, otherwise move one pixel down
 	; 'a:=a + const'  optimization 
 	ld a,[playerSnake_playerSnake_record_playerSnake_record_y]
 	sub $4
 	ld [playerSnake_playerSnake_record_playerSnake_record_y], a
-	jr ControlPlayer_elsedoneblock713
-ControlPlayer_elseblock712:
+	jr ControlPlayer_elsedoneblock730
+ControlPlayer_elseblock729:
 	; 'a:=a + const'  optimization 
 	ld a,[playerSnake_playerSnake_record_playerSnake_record_y]
 	sub $3
 	ld [playerSnake_playerSnake_record_playerSnake_record_y], a
-ControlPlayer_elsedoneblock713:
-ControlPlayer_elsedoneblock699:
-ControlPlayer_elsedoneblock669:
+ControlPlayer_elsedoneblock730:
+ControlPlayer_elsedoneblock715:
+ControlPlayer_elsedoneblock683:
 	
 ; // Draw player sprite at new location
 	; generic assign 
@@ -3933,7 +3957,7 @@ SpawnFlea:
 	ld a, $0
 	ld [t], a
 	ld [u], a
-SpawnFlea_forloop719:
+SpawnFlea_forloop737:
 	; generic assign 
 	; Generic 16-bit binop
 	ld hl,$100
@@ -3952,39 +3976,39 @@ SpawnFlea_forloop719:
 	; Binary clause core: GREATER
 	; Compare with pure num / var optimization
 	cp $3
-	jr c, SpawnFlea_elsedoneblock742
-	jr z, SpawnFlea_elsedoneblock742
-SpawnFlea_localsuccess744: ;keep:
+	jr c, SpawnFlea_elsedoneblock760
+	jr z, SpawnFlea_elsedoneblock760
+SpawnFlea_localsuccess762: ;keep:
 	; ; logical AND, second requirement
 	; Binary clause core: LESS
 	; Compare with pure num / var optimization
 	ld a,[v]
 	cp $9
-	jr nc,SpawnFlea_elsedoneblock742
-SpawnFlea_ConditionalTrueBlock740: ;Main true block ;keep :
+	jr nc,SpawnFlea_elsedoneblock760
+SpawnFlea_ConditionalTrueBlock758: ;Main true block ;keep :
 	; 'a:=a + const'  optimization 
 	ld a,[t]
 	add  a,$1
 	ld [t], a
-SpawnFlea_elsedoneblock742:
+SpawnFlea_elsedoneblock760:
 	; Binary clause core: GREATER
 	; Compare with pure num / var optimization
 	ld a,[t]
 	cp $5
-	jr c, SpawnFlea_elsedoneblock749
-	jr z, SpawnFlea_elsedoneblock749
-SpawnFlea_ConditionalTrueBlock747: ;Main true block ;keep :
+	jr c, SpawnFlea_elsedoneblock767
+	jr z, SpawnFlea_elsedoneblock767
+SpawnFlea_ConditionalTrueBlock765: ;Main true block ;keep :
 	ret
-SpawnFlea_elsedoneblock749:
-SpawnFlea_forloopcounter721:
-SpawnFlea_loopstart722:
+SpawnFlea_elsedoneblock767:
+SpawnFlea_forloopcounter739:
+SpawnFlea_loopstart740:
 	ld a,[u]
 	add a,1
 	ld [u],a
 	cp $a0
-	jr nz,SpawnFlea_forloop719
-SpawnFlea_forloopend720:
-SpawnFlea_loopend723:
+	jr nz,SpawnFlea_forloop737
+SpawnFlea_forloopend738:
+SpawnFlea_loopend741:
 	ld a, $1
 	ld [fleaEnemy_flea_record_flea_record_enabled], a
 	ld a, $0
@@ -4037,12 +4061,12 @@ MoveBullet:
 	; Binary clause core: LESS
 	; Compare with pure num / var optimization
 	cp $7
-	jr nc,MoveBullet_elsedoneblock756
-MoveBullet_ConditionalTrueBlock754: ;Main true block ;keep :
+	jr nc,MoveBullet_elsedoneblock774
+MoveBullet_ConditionalTrueBlock772: ;Main true block ;keep :
 	ld a, $0
 	ld [playerBullet_playerBullet_record_playerBullet_record_fired], a
 	ret
-MoveBullet_elsedoneblock756:
+MoveBullet_elsedoneblock774:
 	
 ; // Find out any values in the grid at the bullet location
 	; generic assign 
@@ -4065,9 +4089,9 @@ MoveBullet_elsedoneblock756:
 	; Binary clause core: GREATER
 	; Compare with pure num / var optimization
 	cp $0
-	jp c, MoveBullet_elsedoneblock762
-	jp z, MoveBullet_elsedoneblock762
-MoveBullet_ConditionalTrueBlock760: ;Main true block ;keep :
+	jp c, MoveBullet_elsedoneblock780
+	jp z, MoveBullet_elsedoneblock780
+MoveBullet_ConditionalTrueBlock778: ;Main true block ;keep :
 	
 ; // Collided with something on the grid
 ; // Turn bullet off
@@ -4077,22 +4101,22 @@ MoveBullet_ConditionalTrueBlock760: ;Main true block ;keep :
 	; Compare with pure num / var optimization
 	ld a,[s]
 	cp $0
-	jp c, MoveBullet_elsedoneblock823
-	jp z, MoveBullet_elsedoneblock823
-MoveBullet_localsuccess849: ;keep:
+	jp c, MoveBullet_elsedoneblock841
+	jp z, MoveBullet_elsedoneblock841
+MoveBullet_localsuccess867: ;keep:
 	; ; logical AND, second requirement
 	; Binary clause core: LESS
 	; Compare with pure num / var optimization
 	ld a,[s]
 	cp $9
-	jp nc,MoveBullet_elsedoneblock823
-MoveBullet_ConditionalTrueBlock821: ;Main true block ;keep :
+	jp nc,MoveBullet_elsedoneblock841
+MoveBullet_ConditionalTrueBlock839: ;Main true block ;keep :
 	; Binary clause core: LESS
 	; Compare with pure num / var optimization
 	ld a,[s]
 	cp $9
-	jp nc,MoveBullet_elsedoneblock854
-MoveBullet_ConditionalTrueBlock852: ;Main true block ;keep :
+	jp nc,MoveBullet_elsedoneblock872
+MoveBullet_ConditionalTrueBlock870: ;Main true block ;keep :
 	
 ; // Test for mushies
 ; // Mushy at this grid loc
@@ -4132,11 +4156,11 @@ MoveBullet_ConditionalTrueBlock852: ;Main true block ;keep :
 	; Binary clause core: EQUALS
 	; Compare with pure num / var optimization
 	cp $4
-	jr nz,MoveBullet_elsedoneblock866
-MoveBullet_ConditionalTrueBlock864: ;Main true block ;keep :
+	jr nz,MoveBullet_elsedoneblock884
+MoveBullet_ConditionalTrueBlock882: ;Main true block ;keep :
 	ld a, $0
 	ld [s], a
-MoveBullet_elsedoneblock866:
+MoveBullet_elsedoneblock884:
 	
 ; // Bad mushroom shot completely
 ; // Update value in grid location
@@ -4191,13 +4215,13 @@ MoveBullet_elsedoneblock866:
 	ld a, $0
 	ld [Sprite_tran], a
 	call Sprite_DrawAt
-MoveBullet_elsedoneblock854:
+MoveBullet_elsedoneblock872:
 	; Binary clause core: EQUALS
 	; Compare with pure num / var optimization
 	ld a,[s]
 	cp $0
-	jp nz,MoveBullet_elsedoneblock872
-MoveBullet_ConditionalTrueBlock870: ;Main true block ;keep :
+	jp nz,MoveBullet_elsedoneblock890
+MoveBullet_ConditionalTrueBlock888: ;Main true block ;keep :
 	
 ; // Delete mushy
 	; generic assign 
@@ -4265,23 +4289,23 @@ MoveBullet_ConditionalTrueBlock870: ;Main true block ;keep :
 	ld a,[hl]
 	; LoadVar Testing if 'screenYtogridY' is word : 0
 	ld [mushroomJustShot_mushroomJustShot_record_mushroomJustShot_record_y], a
-MoveBullet_elsedoneblock872:
-MoveBullet_elsedoneblock823:
-MoveBullet_elsedoneblock762:
+MoveBullet_elsedoneblock890:
+MoveBullet_elsedoneblock841:
+MoveBullet_elsedoneblock780:
 	; Binary clause core: EQUALS
 	; Compare with pure num / var optimization
 	ld a,[s]
 	cp $9
-	jp nz,MoveBullet_localfailed1195
-	jp MoveBullet_ConditionalTrueBlock876
-MoveBullet_localfailed1195: ;keep:
+	jp nz,MoveBullet_localfailed1213
+	jp MoveBullet_ConditionalTrueBlock894
+MoveBullet_localfailed1213: ;keep:
 	; ; logical OR, second chance
 	; Binary clause core: EQUALS
 	; Compare with pure num / var optimization
 	ld a,[s]
 	cp $a
-	jp nz,MoveBullet_elsedoneblock878
-MoveBullet_ConditionalTrueBlock876: ;Main true block ;keep :
+	jp nz,MoveBullet_elsedoneblock896
+MoveBullet_ConditionalTrueBlock894: ;Main true block ;keep :
 	
 ; // Check for shot millipede segment
 ; // Update value in grid location
@@ -4298,7 +4322,7 @@ MoveBullet_ConditionalTrueBlock876: ;Main true block ;keep :
 	ld [q], a
 	ld a, $0
 	ld [varPrefixed_p], a
-MoveBullet_forloop1197:
+MoveBullet_forloop1215:
 	; Binary clause core: EQUALS
 	; Compare two vars optimization
 	ld a,[q]
@@ -4311,8 +4335,8 @@ MoveBullet_forloop1197:
 	ld a,[hl]
 	; LoadVar Testing if 'milliSegments_milliSegments_record_milliSegments_record_y' is word : 0
 	cp b
-	jp nz,MoveBullet_elsedoneblock1361
-MoveBullet_ConditionalTrueBlock1359: ;Main true block ;keep :
+	jp nz,MoveBullet_elsedoneblock1379
+MoveBullet_ConditionalTrueBlock1377: ;Main true block ;keep :
 	; Binary clause core: EQUALS
 	; Compare two vars optimization
 	ld a,[playerBullet_playerBullet_record_playerBullet_record_x]
@@ -4325,8 +4349,8 @@ MoveBullet_ConditionalTrueBlock1359: ;Main true block ;keep :
 	ld a,[hl]
 	; LoadVar Testing if 'milliSegments_milliSegments_record_milliSegments_record_x' is word : 0
 	cp b
-	jp nz,MoveBullet_elsedoneblock1441
-MoveBullet_ConditionalTrueBlock1439: ;Main true block ;keep :
+	jp nz,MoveBullet_elsedoneblock1459
+MoveBullet_ConditionalTrueBlock1457: ;Main true block ;keep :
 	; Binary clause core: NOTEQUALS
 	; Compare with pure num / var optimization
 	; generic assign 
@@ -4342,8 +4366,8 @@ MoveBullet_ConditionalTrueBlock1439: ;Main true block ;keep :
 	ld [BitFlag], a
 	call IsBitSet
 	cp $0
-	jp z, MoveBullet_elsedoneblock1481
-MoveBullet_ConditionalTrueBlock1479: ;Main true block ;keep :
+	jp z, MoveBullet_elsedoneblock1499
+MoveBullet_ConditionalTrueBlock1497: ;Main true block ;keep :
 	
 ; // bullet and millipede are same Grid Location
 	; Storing to array
@@ -4371,23 +4395,23 @@ MoveBullet_ConditionalTrueBlock1479: ;Main true block ;keep :
 	; Compare with pure num / var optimization
 	ld a,[s]
 	cp $9
-	jr nz,MoveBullet_elseblock1500
-MoveBullet_ConditionalTrueBlock1499: ;Main true block ;keep :
+	jr nz,MoveBullet_elseblock1518
+MoveBullet_ConditionalTrueBlock1517: ;Main true block ;keep :
 	ld a, $5
 	ld [t], a
 	call AddScore
-	jr MoveBullet_elsedoneblock1501
-MoveBullet_elseblock1500:
+	jr MoveBullet_elsedoneblock1519
+MoveBullet_elseblock1518:
 	ld a, $32
 	ld [t], a
 	call AddScore
-MoveBullet_elsedoneblock1501:
+MoveBullet_elsedoneblock1519:
 	; Binary clause core: LESS
 	; Compare with pure num / var optimization
 	ld a,[varPrefixed_p]
 	cp $a
-	jr nc,MoveBullet_elsedoneblock1509
-MoveBullet_ConditionalTrueBlock1507: ;Main true block ;keep :
+	jr nc,MoveBullet_elsedoneblock1527
+MoveBullet_ConditionalTrueBlock1525: ;Main true block ;keep :
 	; Storing to array
 	; generic assign 
 	ld b,$1
@@ -4413,7 +4437,7 @@ MoveBullet_ConditionalTrueBlock1507: ;Main true block ;keep :
 	add hl,de
 	pop af
 	ld [hl],a
-MoveBullet_elsedoneblock1509:
+MoveBullet_elsedoneblock1527:
 	ld a, $6
 	ld [u], a
 	call PlaySound
@@ -4504,25 +4528,25 @@ MoveBullet_elsedoneblock1509:
 	ld a,[gameStats_gameStats_record_gameStats_record_milliSegsAlive]
 	sub $1
 	ld [gameStats_gameStats_record_gameStats_record_milliSegsAlive], a
-MoveBullet_elsedoneblock1481:
-MoveBullet_elsedoneblock1441:
-MoveBullet_elsedoneblock1361:
-MoveBullet_forloopcounter1199:
-MoveBullet_loopstart1200:
+MoveBullet_elsedoneblock1499:
+MoveBullet_elsedoneblock1459:
+MoveBullet_elsedoneblock1379:
+MoveBullet_forloopcounter1217:
+MoveBullet_loopstart1218:
 	ld a,[varPrefixed_p]
 	add a,1
 	ld [varPrefixed_p],a
 	cp $a
-	jp nz,MoveBullet_forloop1197
-MoveBullet_forloopend1198:
-MoveBullet_loopend1201:
-MoveBullet_elsedoneblock878:
+	jp nz,MoveBullet_forloop1215
+MoveBullet_forloopend1216:
+MoveBullet_loopend1219:
+MoveBullet_elsedoneblock896:
 	; Binary clause core: NOTEQUALS
 	; Compare with pure num / var optimization
 	ld a,[playerBullet_playerBullet_record_playerBullet_record_fired]
 	cp $0
-	jr z, MoveBullet_elsedoneblock1515
-MoveBullet_ConditionalTrueBlock1513: ;Main true block ;keep :
+	jr z, MoveBullet_elsedoneblock1533
+MoveBullet_ConditionalTrueBlock1531: ;Main true block ;keep :
 	
 ; // Draw sprite at new location onscreen
 	; generic assign 
@@ -4532,7 +4556,7 @@ MoveBullet_ConditionalTrueBlock1513: ;Main true block ;keep :
 	ld a,[playerBullet_playerBullet_record_playerBullet_record_y]
 	ld [y], a
 	call DrawBullet
-MoveBullet_elsedoneblock1515:
+MoveBullet_elsedoneblock1533:
 	ret
 	
 ; // Did the player shoot the flea?
@@ -4545,10 +4569,10 @@ CheckFleaShot:
 	ld b,a
 	ld a,[fleaEnemy_flea_record_flea_record_x]
 	cp b
-	jr z, CheckFleaShot_elsedoneblock1522
-CheckFleaShot_ConditionalTrueBlock1520: ;Main true block ;keep :
+	jr z, CheckFleaShot_elsedoneblock1540
+CheckFleaShot_ConditionalTrueBlock1538: ;Main true block ;keep :
 	ret
-CheckFleaShot_elsedoneblock1522:
+CheckFleaShot_elsedoneblock1540:
 	; generic assign 
 	ld a,[playerBullet_playerBullet_record_playerBullet_record_y]
 	ld [t], a
@@ -4565,8 +4589,8 @@ CheckFleaShot_elsedoneblock1522:
 	ld b,a
 	ld a,[t]
 	cp b
-	jr nc,CheckFleaShot_elsedoneblock1528
-CheckFleaShot_localsuccess1536: ;keep:
+	jr nc,CheckFleaShot_elsedoneblock1546
+CheckFleaShot_localsuccess1554: ;keep:
 	; ; logical AND, second requirement
 	; Binary clause core: GREATER
 	; Compare two vars optimization
@@ -4574,9 +4598,9 @@ CheckFleaShot_localsuccess1536: ;keep:
 	ld b,a
 	ld a,[t]
 	cp b
-	jr c, CheckFleaShot_elsedoneblock1528
-	jr z, CheckFleaShot_elsedoneblock1528
-CheckFleaShot_ConditionalTrueBlock1526: ;Main true block ;keep :
+	jr c, CheckFleaShot_elsedoneblock1546
+	jr z, CheckFleaShot_elsedoneblock1546
+CheckFleaShot_ConditionalTrueBlock1544: ;Main true block ;keep :
 	
 ; // Flea shot by player
 ; // Erase bullet
@@ -4594,12 +4618,12 @@ CheckFleaShot_ConditionalTrueBlock1526: ;Main true block ;keep :
 	; Compare with pure num / var optimization
 	ld a,[fleaEnemy_flea_record_flea_record_shotCount]
 	cp $0
-	jr nz,CheckFleaShot_elsedoneblock1541
-CheckFleaShot_ConditionalTrueBlock1539: ;Main true block ;keep :
+	jr nz,CheckFleaShot_elsedoneblock1559
+CheckFleaShot_ConditionalTrueBlock1557: ;Main true block ;keep :
 	ld a, $1
 	ld [fleaEnemy_flea_record_flea_record_shotCount], a
 	ret
-CheckFleaShot_elsedoneblock1541:
+CheckFleaShot_elsedoneblock1559:
 	
 ; // Flea was already shot once
 	; generic assign 
@@ -4622,7 +4646,7 @@ CheckFleaShot_elsedoneblock1541:
 	ld [fleaEnemy_flea_record_flea_record_animFrame], a
 	ld a, $1
 	ld [fleaEnemy_flea_record_flea_record_dead], a
-CheckFleaShot_elsedoneblock1528:
+CheckFleaShot_elsedoneblock1546:
 	ret
 	
 ; // Update grid from scorpion
@@ -4633,21 +4657,21 @@ ScorpionGridUpdate:
 	; Compare with pure num / var optimization
 	ld a,[u]
 	cp $5
-	jr nc,ScorpionGridUpdate_elsedoneblock1548
-ScorpionGridUpdate_localsuccess1550: ;keep:
+	jr nc,ScorpionGridUpdate_elsedoneblock1566
+ScorpionGridUpdate_localsuccess1568: ;keep:
 	; ; logical AND, second requirement
 	; Binary clause core: GREATER
 	; Compare with pure num / var optimization
 	ld a,[u]
 	cp $0
-	jr c, ScorpionGridUpdate_elsedoneblock1548
-	jr z, ScorpionGridUpdate_elsedoneblock1548
-ScorpionGridUpdate_ConditionalTrueBlock1546: ;Main true block ;keep :
+	jr c, ScorpionGridUpdate_elsedoneblock1566
+	jr z, ScorpionGridUpdate_elsedoneblock1566
+ScorpionGridUpdate_ConditionalTrueBlock1564: ;Main true block ;keep :
 	; 'a:=a + const'  optimization 
 	ld a,[u]
 	add  a,$4
 	ld [u], a
-ScorpionGridUpdate_elsedoneblock1548:
+ScorpionGridUpdate_elsedoneblock1566:
 	ret
 	
 ; // Reset mushrooms, etc under scorpion
@@ -4783,7 +4807,7 @@ ResetMillipedeToStart:
 ; // A large number to note the segment is not on the grid yet.
 	ld a, $0
 	ld [s], a
-ResetMillipedeToStart_forloop1554:
+ResetMillipedeToStart_forloop1572:
 	; Binary clause core: NOTEQUALS
 	; Compare with pure num / var optimization
 	; generic assign 
@@ -4799,8 +4823,8 @@ ResetMillipedeToStart_forloop1554:
 	ld [BitFlag], a
 	call IsBitSet
 	cp $0
-	jr z, ResetMillipedeToStart_elsedoneblock1570
-ResetMillipedeToStart_ConditionalTrueBlock1568: ;Main true block ;keep :
+	jr z, ResetMillipedeToStart_elsedoneblock1588
+ResetMillipedeToStart_ConditionalTrueBlock1586: ;Main true block ;keep :
 	; generic assign 
 	ld a,[s]
 	ld e,a ; variable is 8-bit
@@ -4858,7 +4882,7 @@ ResetMillipedeToStart_ConditionalTrueBlock1568: ;Main true block ;keep :
 	ld a, $0
 	ld [t], a
 	call SetGridLocVal
-ResetMillipedeToStart_elsedoneblock1570:
+ResetMillipedeToStart_elsedoneblock1588:
 	; Storing to array
 	ld a,[s]
 	ld e,a
@@ -4876,15 +4900,15 @@ ResetMillipedeToStart_elsedoneblock1570:
 	add hl,de
 	ld a,$ff
 	ld [hl],a
-ResetMillipedeToStart_forloopcounter1556:
-ResetMillipedeToStart_loopstart1557:
+ResetMillipedeToStart_forloopcounter1574:
+ResetMillipedeToStart_loopstart1575:
 	ld a,[s]
 	add a,1
 	ld [s],a
 	cp $a
-	jp nz,ResetMillipedeToStart_forloop1554
-ResetMillipedeToStart_forloopend1555:
-ResetMillipedeToStart_loopend1558:
+	jp nz,ResetMillipedeToStart_forloop1572
+ResetMillipedeToStart_forloopend1573:
+ResetMillipedeToStart_loopend1576:
 	; Storing to array
 	ld a,$5a
 	ld [milliSegments_milliSegments_record_milliSegments_record_flags+$0],a
@@ -4901,7 +4925,7 @@ ResetMillipedeToStart_loopend1558:
 DoPlayerDeath:
 	ld a, $1
 	ld [v], a
-DoPlayerDeath_forloop1574:
+DoPlayerDeath_forloop1592:
 	; generic assign 
 	ld a,[playerSnake_playerSnake_record_playerSnake_record_x]
 	ld [Sprite_spritex], a
@@ -4920,6 +4944,17 @@ DoPlayerDeath_forloop1574:
 	ld a, $5
 	ld [u], a
 	call PlaySound
+DoPlayerDeath_forloopcounter1594:
+DoPlayerDeath_loopstart1595:
+	ld a,[v]
+	add a,1
+	ld [v],a
+	cp $5
+	jr nz,DoPlayerDeath_forloop1592
+DoPlayerDeath_forloopend1593:
+DoPlayerDeath_loopend1596:
+	
+; // Erase and disable stuff
 	; generic assign 
 	ld a,[playerSnake_playerSnake_record_playerSnake_record_x]
 	ld [Sprite_spritex], a
@@ -4930,19 +4965,24 @@ DoPlayerDeath_forloop1574:
 	ld [Sprite_no], a
 	ld [Sprite_tran], a
 	call Sprite_DrawAt
-DoPlayerDeath_forloopcounter1576:
-DoPlayerDeath_loopstart1577:
-	ld a,[v]
-	add a,1
-	ld [v],a
-	cp $5
-	jr nz,DoPlayerDeath_forloop1574
-DoPlayerDeath_forloopend1575:
-DoPlayerDeath_loopend1578:
+	ld a, $0
+	ld [playerBullet_playerBullet_record_playerBullet_record_fired], a
+	; generic assign 
+	ld a,[playerBullet_playerBullet_record_playerBullet_record_x]
+	ld [Sprite_spritex], a
+	; generic assign 
+	ld a,[playerBullet_playerBullet_record_playerBullet_record_y]
+	ld [Sprite_spritey], a
+	ld a, $0
+	ld [Sprite_no], a
+	ld [Sprite_tran], a
+	call Sprite_DrawAt
 	ld a, $10
 	ld [playerSnake_playerSnake_record_playerSnake_record_x], a
 	ld a, $3a
 	ld [playerSnake_playerSnake_record_playerSnake_record_y], a
+	ld a, $0
+	ld [playerSnake_playerSnake_record_playerSnake_record_dead], a
 	; generic assign 
 	ld a,[playerSnake_playerSnake_record_playerSnake_record_x]
 	ld [Sprite_spritex], a
@@ -4965,6 +5005,18 @@ DoPlayerDeath_loopend1578:
 	ld [fleaEnemy_flea_record_flea_record_enabled], a
 	ld [fleaEnemy_flea_record_flea_record_dead], a
 	call SubtractLife
+	
+; // Erase flea sprite
+	; generic assign 
+	ld a,[fleaEnemy_flea_record_flea_record_x]
+	ld [Sprite_spritex], a
+	; generic assign 
+	ld a,[fleaEnemy_flea_record_flea_record_y]
+	ld [Sprite_spritey], a
+	ld a, $0
+	ld [Sprite_no], a
+	ld [Sprite_tran], a
+	call Sprite_DrawAt
 	
 ; // Delete spider sprite
 	; generic assign 
@@ -5006,10 +5058,10 @@ DoPlayerDeath_loopend1578:
 	call ResetMillipedeToStart
 	ld a, $0
 	ld [y], a
-DoPlayerDeath_forloop1581:
+DoPlayerDeath_forloop1599:
 	ld a, $0
 	ld [x], a
-DoPlayerDeath_forloop1707:
+DoPlayerDeath_forloop1725:
 	
 ; // Reset mushrooms
 	; generic assign 
@@ -5024,21 +5076,21 @@ DoPlayerDeath_forloop1707:
 	; Binary clause core: LESS
 	; Compare with pure num / var optimization
 	cp $9
-	jp nc,DoPlayerDeath_elsedoneblock1773
-DoPlayerDeath_ConditionalTrueBlock1771: ;Main true block ;keep :
+	jp nc,DoPlayerDeath_elsedoneblock1791
+DoPlayerDeath_ConditionalTrueBlock1789: ;Main true block ;keep :
 	; Binary clause core: NOTEQUALS
 	; Compare with pure num / var optimization
 	ld a,[u]
 	cp $4
-	jr z, DoPlayerDeath_elsedoneblock1804
-DoPlayerDeath_localsuccess1815: ;keep:
+	jr z, DoPlayerDeath_elsedoneblock1822
+DoPlayerDeath_localsuccess1833: ;keep:
 	; ; logical AND, second requirement
 	; Binary clause core: NOTEQUALS
 	; Compare with pure num / var optimization
 	ld a,[u]
 	cp $0
-	jr z, DoPlayerDeath_elsedoneblock1804
-DoPlayerDeath_ConditionalTrueBlock1802: ;Main true block ;keep :
+	jr z, DoPlayerDeath_elsedoneblock1822
+DoPlayerDeath_ConditionalTrueBlock1820: ;Main true block ;keep :
 	; generic assign 
 	ld a,[x]
 	ld [v], a
@@ -5084,41 +5136,41 @@ DoPlayerDeath_ConditionalTrueBlock1802: ;Main true block ;keep :
 	call PlaySound
 	ld a, $0
 	ld [u], a
-DoPlayerDeath_forloop1817:
+DoPlayerDeath_forloop1835:
 	; Wait
 	ld a,$14
-DoPlayerDeath_wait1825:
+DoPlayerDeath_wait1843:
 	sub 1
-	jr nz,DoPlayerDeath_wait1825
-DoPlayerDeath_forloopcounter1819:
-DoPlayerDeath_loopstart1820:
+	jr nz,DoPlayerDeath_wait1843
+DoPlayerDeath_forloopcounter1837:
+DoPlayerDeath_loopstart1838:
 	ld a,[u]
 	add a,1
 	ld [u],a
 	cp $c8
-	jr nz,DoPlayerDeath_forloop1817
-DoPlayerDeath_forloopend1818:
-DoPlayerDeath_loopend1821:
-DoPlayerDeath_elsedoneblock1804:
-DoPlayerDeath_elsedoneblock1773:
-DoPlayerDeath_forloopcounter1709:
-DoPlayerDeath_loopstart1710:
+	jr nz,DoPlayerDeath_forloop1835
+DoPlayerDeath_forloopend1836:
+DoPlayerDeath_loopend1839:
+DoPlayerDeath_elsedoneblock1822:
+DoPlayerDeath_elsedoneblock1791:
+DoPlayerDeath_forloopcounter1727:
+DoPlayerDeath_loopstart1728:
 	ld a,[x]
 	add a,1
 	ld [x],a
 	cp $20
-	jp nz,DoPlayerDeath_forloop1707
-DoPlayerDeath_forloopend1708:
-DoPlayerDeath_loopend1711:
-DoPlayerDeath_forloopcounter1583:
-DoPlayerDeath_loopstart1584:
+	jp nz,DoPlayerDeath_forloop1725
+DoPlayerDeath_forloopend1726:
+DoPlayerDeath_loopend1729:
+DoPlayerDeath_forloopcounter1601:
+DoPlayerDeath_loopstart1602:
 	ld a,[y]
 	add a,1
 	ld [y],a
 	cp $d
-	jp nz,DoPlayerDeath_forloop1581
-DoPlayerDeath_forloopend1582:
-DoPlayerDeath_loopend1585:
+	jp nz,DoPlayerDeath_forloop1599
+DoPlayerDeath_forloopend1600:
+DoPlayerDeath_loopend1603:
 	ret
 	
 ; // All enemy death sequences
@@ -5129,15 +5181,15 @@ DoEnemyDeathAnim:
 	; Compare with pure num / var optimization
 	ld a,[scorpionEnemy_scorpion_record_scorpion_record_enabled]
 	cp $0
-	jp z, DoEnemyDeathAnim_elsedoneblock1830
-DoEnemyDeathAnim_localsuccess1838: ;keep:
+	jp z, DoEnemyDeathAnim_elsedoneblock1848
+DoEnemyDeathAnim_localsuccess1856: ;keep:
 	; ; logical AND, second requirement
 	; Binary clause core: NOTEQUALS
 	; Compare with pure num / var optimization
 	ld a,[scorpionEnemy_scorpion_record_scorpion_record_dead]
 	cp $0
-	jp z, DoEnemyDeathAnim_elsedoneblock1830
-DoEnemyDeathAnim_ConditionalTrueBlock1828: ;Main true block ;keep :
+	jp z, DoEnemyDeathAnim_elsedoneblock1848
+DoEnemyDeathAnim_ConditionalTrueBlock1846: ;Main true block ;keep :
 	
 ; // Scorpion death
 ; // Update sprite data
@@ -5187,8 +5239,8 @@ DoEnemyDeathAnim_ConditionalTrueBlock1828: ;Main true block ;keep :
 	; Compare with pure num / var optimization
 	ld a,[scorpionEnemy_scorpion_record_scorpion_record_animFrame]
 	cp $4
-	jr nz,DoEnemyDeathAnim_elsedoneblock1843
-DoEnemyDeathAnim_ConditionalTrueBlock1841: ;Main true block ;keep :
+	jr nz,DoEnemyDeathAnim_elsedoneblock1861
+DoEnemyDeathAnim_ConditionalTrueBlock1859: ;Main true block ;keep :
 	; generic assign 
 	ld b,$1
 	ld a,[scorpionEnemy_scorpion_record_scorpion_record_x]
@@ -5205,21 +5257,21 @@ DoEnemyDeathAnim_ConditionalTrueBlock1841: ;Main true block ;keep :
 	ld a, $0
 	ld [scorpionEnemy_scorpion_record_scorpion_record_enabled], a
 	ld [scorpionEnemy_scorpion_record_scorpion_record_dead], a
-DoEnemyDeathAnim_elsedoneblock1843:
-DoEnemyDeathAnim_elsedoneblock1830:
+DoEnemyDeathAnim_elsedoneblock1861:
+DoEnemyDeathAnim_elsedoneblock1848:
 	; Binary clause core: NOTEQUALS
 	; Compare with pure num / var optimization
 	ld a,[spiderEnemy_spider_record_spider_record_enabled]
 	cp $0
-	jp z, DoEnemyDeathAnim_elsedoneblock1849
-DoEnemyDeathAnim_localsuccess1857: ;keep:
+	jp z, DoEnemyDeathAnim_elsedoneblock1867
+DoEnemyDeathAnim_localsuccess1875: ;keep:
 	; ; logical AND, second requirement
 	; Binary clause core: NOTEQUALS
 	; Compare with pure num / var optimization
 	ld a,[spiderEnemy_spider_record_spider_record_dead]
 	cp $0
-	jp z, DoEnemyDeathAnim_elsedoneblock1849
-DoEnemyDeathAnim_ConditionalTrueBlock1847: ;Main true block ;keep :
+	jp z, DoEnemyDeathAnim_elsedoneblock1867
+DoEnemyDeathAnim_ConditionalTrueBlock1865: ;Main true block ;keep :
 	
 ; // Spider death
 ; // Update sprite data
@@ -5269,8 +5321,8 @@ DoEnemyDeathAnim_ConditionalTrueBlock1847: ;Main true block ;keep :
 	; Compare with pure num / var optimization
 	ld a,[spiderEnemy_spider_record_spider_record_animFrame]
 	cp $4
-	jr nz,DoEnemyDeathAnim_elsedoneblock1862
-DoEnemyDeathAnim_ConditionalTrueBlock1860: ;Main true block ;keep :
+	jr nz,DoEnemyDeathAnim_elsedoneblock1880
+DoEnemyDeathAnim_ConditionalTrueBlock1878: ;Main true block ;keep :
 	; generic assign 
 	ld b,$1
 	ld a,[spiderEnemy_spider_record_spider_record_x]
@@ -5286,14 +5338,14 @@ DoEnemyDeathAnim_ConditionalTrueBlock1860: ;Main true block ;keep :
 	ld a, $0
 	ld [spiderEnemy_spider_record_spider_record_enabled], a
 	ld [spiderEnemy_spider_record_spider_record_dead], a
-DoEnemyDeathAnim_elsedoneblock1862:
-DoEnemyDeathAnim_elsedoneblock1849:
+DoEnemyDeathAnim_elsedoneblock1880:
+DoEnemyDeathAnim_elsedoneblock1867:
 	; Binary clause core: EQUALS
 	; Compare with pure num / var optimization
 	ld a,[fleaEnemy_flea_record_flea_record_shotCount]
 	cp $2
-	jr nz,DoEnemyDeathAnim_elsedoneblock1868
-DoEnemyDeathAnim_ConditionalTrueBlock1866: ;Main true block ;keep :
+	jr nz,DoEnemyDeathAnim_elsedoneblock1886
+DoEnemyDeathAnim_ConditionalTrueBlock1884: ;Main true block ;keep :
 	
 ; // Do flea stuff
 	ld a, $4
@@ -5318,8 +5370,8 @@ DoEnemyDeathAnim_ConditionalTrueBlock1866: ;Main true block ;keep :
 	; Compare with pure num / var optimization
 	ld a,[fleaEnemy_flea_record_flea_record_animFrame]
 	cp $4
-	jr nz,DoEnemyDeathAnim_elsedoneblock1880
-DoEnemyDeathAnim_ConditionalTrueBlock1878: ;Main true block ;keep :
+	jr nz,DoEnemyDeathAnim_elsedoneblock1898
+DoEnemyDeathAnim_ConditionalTrueBlock1896: ;Main true block ;keep :
 	; generic assign 
 	ld a,[fleaEnemy_flea_record_flea_record_x]
 	ld [Sprite_spritex], a
@@ -5336,12 +5388,12 @@ DoEnemyDeathAnim_ConditionalTrueBlock1878: ;Main true block ;keep :
 	ld [fleaEnemy_flea_record_flea_record_enabled], a
 	ld [fleaEnemy_flea_record_flea_record_dead], a
 	ret
-DoEnemyDeathAnim_elsedoneblock1880:
+DoEnemyDeathAnim_elsedoneblock1898:
 	; 'a:=a + const'  optimization 
 	ld a,[fleaEnemy_flea_record_flea_record_animFrame]
 	add  a,$1
 	ld [fleaEnemy_flea_record_flea_record_animFrame], a
-DoEnemyDeathAnim_elsedoneblock1868:
+DoEnemyDeathAnim_elsedoneblock1886:
 	ret
 	
 ; // Check if spider and player collided
@@ -5352,21 +5404,21 @@ CheckSpiderCollide:
 	; Compare with pure num / var optimization
 	ld a,[spiderEnemy_spider_record_spider_record_enabled]
 	cp $0
-	jr nz,CheckSpiderCollide_elsedoneblock1887
-CheckSpiderCollide_ConditionalTrueBlock1885: ;Main true block ;keep :
+	jr nz,CheckSpiderCollide_elsedoneblock1905
+CheckSpiderCollide_ConditionalTrueBlock1903: ;Main true block ;keep :
 	
 ; // If not touching player, ignore
 	ret
-CheckSpiderCollide_elsedoneblock1887:
+CheckSpiderCollide_elsedoneblock1905:
 	; Binary clause core: LESS
 	; Compare two vars optimization
 	ld a,[spiderEnemy_spider_record_spider_record_x]
 	ld b,a
 	ld a,[playerSnake_playerSnake_record_playerSnake_record_x]
 	cp b
-	jr nc,CheckSpiderCollide_localfailed1895
-	jr CheckSpiderCollide_ConditionalTrueBlock1891
-CheckSpiderCollide_localfailed1895: ;keep:
+	jr nc,CheckSpiderCollide_localfailed1913
+	jr CheckSpiderCollide_ConditionalTrueBlock1909
+CheckSpiderCollide_localfailed1913: ;keep:
 	; ; logical OR, second chance
 	; Swapped comparison expressions
 	; Binary clause core: LESS
@@ -5376,20 +5428,20 @@ CheckSpiderCollide_localfailed1895: ;keep:
 	ld a,[spiderEnemy_spider_record_spider_record_x]
 	add  a, b
 	cp c
-	jr nc,CheckSpiderCollide_elsedoneblock1893
-CheckSpiderCollide_ConditionalTrueBlock1891: ;Main true block ;keep :
+	jr nc,CheckSpiderCollide_elsedoneblock1911
+CheckSpiderCollide_ConditionalTrueBlock1909: ;Main true block ;keep :
 	ret
-CheckSpiderCollide_elsedoneblock1893:
+CheckSpiderCollide_elsedoneblock1911:
 	; Binary clause core: LESS
 	; Compare two vars optimization
 	ld a,[playerSnake_playerSnake_record_playerSnake_record_y]
 	ld b,a
 	ld a,[spiderEnemy_spider_record_spider_record_y]
 	cp b
-	jr nc,CheckSpiderCollide_elsedoneblock1900
-CheckSpiderCollide_ConditionalTrueBlock1898: ;Main true block ;keep :
+	jr nc,CheckSpiderCollide_elsedoneblock1918
+CheckSpiderCollide_ConditionalTrueBlock1916: ;Main true block ;keep :
 	ret
-CheckSpiderCollide_elsedoneblock1900:
+CheckSpiderCollide_elsedoneblock1918:
 	
 ; // Passed the above, so flea and snake are touching
 	ld a, $0
@@ -5430,29 +5482,8 @@ CheckSpiderCollide_elsedoneblock1900:
 	ld [Sprite_no], a
 	ld [Sprite_tran], a
 	call Sprite_DrawAt
-	; generic assign 
-	ld a,[playerSnake_playerSnake_record_playerSnake_record_x]
-	ld [Sprite_spritex], a
-	; generic assign 
-	ld a,[playerSnake_playerSnake_record_playerSnake_record_y]
-	ld [Sprite_spritey], a
-	ld a, $0
-	ld [Sprite_no], a
-	ld [Sprite_tran], a
-	call Sprite_DrawAt
-	ld a, $0
-	ld [playerBullet_playerBullet_record_playerBullet_record_fired], a
-	; generic assign 
-	ld a,[playerBullet_playerBullet_record_playerBullet_record_x]
-	ld [Sprite_spritex], a
-	; generic assign 
-	ld a,[playerBullet_playerBullet_record_playerBullet_record_y]
-	ld [Sprite_spritey], a
-	ld a, $0
-	ld [Sprite_no], a
-	ld [Sprite_tran], a
-	call Sprite_DrawAt
-	call DoPlayerDeath
+	ld a, $1
+	ld [playerSnake_playerSnake_record_playerSnake_record_dead], a
 	ret
 	
 ; // Check if flea and player collided
@@ -5463,32 +5494,32 @@ CheckFleaCollide:
 	; Compare with pure num / var optimization
 	ld a,[fleaEnemy_flea_record_flea_record_enabled]
 	cp $0
-	jr nz,CheckFleaCollide_elsedoneblock1907
-CheckFleaCollide_ConditionalTrueBlock1905: ;Main true block ;keep :
+	jr nz,CheckFleaCollide_elsedoneblock1925
+CheckFleaCollide_ConditionalTrueBlock1923: ;Main true block ;keep :
 	
 ; // If not touching player, ignore
 	ret
-CheckFleaCollide_elsedoneblock1907:
+CheckFleaCollide_elsedoneblock1925:
 	; Binary clause core: NOTEQUALS
 	; Compare two vars optimization
 	ld a,[playerSnake_playerSnake_record_playerSnake_record_x]
 	ld b,a
 	ld a,[fleaEnemy_flea_record_flea_record_x]
 	cp b
-	jr z, CheckFleaCollide_elsedoneblock1913
-CheckFleaCollide_ConditionalTrueBlock1911: ;Main true block ;keep :
+	jr z, CheckFleaCollide_elsedoneblock1931
+CheckFleaCollide_ConditionalTrueBlock1929: ;Main true block ;keep :
 	ret
-CheckFleaCollide_elsedoneblock1913:
+CheckFleaCollide_elsedoneblock1931:
 	; Binary clause core: LESS
 	; Compare two vars optimization
 	ld a,[playerSnake_playerSnake_record_playerSnake_record_y]
 	ld b,a
 	ld a,[fleaEnemy_flea_record_flea_record_y]
 	cp b
-	jr nc,CheckFleaCollide_elsedoneblock1919
-CheckFleaCollide_ConditionalTrueBlock1917: ;Main true block ;keep :
+	jr nc,CheckFleaCollide_elsedoneblock1937
+CheckFleaCollide_ConditionalTrueBlock1935: ;Main true block ;keep :
 	ret
-CheckFleaCollide_elsedoneblock1919:
+CheckFleaCollide_elsedoneblock1937:
 	
 ; // Passed the above, so flea and snake are touching
 	ld a, $0
@@ -5513,19 +5544,8 @@ CheckFleaCollide_elsedoneblock1919:
 	ld [Sprite_no], a
 	ld [Sprite_tran], a
 	call Sprite_DrawAt
-	ld a, $0
-	ld [playerBullet_playerBullet_record_playerBullet_record_fired], a
-	; generic assign 
-	ld a,[playerBullet_playerBullet_record_playerBullet_record_x]
-	ld [Sprite_spritex], a
-	; generic assign 
-	ld a,[playerBullet_playerBullet_record_playerBullet_record_y]
-	ld [Sprite_spritey], a
-	ld a, $0
-	ld [Sprite_no], a
-	ld [Sprite_tran], a
-	call Sprite_DrawAt
-	call DoPlayerDeath
+	ld a, $1
+	ld [playerSnake_playerSnake_record_playerSnake_record_dead], a
 	ret
 	
 ; // Move the flea down the screen, dropping mushies on the way
@@ -5536,8 +5556,8 @@ MoveFlea:
 	; Compare with pure num / var optimization
 	ld a,[fleaEnemy_flea_record_flea_record_shotCount]
 	cp $0
-	jr nz,MoveFlea_elsedoneblock1926
-MoveFlea_ConditionalTrueBlock1924: ;Main true block ;keep :
+	jr nz,MoveFlea_elsedoneblock1944
+MoveFlea_ConditionalTrueBlock1942: ;Main true block ;keep :
 	
 ; // Speed control
 	; 'a:=a + const'  optimization 
@@ -5547,15 +5567,15 @@ MoveFlea_ConditionalTrueBlock1924: ;Main true block ;keep :
 	; Binary clause core: EQUALS
 	; Compare with pure num / var optimization
 	cp $0
-	jr nz,MoveFlea_elseblock1939
-MoveFlea_ConditionalTrueBlock1938: ;Main true block ;keep :
+	jr nz,MoveFlea_elseblock1957
+MoveFlea_ConditionalTrueBlock1956: ;Main true block ;keep :
 	ld a, $2
 	ld [fleaEnemy_flea_record_flea_record_moveSpeed], a
-	jr MoveFlea_elsedoneblock1940
-MoveFlea_elseblock1939:
+	jr MoveFlea_elsedoneblock1958
+MoveFlea_elseblock1957:
 	ret
-MoveFlea_elsedoneblock1940:
-MoveFlea_elsedoneblock1926:
+MoveFlea_elsedoneblock1958:
+MoveFlea_elsedoneblock1944:
 	
 ; // Erase flea sprite
 	; generic assign 
@@ -5575,9 +5595,9 @@ MoveFlea_elsedoneblock1926:
 	; Binary clause core: GREATER
 	; Compare with pure num / var optimization
 	cp $3a
-	jr c, MoveFlea_elsedoneblock1948
-	jr z, MoveFlea_elsedoneblock1948
-MoveFlea_ConditionalTrueBlock1946: ;Main true block ;keep :
+	jr c, MoveFlea_elsedoneblock1966
+	jr z, MoveFlea_elsedoneblock1966
+MoveFlea_ConditionalTrueBlock1964: ;Main true block ;keep :
 	
 ; // Disable if reached bottom of screen
 	ld a, $0
@@ -5596,7 +5616,7 @@ MoveFlea_ConditionalTrueBlock1946: ;Main true block ;keep :
 	call Sprite_DrawAt
 	call SpawnFlea
 	ret
-MoveFlea_elsedoneblock1948:
+MoveFlea_elsedoneblock1966:
 	; generic assign 
 	ld a,[fleaEnemy_flea_record_flea_record_x]
 	ld [Sprite_spritex], a
@@ -5619,8 +5639,8 @@ MoveFlea_elsedoneblock1948:
 	; Compare with pure num / var optimization
 	ld a,[fleaEnemy_flea_record_flea_record_dropCount]
 	cp $4
-	jp nz,MoveFlea_elsedoneblock1954
-MoveFlea_ConditionalTrueBlock1952: ;Main true block ;keep :
+	jp nz,MoveFlea_elsedoneblock1972
+MoveFlea_ConditionalTrueBlock1970: ;Main true block ;keep :
 	
 ; // Only update every 4 pixels down
 	ld a, $0
@@ -5636,9 +5656,9 @@ MoveFlea_ConditionalTrueBlock1952: ;Main true block ;keep :
 	; Binary clause core: GREATER
 	; Compare with pure num / var optimization
 	cp $1e
-	jr c, MoveFlea_elseblock1967
-	jr z, MoveFlea_elseblock1967
-MoveFlea_ConditionalTrueBlock1966: ;Main true block ;keep :
+	jr c, MoveFlea_elseblock1985
+	jr z, MoveFlea_elseblock1985
+MoveFlea_ConditionalTrueBlock1984: ;Main true block ;keep :
 	
 ; // Update grid info
 	; generic assign 
@@ -5678,8 +5698,8 @@ MoveFlea_ConditionalTrueBlock1966: ;Main true block ;keep :
 	ld a, $0
 	ld [Sprite_tran], a
 	call Sprite_DrawAt
-	jr MoveFlea_elsedoneblock1968
-MoveFlea_elseblock1967:
+	jr MoveFlea_elsedoneblock1986
+MoveFlea_elseblock1985:
 	; generic assign 
 	ld a,[fleaEnemy_flea_record_flea_record_x]
 	ld [v], a
@@ -5702,14 +5722,14 @@ MoveFlea_elseblock1967:
 	ld a, $0
 	ld [t], a
 	call SetGridLocVal
-MoveFlea_elsedoneblock1968:
-MoveFlea_elsedoneblock1954:
+MoveFlea_elsedoneblock1986:
+MoveFlea_elsedoneblock1972:
 	ret
 	
 ; // Drawing Millipede sprite
 	; ***********  Defining procedure : DrawMilliSprite
 	;    Procedure type : User-defined procedure
-DrawMilliSprite_block1973:
+DrawMilliSprite_block1991:
 DrawMilliSprite:
 	; Binary clause core: NOTEQUALS
 	; Compare with pure num / var optimization
@@ -5726,8 +5746,8 @@ DrawMilliSprite:
 	ld [BitFlag], a
 	call IsBitSet
 	cp $0
-	jp z, DrawMilliSprite_elseblock1976
-DrawMilliSprite_ConditionalTrueBlock1975: ;Main true block ;keep :
+	jp z, DrawMilliSprite_elseblock1994
+DrawMilliSprite_ConditionalTrueBlock1993: ;Main true block ;keep :
 	; Binary clause core: NOTEQUALS
 	; Compare with pure num / var optimization
 	; generic assign 
@@ -5743,13 +5763,13 @@ DrawMilliSprite_ConditionalTrueBlock1975: ;Main true block ;keep :
 	ld [BitFlag], a
 	call IsBitSet
 	cp $0
-	jr z, DrawMilliSprite_elsedoneblock1996
-DrawMilliSprite_ConditionalTrueBlock1994: ;Main true block ;keep :
+	jr z, DrawMilliSprite_elsedoneblock2014
+DrawMilliSprite_ConditionalTrueBlock2012: ;Main true block ;keep :
 	
 ; // Draw Millipede head sprite
 	ld a, $d
 	ld [v], a
-DrawMilliSprite_elsedoneblock1996:
+DrawMilliSprite_elsedoneblock2014:
 	; Binary clause core: NOTEQUALS
 	; Compare with pure num / var optimization
 	; generic assign 
@@ -5765,11 +5785,11 @@ DrawMilliSprite_elsedoneblock1996:
 	ld [BitFlag], a
 	call IsBitSet
 	cp $0
-	jr z, DrawMilliSprite_elsedoneblock2002
-DrawMilliSprite_ConditionalTrueBlock2000: ;Main true block ;keep :
+	jr z, DrawMilliSprite_elsedoneblock2020
+DrawMilliSprite_ConditionalTrueBlock2018: ;Main true block ;keep :
 	ld a, $f
 	ld [v], a
-DrawMilliSprite_elsedoneblock2002:
+DrawMilliSprite_elsedoneblock2020:
 	; generic assign 
 	ld a,[s]
 	ld e,a ; variable is 8-bit
@@ -5829,8 +5849,8 @@ DrawMilliSprite_elsedoneblock2002:
 	ld a, $a
 	ld [t], a
 	call SetGridLocVal
-	jp DrawMilliSprite_elsedoneblock1977
-DrawMilliSprite_elseblock1976:
+	jp DrawMilliSprite_elsedoneblock1995
+DrawMilliSprite_elseblock1994:
 	
 ; // Millipede body
 	; generic assign 
@@ -5891,7 +5911,7 @@ DrawMilliSprite_elseblock1976:
 	ld a, $9
 	ld [t], a
 	call SetGridLocVal
-DrawMilliSprite_elsedoneblock1977:
+DrawMilliSprite_elsedoneblock1995:
 	ret
 	
 ; // Did player shoot a mushroom?
@@ -5911,8 +5931,8 @@ CheckMushroomShot:
 	ld a,[hl]
 	; LoadVar Testing if 'milliSegments_milliSegments_record_milliSegments_record_x' is word : 0
 	cp b
-	jr nz,CheckMushroomShot_elsedoneblock2010
-CheckMushroomShot_localsuccess2012: ;keep:
+	jr nz,CheckMushroomShot_elsedoneblock2028
+CheckMushroomShot_localsuccess2030: ;keep:
 	; ; logical AND, second requirement
 	; Swapped comparison expressions
 	; Binary clause core: EQUALS
@@ -5927,8 +5947,8 @@ CheckMushroomShot_localsuccess2012: ;keep:
 	ld a,[hl]
 	; LoadVar Testing if 'milliSegments_milliSegments_record_milliSegments_record_y' is word : 0
 	cp b
-	jr nz,CheckMushroomShot_elsedoneblock2010
-CheckMushroomShot_ConditionalTrueBlock2008: ;Main true block ;keep :
+	jr nz,CheckMushroomShot_elsedoneblock2028
+CheckMushroomShot_ConditionalTrueBlock2026: ;Main true block ;keep :
 	
 ; // Don't change direction if mushroom just shot
 	ld a, $1
@@ -5936,7 +5956,7 @@ CheckMushroomShot_ConditionalTrueBlock2008: ;Main true block ;keep :
 	ld a, $0
 	ld [mushroomJustShot_mushroomJustShot_record_mushroomJustShot_record_x], a
 	ld [mushroomJustShot_mushroomJustShot_record_mushroomJustShot_record_y], a
-CheckMushroomShot_elsedoneblock2010:
+CheckMushroomShot_elsedoneblock2028:
 	ret
 	
 ; // Did player shoot scorpion?
@@ -5947,29 +5967,29 @@ CheckScorpionShot:
 	; Compare with pure num / var optimization
 	ld a,[playerBullet_playerBullet_record_playerBullet_record_fired]
 	cp $0
-	jr nz,CheckScorpionShot_elsedoneblock2018
-CheckScorpionShot_ConditionalTrueBlock2016: ;Main true block ;keep :
+	jr nz,CheckScorpionShot_elsedoneblock2036
+CheckScorpionShot_ConditionalTrueBlock2034: ;Main true block ;keep :
 	
 ; // Check fail conditions first as it's faster.
 	ret
-CheckScorpionShot_elsedoneblock2018:
+CheckScorpionShot_elsedoneblock2036:
 	; Binary clause core: NOTEQUALS
 	; Compare with pure num / var optimization
 	ld a,[scorpionEnemy_scorpion_record_scorpion_record_dead]
 	cp $0
-	jr z, CheckScorpionShot_elsedoneblock2024
-CheckScorpionShot_ConditionalTrueBlock2022: ;Main true block ;keep :
+	jr z, CheckScorpionShot_elsedoneblock2042
+CheckScorpionShot_ConditionalTrueBlock2040: ;Main true block ;keep :
 	ret
-CheckScorpionShot_elsedoneblock2024:
+CheckScorpionShot_elsedoneblock2042:
 	; Binary clause core: LESS
 	; Compare two vars optimization
 	ld a,[scorpionEnemy_scorpion_record_scorpion_record_x]
 	ld b,a
 	ld a,[playerBullet_playerBullet_record_playerBullet_record_x]
 	cp b
-	jr nc,CheckScorpionShot_localfailed2032
-	jr CheckScorpionShot_ConditionalTrueBlock2028
-CheckScorpionShot_localfailed2032: ;keep:
+	jr nc,CheckScorpionShot_localfailed2050
+	jr CheckScorpionShot_ConditionalTrueBlock2046
+CheckScorpionShot_localfailed2050: ;keep:
 	; ; logical OR, second chance
 	; Swapped comparison expressions
 	; Binary clause core: LESS
@@ -5979,10 +5999,10 @@ CheckScorpionShot_localfailed2032: ;keep:
 	ld a,[scorpionEnemy_scorpion_record_scorpion_record_x]
 	add  a, b
 	cp c
-	jr nc,CheckScorpionShot_elsedoneblock2030
-CheckScorpionShot_ConditionalTrueBlock2028: ;Main true block ;keep :
+	jr nc,CheckScorpionShot_elsedoneblock2048
+CheckScorpionShot_ConditionalTrueBlock2046: ;Main true block ;keep :
 	ret
-CheckScorpionShot_elsedoneblock2030:
+CheckScorpionShot_elsedoneblock2048:
 	; Swapped comparison expressions
 	; Binary clause core: LESS
 	ld a,[playerBullet_playerBullet_record_playerBullet_record_y]
@@ -5991,9 +6011,9 @@ CheckScorpionShot_elsedoneblock2030:
 	ld a,[scorpionEnemy_scorpion_record_scorpion_record_y]
 	add  a, b
 	cp c
-	jr nc,CheckScorpionShot_localfailed2039
-	jr CheckScorpionShot_ConditionalTrueBlock2035
-CheckScorpionShot_localfailed2039: ;keep:
+	jr nc,CheckScorpionShot_localfailed2057
+	jr CheckScorpionShot_ConditionalTrueBlock2053
+CheckScorpionShot_localfailed2057: ;keep:
 	; ; logical OR, second chance
 	; Binary clause core: LESS
 	; Compare two vars optimization
@@ -6001,10 +6021,10 @@ CheckScorpionShot_localfailed2039: ;keep:
 	ld b,a
 	ld a,[playerBullet_playerBullet_record_playerBullet_record_y]
 	cp b
-	jr nc,CheckScorpionShot_elsedoneblock2037
-CheckScorpionShot_ConditionalTrueBlock2035: ;Main true block ;keep :
+	jr nc,CheckScorpionShot_elsedoneblock2055
+CheckScorpionShot_ConditionalTrueBlock2053: ;Main true block ;keep :
 	ret
-CheckScorpionShot_elsedoneblock2037:
+CheckScorpionShot_elsedoneblock2055:
 	
 ; // Passed these  conditions so bullet is touching part of the scorpion
 	ld a, $1
@@ -6034,29 +6054,29 @@ CheckSpiderShot:
 	; Compare with pure num / var optimization
 	ld a,[playerBullet_playerBullet_record_playerBullet_record_fired]
 	cp $0
-	jr nz,CheckSpiderShot_elsedoneblock2045
-CheckSpiderShot_ConditionalTrueBlock2043: ;Main true block ;keep :
+	jr nz,CheckSpiderShot_elsedoneblock2063
+CheckSpiderShot_ConditionalTrueBlock2061: ;Main true block ;keep :
 	
 ; // Check fail conditions first as it's faster.
 	ret
-CheckSpiderShot_elsedoneblock2045:
+CheckSpiderShot_elsedoneblock2063:
 	; Binary clause core: NOTEQUALS
 	; Compare with pure num / var optimization
 	ld a,[spiderEnemy_spider_record_spider_record_dead]
 	cp $0
-	jr z, CheckSpiderShot_elsedoneblock2051
-CheckSpiderShot_ConditionalTrueBlock2049: ;Main true block ;keep :
+	jr z, CheckSpiderShot_elsedoneblock2069
+CheckSpiderShot_ConditionalTrueBlock2067: ;Main true block ;keep :
 	ret
-CheckSpiderShot_elsedoneblock2051:
+CheckSpiderShot_elsedoneblock2069:
 	; Binary clause core: LESS
 	; Compare two vars optimization
 	ld a,[spiderEnemy_spider_record_spider_record_x]
 	ld b,a
 	ld a,[playerBullet_playerBullet_record_playerBullet_record_x]
 	cp b
-	jr nc,CheckSpiderShot_localfailed2059
-	jr CheckSpiderShot_ConditionalTrueBlock2055
-CheckSpiderShot_localfailed2059: ;keep:
+	jr nc,CheckSpiderShot_localfailed2077
+	jr CheckSpiderShot_ConditionalTrueBlock2073
+CheckSpiderShot_localfailed2077: ;keep:
 	; ; logical OR, second chance
 	; Swapped comparison expressions
 	; Binary clause core: LESS
@@ -6066,10 +6086,10 @@ CheckSpiderShot_localfailed2059: ;keep:
 	ld a,[spiderEnemy_spider_record_spider_record_x]
 	add  a, b
 	cp c
-	jr nc,CheckSpiderShot_elsedoneblock2057
-CheckSpiderShot_ConditionalTrueBlock2055: ;Main true block ;keep :
+	jr nc,CheckSpiderShot_elsedoneblock2075
+CheckSpiderShot_ConditionalTrueBlock2073: ;Main true block ;keep :
 	ret
-CheckSpiderShot_elsedoneblock2057:
+CheckSpiderShot_elsedoneblock2075:
 	; Swapped comparison expressions
 	; Binary clause core: LESS
 	ld a,[playerBullet_playerBullet_record_playerBullet_record_y]
@@ -6078,9 +6098,9 @@ CheckSpiderShot_elsedoneblock2057:
 	ld a,[spiderEnemy_spider_record_spider_record_y]
 	add  a, b
 	cp c
-	jr nc,CheckSpiderShot_localfailed2066
-	jr CheckSpiderShot_ConditionalTrueBlock2062
-CheckSpiderShot_localfailed2066: ;keep:
+	jr nc,CheckSpiderShot_localfailed2084
+	jr CheckSpiderShot_ConditionalTrueBlock2080
+CheckSpiderShot_localfailed2084: ;keep:
 	; ; logical OR, second chance
 	; Binary clause core: LESS
 	; Compare two vars optimization
@@ -6088,10 +6108,10 @@ CheckSpiderShot_localfailed2066: ;keep:
 	ld b,a
 	ld a,[playerBullet_playerBullet_record_playerBullet_record_y]
 	cp b
-	jr nc,CheckSpiderShot_elsedoneblock2064
-CheckSpiderShot_ConditionalTrueBlock2062: ;Main true block ;keep :
+	jr nc,CheckSpiderShot_elsedoneblock2082
+CheckSpiderShot_ConditionalTrueBlock2080: ;Main true block ;keep :
 	ret
-CheckSpiderShot_elsedoneblock2064:
+CheckSpiderShot_elsedoneblock2082:
 	
 ; // Passed these  conditions so bullet is touching part of the scorpion
 	ld a, $1
@@ -6118,11 +6138,11 @@ CheckSpiderShot_elsedoneblock2064:
 	ld a,[playerSnake_playerSnake_record_playerSnake_record_y]
 	sub  b
 	cp c
-	jr nc,CheckSpiderShot_elsedoneblock2071
-CheckSpiderShot_ConditionalTrueBlock2069: ;Main true block ;keep :
+	jr nc,CheckSpiderShot_elsedoneblock2089
+CheckSpiderShot_ConditionalTrueBlock2087: ;Main true block ;keep :
 	ld a, $3c
 	ld [varPrefixed_p], a
-CheckSpiderShot_elsedoneblock2071:
+CheckSpiderShot_elsedoneblock2089:
 	; Binary clause core: LESS
 	ld a,$a
 	ld c, a
@@ -6131,11 +6151,11 @@ CheckSpiderShot_elsedoneblock2071:
 	ld a,[playerSnake_playerSnake_record_playerSnake_record_y]
 	sub  b
 	cp c
-	jr nc,CheckSpiderShot_elsedoneblock2077
-CheckSpiderShot_ConditionalTrueBlock2075: ;Main true block ;keep :
+	jr nc,CheckSpiderShot_elsedoneblock2095
+CheckSpiderShot_ConditionalTrueBlock2093: ;Main true block ;keep :
 	ld a, $5a
 	ld [varPrefixed_p], a
-CheckSpiderShot_elsedoneblock2077:
+CheckSpiderShot_elsedoneblock2095:
 	; generic assign 
 	ld a,[varPrefixed_p]
 	ld [t], a
@@ -6153,14 +6173,14 @@ MoveSpider:
 	; Binary clause core: EQUALS
 	; Compare with pure num / var optimization
 	cp $0
-	jr nz,MoveSpider_elseblock2083
-MoveSpider_ConditionalTrueBlock2082: ;Main true block ;keep :
+	jr nz,MoveSpider_elseblock2101
+MoveSpider_ConditionalTrueBlock2100: ;Main true block ;keep :
 	ld a, $2
 	ld [spiderEnemy_spider_record_spider_record_moveSpeed], a
-	jr MoveSpider_elsedoneblock2084
-MoveSpider_elseblock2083:
+	jr MoveSpider_elsedoneblock2102
+MoveSpider_elseblock2101:
 	ret
-MoveSpider_elsedoneblock2084:
+MoveSpider_elsedoneblock2102:
 	
 ; // Delete spider sprite
 	; generic assign 
@@ -6328,26 +6348,26 @@ MoveSpider_elsedoneblock2084:
 	; Compare with pure num / var optimization
 	ld a,[spiderEnemy_spider_record_spider_record_vertical]
 	cp $0
-	jr z, MoveSpider_elsedoneblock2092
-MoveSpider_ConditionalTrueBlock2090: ;Main true block ;keep :
+	jr z, MoveSpider_elsedoneblock2110
+MoveSpider_ConditionalTrueBlock2108: ;Main true block ;keep :
 	
 ; // Move spider up and down
 	; 'a:=a + const'  optimization 
 	ld a,[spiderEnemy_spider_record_spider_record_y]
 	add  a,$1
 	ld [spiderEnemy_spider_record_spider_record_y], a
-MoveSpider_elsedoneblock2092:
+MoveSpider_elsedoneblock2110:
 	; Binary clause core: EQUALS
 	; Compare with pure num / var optimization
 	ld a,[spiderEnemy_spider_record_spider_record_vertical]
 	cp $0
-	jr nz,MoveSpider_elsedoneblock2098
-MoveSpider_ConditionalTrueBlock2096: ;Main true block ;keep :
+	jr nz,MoveSpider_elsedoneblock2116
+MoveSpider_ConditionalTrueBlock2114: ;Main true block ;keep :
 	; 'a:=a + const'  optimization 
 	ld a,[spiderEnemy_spider_record_spider_record_y]
 	sub $1
 	ld [spiderEnemy_spider_record_spider_record_y], a
-MoveSpider_elsedoneblock2098:
+MoveSpider_elsedoneblock2116:
 	; 'a:=a + const'  optimization 
 	ld a,[spiderEnemy_spider_record_spider_record_vertcount]
 	add  a,$1
@@ -6355,46 +6375,46 @@ MoveSpider_elsedoneblock2098:
 	; Binary clause core: EQUALS
 	; Compare with pure num / var optimization
 	cp $4
-	jr nz,MoveSpider_elsedoneblock2104
-MoveSpider_ConditionalTrueBlock2102: ;Main true block ;keep :
+	jr nz,MoveSpider_elsedoneblock2122
+MoveSpider_ConditionalTrueBlock2120: ;Main true block ;keep :
 	ld a, $0
 	ld [spiderEnemy_spider_record_spider_record_vertcount], a
-MoveSpider_elsedoneblock2104:
+MoveSpider_elsedoneblock2122:
 	; Binary clause core: GREATER
 	; Compare with pure num / var optimization
 	ld a,[spiderEnemy_spider_record_spider_record_y]
 	cp $3a
-	jr c, MoveSpider_elsedoneblock2110
-	jr z, MoveSpider_elsedoneblock2110
-MoveSpider_ConditionalTrueBlock2108: ;Main true block ;keep :
+	jr c, MoveSpider_elsedoneblock2128
+	jr z, MoveSpider_elsedoneblock2128
+MoveSpider_ConditionalTrueBlock2126: ;Main true block ;keep :
 	ld a, $3a
 	ld [spiderEnemy_spider_record_spider_record_y], a
 	ld a, $0
 	ld [spiderEnemy_spider_record_spider_record_vertical], a
-MoveSpider_elsedoneblock2110:
+MoveSpider_elsedoneblock2128:
 	; Binary clause core: LESS
 	; Compare with pure num / var optimization
 	ld a,[spiderEnemy_spider_record_spider_record_y]
 	cp $23
-	jr nc,MoveSpider_elsedoneblock2116
-MoveSpider_ConditionalTrueBlock2114: ;Main true block ;keep :
+	jr nc,MoveSpider_elsedoneblock2134
+MoveSpider_ConditionalTrueBlock2132: ;Main true block ;keep :
 	ld a, $23
 	ld [spiderEnemy_spider_record_spider_record_y], a
 	ld a, $1
 	ld [spiderEnemy_spider_record_spider_record_vertical], a
-MoveSpider_elsedoneblock2116:
+MoveSpider_elsedoneblock2134:
 	; Binary clause core: NOTEQUALS
 	; Compare with pure num / var optimization
 	ld a,[spiderEnemy_spider_record_spider_record_direction]
 	cp $0
-	jr z, MoveSpider_elsedoneblock2122
-MoveSpider_ConditionalTrueBlock2120: ;Main true block ;keep :
+	jr z, MoveSpider_elsedoneblock2140
+MoveSpider_ConditionalTrueBlock2138: ;Main true block ;keep :
 	; Binary clause core: LESS
 	; Compare with pure num / var optimization
 	ld a,[spiderEnemy_spider_record_spider_record_x]
 	cp $1d
-	jr nc,MoveSpider_elseblock2171
-MoveSpider_ConditionalTrueBlock2170: ;Main true block ;keep :
+	jr nc,MoveSpider_elseblock2189
+MoveSpider_ConditionalTrueBlock2188: ;Main true block ;keep :
 	
 ; // Move spider left and right
 ; // Moving Right
@@ -6409,40 +6429,40 @@ MoveSpider_ConditionalTrueBlock2170: ;Main true block ;keep :
 	; Binary clause core: GREATER
 	; Compare with pure num / var optimization
 	cp $28
-	jr c, MoveSpider_elsedoneblock2197
-	jr z, MoveSpider_elsedoneblock2197
-MoveSpider_ConditionalTrueBlock2195: ;Main true block ;keep :
+	jr c, MoveSpider_elsedoneblock2215
+	jr z, MoveSpider_elsedoneblock2215
+MoveSpider_ConditionalTrueBlock2213: ;Main true block ;keep :
 	; Binary clause core: EQUALS
 	; Compare with pure num / var optimization
 	ld a,[spiderEnemy_spider_record_spider_record_vertcount]
 	cp $0
-	jr nz,MoveSpider_elsedoneblock2209
-MoveSpider_ConditionalTrueBlock2207: ;Main true block ;keep :
+	jr nz,MoveSpider_elsedoneblock2227
+MoveSpider_ConditionalTrueBlock2225: ;Main true block ;keep :
 	; 'a:=a + const'  optimization 
 	ld a,[spiderEnemy_spider_record_spider_record_x]
 	add  a,$1
 	ld [spiderEnemy_spider_record_spider_record_x], a
-MoveSpider_elsedoneblock2209:
-MoveSpider_elsedoneblock2197:
-	jr MoveSpider_elsedoneblock2172
-MoveSpider_elseblock2171:
+MoveSpider_elsedoneblock2227:
+MoveSpider_elsedoneblock2215:
+	jr MoveSpider_elsedoneblock2190
+MoveSpider_elseblock2189:
 	ld a, $0
 	ld [spiderEnemy_spider_record_spider_record_enabled], a
-MoveSpider_elsedoneblock2172:
-MoveSpider_elsedoneblock2122:
+MoveSpider_elsedoneblock2190:
+MoveSpider_elsedoneblock2140:
 	; Binary clause core: EQUALS
 	; Compare with pure num / var optimization
 	ld a,[spiderEnemy_spider_record_spider_record_direction]
 	cp $0
-	jr nz,MoveSpider_elsedoneblock2216
-MoveSpider_ConditionalTrueBlock2214: ;Main true block ;keep :
+	jr nz,MoveSpider_elsedoneblock2234
+MoveSpider_ConditionalTrueBlock2232: ;Main true block ;keep :
 	; Binary clause core: GREATER
 	; Compare with pure num / var optimization
 	ld a,[spiderEnemy_spider_record_spider_record_x]
 	cp $0
-	jr c, MoveSpider_elseblock2265
-	jr z, MoveSpider_elseblock2265
-MoveSpider_ConditionalTrueBlock2264: ;Main true block ;keep :
+	jr c, MoveSpider_elseblock2283
+	jr z, MoveSpider_elseblock2283
+MoveSpider_ConditionalTrueBlock2282: ;Main true block ;keep :
 	
 ; // Moving Left
 	; generic assign 
@@ -6456,27 +6476,27 @@ MoveSpider_ConditionalTrueBlock2264: ;Main true block ;keep :
 	; Binary clause core: GREATER
 	; Compare with pure num / var optimization
 	cp $28
-	jr c, MoveSpider_elsedoneblock2291
-	jr z, MoveSpider_elsedoneblock2291
-MoveSpider_ConditionalTrueBlock2289: ;Main true block ;keep :
+	jr c, MoveSpider_elsedoneblock2309
+	jr z, MoveSpider_elsedoneblock2309
+MoveSpider_ConditionalTrueBlock2307: ;Main true block ;keep :
 	; Binary clause core: EQUALS
 	; Compare with pure num / var optimization
 	ld a,[spiderEnemy_spider_record_spider_record_vertcount]
 	cp $0
-	jr nz,MoveSpider_elsedoneblock2303
-MoveSpider_ConditionalTrueBlock2301: ;Main true block ;keep :
+	jr nz,MoveSpider_elsedoneblock2321
+MoveSpider_ConditionalTrueBlock2319: ;Main true block ;keep :
 	; 'a:=a + const'  optimization 
 	ld a,[spiderEnemy_spider_record_spider_record_x]
 	sub $1
 	ld [spiderEnemy_spider_record_spider_record_x], a
-MoveSpider_elsedoneblock2303:
-MoveSpider_elsedoneblock2291:
-	jr MoveSpider_elsedoneblock2266
-MoveSpider_elseblock2265:
+MoveSpider_elsedoneblock2321:
+MoveSpider_elsedoneblock2309:
+	jr MoveSpider_elsedoneblock2284
+MoveSpider_elseblock2283:
 	ld a, $0
 	ld [spiderEnemy_spider_record_spider_record_enabled], a
-MoveSpider_elsedoneblock2266:
-MoveSpider_elsedoneblock2216:
+MoveSpider_elsedoneblock2284:
+MoveSpider_elsedoneblock2234:
 	
 ; // Play sound effect
 	ld a, $9
@@ -6486,8 +6506,8 @@ MoveSpider_elsedoneblock2216:
 	; Compare with pure num / var optimization
 	ld a,[spiderEnemy_spider_record_spider_record_enabled]
 	cp $0
-	jr z, MoveSpider_elsedoneblock2310
-MoveSpider_ConditionalTrueBlock2308: ;Main true block ;keep :
+	jr z, MoveSpider_elsedoneblock2328
+MoveSpider_ConditionalTrueBlock2326: ;Main true block ;keep :
 	
 ; // Update sprite data
 	ld hl,bigSprites
@@ -6525,7 +6545,7 @@ MoveSpider_ConditionalTrueBlock2308: ;Main true block ;keep :
 	ld a, $4
 	ld [Sprite_spriteheight], a
 	call Sprite_SetSize
-MoveSpider_elsedoneblock2310:
+MoveSpider_elsedoneblock2328:
 	; 'a:=a + const'  optimization 
 	ld a,[spiderEnemy_spider_record_spider_record_animFrame]
 	add  a,$1
@@ -6533,11 +6553,11 @@ MoveSpider_elsedoneblock2310:
 	; Binary clause core: EQUALS
 	; Compare with pure num / var optimization
 	cp $4
-	jr nz,MoveSpider_elsedoneblock2316
-MoveSpider_ConditionalTrueBlock2314: ;Main true block ;keep :
+	jr nz,MoveSpider_elsedoneblock2334
+MoveSpider_ConditionalTrueBlock2332: ;Main true block ;keep :
 	ld a, $0
 	ld [spiderEnemy_spider_record_spider_record_animFrame], a
-MoveSpider_elsedoneblock2316:
+MoveSpider_elsedoneblock2334:
 	ret
 	
 ; // Move scorpion
@@ -6551,14 +6571,14 @@ MoveScorpion:
 	; Binary clause core: EQUALS
 	; Compare with pure num / var optimization
 	cp $0
-	jr nz,MoveScorpion_elseblock2322
-MoveScorpion_ConditionalTrueBlock2321: ;Main true block ;keep :
+	jr nz,MoveScorpion_elseblock2340
+MoveScorpion_ConditionalTrueBlock2339: ;Main true block ;keep :
 	ld a, $3
 	ld [scorpionEnemy_scorpion_record_scorpion_record_moveSpeed], a
-	jr MoveScorpion_elsedoneblock2323
-MoveScorpion_elseblock2322:
+	jr MoveScorpion_elsedoneblock2341
+MoveScorpion_elseblock2340:
 	ret
-MoveScorpion_elsedoneblock2323:
+MoveScorpion_elsedoneblock2341:
 	; 'a:=a + const'  optimization 
 	ld a,[scorpionEnemy_scorpion_record_scorpion_record_animFrame]
 	add  a,$1
@@ -6566,17 +6586,17 @@ MoveScorpion_elsedoneblock2323:
 	; Binary clause core: EQUALS
 	; Compare with pure num / var optimization
 	cp $4
-	jr nz,MoveScorpion_elsedoneblock2331
-MoveScorpion_ConditionalTrueBlock2329: ;Main true block ;keep :
+	jr nz,MoveScorpion_elsedoneblock2349
+MoveScorpion_ConditionalTrueBlock2347: ;Main true block ;keep :
 	ld a, $0
 	ld [scorpionEnemy_scorpion_record_scorpion_record_animFrame], a
-MoveScorpion_elsedoneblock2331:
+MoveScorpion_elsedoneblock2349:
 	; Binary clause core: NOTEQUALS
 	; Compare with pure num / var optimization
 	ld a,[scorpionEnemy_scorpion_record_scorpion_record_direction]
 	cp $0
-	jp z, MoveScorpion_elsedoneblock2337
-MoveScorpion_ConditionalTrueBlock2335: ;Main true block ;keep :
+	jp z, MoveScorpion_elsedoneblock2355
+MoveScorpion_ConditionalTrueBlock2353: ;Main true block ;keep :
 	
 ; // Moving Right
 ; // Set start sprite
@@ -6604,16 +6624,16 @@ MoveScorpion_ConditionalTrueBlock2335: ;Main true block ;keep :
 	; Binary clause core: LESS
 	; Compare with pure num / var optimization
 	cp $5
-	jr nc,MoveScorpion_elseblock2359
-MoveScorpion_localsuccess2363: ;keep:
+	jr nc,MoveScorpion_elseblock2377
+MoveScorpion_localsuccess2381: ;keep:
 	; ; logical AND, second requirement
 	; Binary clause core: GREATER
 	; Compare with pure num / var optimization
 	ld a,[u]
 	cp $0
-	jr c, MoveScorpion_elseblock2359
-	jr z, MoveScorpion_elseblock2359
-MoveScorpion_ConditionalTrueBlock2358: ;Main true block ;keep :
+	jr c, MoveScorpion_elseblock2377
+	jr z, MoveScorpion_elseblock2377
+MoveScorpion_ConditionalTrueBlock2376: ;Main true block ;keep :
 	; 'a:=a + const'  optimization 
 	ld a,[u]
 	add  a,$4
@@ -6648,8 +6668,8 @@ MoveScorpion_ConditionalTrueBlock2358: ;Main true block ;keep :
 	ld a,[u]
 	ld [t], a
 	call SetGridLocVal
-	jr MoveScorpion_elsedoneblock2360
-MoveScorpion_elseblock2359:
+	jr MoveScorpion_elsedoneblock2378
+MoveScorpion_elseblock2377:
 	; generic assign 
 	ld a,[scorpionEnemy_scorpion_record_scorpion_record_x]
 	ld [Sprite_spritex], a
@@ -6662,30 +6682,30 @@ MoveScorpion_elseblock2359:
 	ld a, $0
 	ld [Sprite_tran], a
 	call Sprite_DrawAt
-MoveScorpion_elsedoneblock2360:
+MoveScorpion_elsedoneblock2378:
 	; Binary clause core: LESS
 	; Compare with pure num / var optimization
 	ld a,[scorpionEnemy_scorpion_record_scorpion_record_x]
 	cp $1d
-	jr nc,MoveScorpion_elseblock2368
-MoveScorpion_ConditionalTrueBlock2367: ;Main true block ;keep :
+	jr nc,MoveScorpion_elseblock2386
+MoveScorpion_ConditionalTrueBlock2385: ;Main true block ;keep :
 	; 'a:=a + const'  optimization 
 	ld a,[scorpionEnemy_scorpion_record_scorpion_record_x]
 	add  a,$1
 	ld [scorpionEnemy_scorpion_record_scorpion_record_x], a
-	jr MoveScorpion_elsedoneblock2369
-MoveScorpion_elseblock2368:
+	jr MoveScorpion_elsedoneblock2387
+MoveScorpion_elseblock2386:
 	ld a, $0
 	ld [scorpionEnemy_scorpion_record_scorpion_record_enabled], a
 	call ResetScorpionGrid
-MoveScorpion_elsedoneblock2369:
-MoveScorpion_elsedoneblock2337:
+MoveScorpion_elsedoneblock2387:
+MoveScorpion_elsedoneblock2355:
 	; Binary clause core: EQUALS
 	; Compare with pure num / var optimization
 	ld a,[scorpionEnemy_scorpion_record_scorpion_record_direction]
 	cp $0
-	jp nz,MoveScorpion_elsedoneblock2377
-MoveScorpion_ConditionalTrueBlock2375: ;Main true block ;keep :
+	jp nz,MoveScorpion_elsedoneblock2395
+MoveScorpion_ConditionalTrueBlock2393: ;Main true block ;keep :
 	
 ; // Moving Left
 ; // Set start sprite
@@ -6715,16 +6735,16 @@ MoveScorpion_ConditionalTrueBlock2375: ;Main true block ;keep :
 	; Binary clause core: LESS
 	; Compare with pure num / var optimization
 	cp $5
-	jr nc,MoveScorpion_elseblock2399
-MoveScorpion_localsuccess2403: ;keep:
+	jr nc,MoveScorpion_elseblock2417
+MoveScorpion_localsuccess2421: ;keep:
 	; ; logical AND, second requirement
 	; Binary clause core: GREATER
 	; Compare with pure num / var optimization
 	ld a,[u]
 	cp $0
-	jr c, MoveScorpion_elseblock2399
-	jr z, MoveScorpion_elseblock2399
-MoveScorpion_ConditionalTrueBlock2398: ;Main true block ;keep :
+	jr c, MoveScorpion_elseblock2417
+	jr z, MoveScorpion_elseblock2417
+MoveScorpion_ConditionalTrueBlock2416: ;Main true block ;keep :
 	; 'a:=a + const'  optimization 
 	ld a,[u]
 	add  a,$4
@@ -6763,8 +6783,8 @@ MoveScorpion_ConditionalTrueBlock2398: ;Main true block ;keep :
 	ld a,[u]
 	ld [t], a
 	call SetGridLocVal
-	jr MoveScorpion_elsedoneblock2400
-MoveScorpion_elseblock2399:
+	jr MoveScorpion_elsedoneblock2418
+MoveScorpion_elseblock2417:
 	; generic assign 
 	ld b,$2
 	ld a,[scorpionEnemy_scorpion_record_scorpion_record_x]
@@ -6779,31 +6799,31 @@ MoveScorpion_elseblock2399:
 	ld a, $0
 	ld [Sprite_tran], a
 	call Sprite_DrawAt
-MoveScorpion_elsedoneblock2400:
+MoveScorpion_elsedoneblock2418:
 	; Binary clause core: GREATER
 	; Compare with pure num / var optimization
 	ld a,[scorpionEnemy_scorpion_record_scorpion_record_x]
 	cp $0
-	jr c, MoveScorpion_elseblock2408
-	jr z, MoveScorpion_elseblock2408
-MoveScorpion_ConditionalTrueBlock2407: ;Main true block ;keep :
+	jr c, MoveScorpion_elseblock2426
+	jr z, MoveScorpion_elseblock2426
+MoveScorpion_ConditionalTrueBlock2425: ;Main true block ;keep :
 	; 'a:=a + const'  optimization 
 	ld a,[scorpionEnemy_scorpion_record_scorpion_record_x]
 	sub $1
 	ld [scorpionEnemy_scorpion_record_scorpion_record_x], a
-	jr MoveScorpion_elsedoneblock2409
-MoveScorpion_elseblock2408:
+	jr MoveScorpion_elsedoneblock2427
+MoveScorpion_elseblock2426:
 	ld a, $0
 	ld [scorpionEnemy_scorpion_record_scorpion_record_enabled], a
 	call ResetScorpionGrid
-MoveScorpion_elsedoneblock2409:
-MoveScorpion_elsedoneblock2377:
+MoveScorpion_elsedoneblock2427:
+MoveScorpion_elsedoneblock2395:
 	; Binary clause core: NOTEQUALS
 	; Compare with pure num / var optimization
 	ld a,[scorpionEnemy_scorpion_record_scorpion_record_enabled]
 	cp $0
-	jr z, MoveScorpion_elsedoneblock2417
-MoveScorpion_ConditionalTrueBlock2415: ;Main true block ;keep :
+	jr z, MoveScorpion_elsedoneblock2435
+MoveScorpion_ConditionalTrueBlock2433: ;Main true block ;keep :
 	
 ; // Play sound effect
 	ld a, $7
@@ -6846,7 +6866,7 @@ MoveScorpion_ConditionalTrueBlock2415: ;Main true block ;keep :
 	ld a, $4
 	ld [Sprite_spriteheight], a
 	call Sprite_SetSize
-MoveScorpion_elsedoneblock2417:
+MoveScorpion_elsedoneblock2435:
 	ret
 	
 ; // Spawn scorpion
@@ -6866,12 +6886,12 @@ SpawnScorpion:
 	; Binary clause core: LESS
 	; Compare with pure num / var optimization
 	cp $c5
-	jr nc,SpawnScorpion_elsedoneblock2424
-SpawnScorpion_ConditionalTrueBlock2422: ;Main true block ;keep :
+	jr nc,SpawnScorpion_elsedoneblock2442
+SpawnScorpion_ConditionalTrueBlock2440: ;Main true block ;keep :
 	
 ; // Spawn or not
 	ret
-SpawnScorpion_elsedoneblock2424:
+SpawnScorpion_elsedoneblock2442:
 	
 ; // Pick a random side of the screen to spawn a scorpion
 	; generic assign 
@@ -6885,9 +6905,9 @@ SpawnScorpion_elsedoneblock2424:
 	; Binary clause core: GREATER
 	; Compare with pure num / var optimization
 	cp $32
-	jr c, SpawnScorpion_elseblock2429
-	jr z, SpawnScorpion_elseblock2429
-SpawnScorpion_ConditionalTrueBlock2428: ;Main true block ;keep :
+	jr c, SpawnScorpion_elseblock2447
+	jr z, SpawnScorpion_elseblock2447
+SpawnScorpion_ConditionalTrueBlock2446: ;Main true block ;keep :
 	
 ; // Spawn on the random side
 	ld a, $1d
@@ -6918,8 +6938,8 @@ SpawnScorpion_ConditionalTrueBlock2428: ;Main true block ;keep :
 	ld [scorpionEnemy_scorpion_record_scorpion_record_y], a
 	ld a, $0
 	ld [scorpionEnemy_scorpion_record_scorpion_record_direction], a
-	jr SpawnScorpion_elsedoneblock2430
-SpawnScorpion_elseblock2429:
+	jr SpawnScorpion_elsedoneblock2448
+SpawnScorpion_elseblock2447:
 	ld a, $0
 	ld [scorpionEnemy_scorpion_record_scorpion_record_x], a
 	; generic assign 
@@ -6948,7 +6968,7 @@ SpawnScorpion_elseblock2429:
 	ld [scorpionEnemy_scorpion_record_scorpion_record_y], a
 	ld a, $1
 	ld [scorpionEnemy_scorpion_record_scorpion_record_direction], a
-SpawnScorpion_elsedoneblock2430:
+SpawnScorpion_elsedoneblock2448:
 	ld a, $1
 	ld [scorpionEnemy_scorpion_record_scorpion_record_enabled], a
 	ld a, $0
@@ -6975,12 +6995,12 @@ SpawnSpider:
 	; Binary clause core: LESS
 	; Compare with pure num / var optimization
 	cp $c3
-	jr nc,SpawnSpider_elsedoneblock2443
-SpawnSpider_ConditionalTrueBlock2441: ;Main true block ;keep :
+	jr nc,SpawnSpider_elsedoneblock2461
+SpawnSpider_ConditionalTrueBlock2459: ;Main true block ;keep :
 	
 ; // Spawn or not
 	ret
-SpawnSpider_elsedoneblock2443:
+SpawnSpider_elsedoneblock2461:
 	
 ; // Pick a random side of the screen to spawn a scorpion
 	; generic assign 
@@ -6996,9 +7016,9 @@ SpawnSpider_elsedoneblock2443:
 	; Binary clause core: GREATER
 	; Compare with pure num / var optimization
 	cp $32
-	jr c, SpawnSpider_elseblock2448
-	jr z, SpawnSpider_elseblock2448
-SpawnSpider_ConditionalTrueBlock2447: ;Main true block ;keep :
+	jr c, SpawnSpider_elseblock2466
+	jr z, SpawnSpider_elseblock2466
+SpawnSpider_ConditionalTrueBlock2465: ;Main true block ;keep :
 	
 ; // Spawn on the random side
 	ld a, $1d
@@ -7009,8 +7029,8 @@ SpawnSpider_ConditionalTrueBlock2447: ;Main true block ;keep :
 	ld [spiderEnemy_spider_record_spider_record_direction], a
 	ld a, $1
 	ld [spiderEnemy_spider_record_spider_record_vertical], a
-	jr SpawnSpider_elsedoneblock2449
-SpawnSpider_elseblock2448:
+	jr SpawnSpider_elsedoneblock2467
+SpawnSpider_elseblock2466:
 	
 ; // Going down
 	ld a, $0
@@ -7020,7 +7040,7 @@ SpawnSpider_elseblock2448:
 	ld a, $1
 	ld [spiderEnemy_spider_record_spider_record_direction], a
 	ld [spiderEnemy_spider_record_spider_record_vertical], a
-SpawnSpider_elsedoneblock2449:
+SpawnSpider_elsedoneblock2467:
 	ld a, $1
 	ld [spiderEnemy_spider_record_spider_record_enabled], a
 	ld a, $0
@@ -7046,13 +7066,13 @@ SpawnMillipedeHead:
 	; Binary clause core: LESS
 	; Compare with pure num / var optimization
 	cp $32
-	jr nc,SpawnMillipedeHead_elsedoneblock2458
-SpawnMillipedeHead_ConditionalTrueBlock2456: ;Main true block ;keep :
+	jr nc,SpawnMillipedeHead_elsedoneblock2476
+SpawnMillipedeHead_ConditionalTrueBlock2474: ;Main true block ;keep :
 	ret
-SpawnMillipedeHead_elsedoneblock2458:
+SpawnMillipedeHead_elsedoneblock2476:
 	ld a, $0
 	ld [u], a
-SpawnMillipedeHead_forloop2461:
+SpawnMillipedeHead_forloop2479:
 	; Binary clause core: EQUALS
 	; Compare with pure num / var optimization
 	; generic assign 
@@ -7068,8 +7088,8 @@ SpawnMillipedeHead_forloop2461:
 	ld [BitFlag], a
 	call IsBitSet
 	cp $0
-	jp nz,SpawnMillipedeHead_elsedoneblock2493
-SpawnMillipedeHead_ConditionalTrueBlock2491: ;Main true block ;keep :
+	jp nz,SpawnMillipedeHead_elsedoneblock2511
+SpawnMillipedeHead_ConditionalTrueBlock2509: ;Main true block ;keep :
 	
 ; // Find unused millipede part in array
 ; // Pick a random side of the screen to spawn a new head
@@ -7084,9 +7104,9 @@ SpawnMillipedeHead_ConditionalTrueBlock2491: ;Main true block ;keep :
 	; Binary clause core: GREATER
 	; Compare with pure num / var optimization
 	cp $f
-	jr c, SpawnMillipedeHead_elseblock2506
-	jr z, SpawnMillipedeHead_elseblock2506
-SpawnMillipedeHead_ConditionalTrueBlock2505: ;Main true block ;keep :
+	jr c, SpawnMillipedeHead_elseblock2524
+	jr z, SpawnMillipedeHead_elseblock2524
+SpawnMillipedeHead_ConditionalTrueBlock2523: ;Main true block ;keep :
 	
 ; // Spawn on the random side
 	; Storing to array
@@ -7104,8 +7124,8 @@ SpawnMillipedeHead_ConditionalTrueBlock2505: ;Main true block ;keep :
 	add hl,de
 	ld a,$59
 	ld [hl],a
-	jr SpawnMillipedeHead_elsedoneblock2507
-SpawnMillipedeHead_elseblock2506:
+	jr SpawnMillipedeHead_elsedoneblock2525
+SpawnMillipedeHead_elseblock2524:
 	; Storing to array
 	ld a,[u]
 	ld e,a
@@ -7121,7 +7141,7 @@ SpawnMillipedeHead_elseblock2506:
 	add hl,de
 	ld a,$5a
 	ld [hl],a
-SpawnMillipedeHead_elsedoneblock2507:
+SpawnMillipedeHead_elsedoneblock2525:
 	; Storing to array
 	ld a,[u]
 	ld e,a
@@ -7167,16 +7187,16 @@ SpawnMillipedeHead_elsedoneblock2507:
 	add  a,$1
 	ld [gameStats_gameStats_record_gameStats_record_milliSegsAlive], a
 	ret
-SpawnMillipedeHead_elsedoneblock2493:
-SpawnMillipedeHead_forloopcounter2463:
-SpawnMillipedeHead_loopstart2464:
+SpawnMillipedeHead_elsedoneblock2511:
+SpawnMillipedeHead_forloopcounter2481:
+SpawnMillipedeHead_loopstart2482:
 	ld a,[u]
 	add a,1
 	ld [u],a
 	cp $a
-	jp nz,SpawnMillipedeHead_forloop2461
-SpawnMillipedeHead_forloopend2462:
-SpawnMillipedeHead_loopend2465:
+	jp nz,SpawnMillipedeHead_forloop2479
+SpawnMillipedeHead_forloopend2480:
+SpawnMillipedeHead_loopend2483:
 	ret
 	
 ; // Check Millipede colliding with player
@@ -7215,10 +7235,10 @@ CheckMillipedeCollide:
 	ld a,[playerSnake_playerSnake_record_playerSnake_record_y]
 	sub  b
 	cp c
-	jr c, CheckMillipedeCollide_localfailed2518
-	jr z, CheckMillipedeCollide_localfailed2518
-	jr CheckMillipedeCollide_ConditionalTrueBlock2514
-CheckMillipedeCollide_localfailed2518: ;keep:
+	jr c, CheckMillipedeCollide_localfailed2536
+	jr z, CheckMillipedeCollide_localfailed2536
+	jr CheckMillipedeCollide_ConditionalTrueBlock2532
+CheckMillipedeCollide_localfailed2536: ;keep:
 	; ; logical OR, second chance
 	; Swapped comparison expressions
 	; Binary clause core: LESS
@@ -7228,10 +7248,10 @@ CheckMillipedeCollide_localfailed2518: ;keep:
 	ld a,[playerSnake_playerSnake_record_playerSnake_record_y]
 	add  a, b
 	cp c
-	jr nc,CheckMillipedeCollide_elsedoneblock2516
-CheckMillipedeCollide_ConditionalTrueBlock2514: ;Main true block ;keep :
+	jr nc,CheckMillipedeCollide_elsedoneblock2534
+CheckMillipedeCollide_ConditionalTrueBlock2532: ;Main true block ;keep :
 	ret
-CheckMillipedeCollide_elsedoneblock2516:
+CheckMillipedeCollide_elsedoneblock2534:
 	; Binary clause core: NOTEQUALS
 	; Compare two vars optimization
 	ld a,[playerSnake_playerSnake_record_playerSnake_record_x]
@@ -7244,42 +7264,12 @@ CheckMillipedeCollide_elsedoneblock2516:
 	ld a,[hl]
 	; LoadVar Testing if 'milliSegments_milliSegments_record_milliSegments_record_x' is word : 0
 	cp b
-	jr z, CheckMillipedeCollide_elsedoneblock2523
-CheckMillipedeCollide_ConditionalTrueBlock2521: ;Main true block ;keep :
+	jr z, CheckMillipedeCollide_elsedoneblock2541
+CheckMillipedeCollide_ConditionalTrueBlock2539: ;Main true block ;keep :
 	ret
-CheckMillipedeCollide_elsedoneblock2523:
+CheckMillipedeCollide_elsedoneblock2541:
 	ld a, $1
 	ld [playerSnake_playerSnake_record_playerSnake_record_dead], a
-	ret
-	; ***********  Defining procedure : MillipedeKilledPlayer
-	;    Procedure type : User-defined procedure
-MillipedeKilledPlayer:
-	
-; // Erase and disable stuff
-	; generic assign 
-	ld a,[playerSnake_playerSnake_record_playerSnake_record_x]
-	ld [Sprite_spritex], a
-	; generic assign 
-	ld a,[playerSnake_playerSnake_record_playerSnake_record_y]
-	ld [Sprite_spritey], a
-	ld a, $0
-	ld [Sprite_no], a
-	ld [Sprite_tran], a
-	call Sprite_DrawAt
-	ld a, $0
-	ld [playerBullet_playerBullet_record_playerBullet_record_fired], a
-	; generic assign 
-	ld a,[playerBullet_playerBullet_record_playerBullet_record_x]
-	ld [Sprite_spritex], a
-	; generic assign 
-	ld a,[playerBullet_playerBullet_record_playerBullet_record_y]
-	ld [Sprite_spritey], a
-	ld a, $0
-	ld [Sprite_no], a
-	ld [Sprite_tran], a
-	call Sprite_DrawAt
-	call ResetMillipedeToStart
-	call DoPlayerDeath
 	ret
 	
 ; // Move Millipede
@@ -7289,7 +7279,7 @@ MoveMillipede:
 	ld a, $0
 	ld [varPrefixed_p], a
 	ld [s], a
-MoveMillipede_forloop2528:
+MoveMillipede_forloop2545:
 	ld a, $0
 	ld [q], a
 	; Binary clause core: NOTEQUALS
@@ -7307,8 +7297,8 @@ MoveMillipede_forloop2528:
 	ld [BitFlag], a
 	call IsBitSet
 	cp $0
-	jp z, MoveMillipede_elsedoneblock6496
-MoveMillipede_ConditionalTrueBlock6494: ;Main true block ;keep :
+	jp z, MoveMillipede_elsedoneblock6537
+MoveMillipede_ConditionalTrueBlock6535: ;Main true block ;keep :
 	; Binary clause core: EQUALS
 	; Compare with pure num / var optimization
 	ld a,[s]
@@ -7319,14 +7309,14 @@ MoveMillipede_ConditionalTrueBlock6494: ;Main true block ;keep :
 	ld a,[hl]
 	; LoadVar Testing if 'milliSegments_milliSegments_record_milliSegments_record_y' is word : 0
 	cp $ff
-	jp nz,MoveMillipede_elseblock8477
-MoveMillipede_ConditionalTrueBlock8476: ;Main true block ;keep :
+	jp nz,MoveMillipede_elseblock8530
+MoveMillipede_ConditionalTrueBlock8529: ;Main true block ;keep :
 	; Binary clause core: EQUALS
 	; Compare with pure num / var optimization
 	ld a,[varPrefixed_p]
 	cp $0
-	jp nz,MoveMillipede_elsedoneblock9469
-MoveMillipede_ConditionalTrueBlock9467: ;Main true block ;keep :
+	jp nz,MoveMillipede_elsedoneblock9528
+MoveMillipede_ConditionalTrueBlock9526: ;Main true block ;keep :
 	
 ; // Test if segment is not on grid
 ; // Only one segment at a time to go into the grid
@@ -7368,15 +7358,15 @@ MoveMillipede_ConditionalTrueBlock9467: ;Main true block ;keep :
 	ld [BitFlag], a
 	call IsBitSet
 	cp $0
-	jr z, MoveMillipede_elseblock9482
-MoveMillipede_ConditionalTrueBlock9481: ;Main true block ;keep :
+	jr z, MoveMillipede_elseblock9541
+MoveMillipede_ConditionalTrueBlock9540: ;Main true block ;keep :
 	ld a, $a
 	ld [v], a
-	jr MoveMillipede_elsedoneblock9483
-MoveMillipede_elseblock9482:
+	jr MoveMillipede_elsedoneblock9542
+MoveMillipede_elseblock9541:
 	ld a, $9
 	ld [v], a
-MoveMillipede_elsedoneblock9483:
+MoveMillipede_elsedoneblock9542:
 	call DrawMilliSprite
 	; generic assign 
 	ld a,[s]
@@ -7399,13 +7389,21 @@ MoveMillipede_elsedoneblock9483:
 	ld a,[v]
 	ld [t], a
 	call SetGridLocVal
-MoveMillipede_elsedoneblock9469:
-	jp MoveMillipede_elsedoneblock8478
-MoveMillipede_elseblock8477:
+MoveMillipede_elsedoneblock9528:
+	jp MoveMillipede_elsedoneblock8531
+MoveMillipede_elseblock8530:
 	
 ; // Segment is already on the grid
 ; // Check if colliding with player
 	call CheckMillipedeCollide
+	; Binary clause core: NOTEQUALS
+	; Compare with pure num / var optimization
+	ld a,[playerSnake_playerSnake_record_playerSnake_record_dead]
+	cp $0
+	jr z, MoveMillipede_elsedoneblock9551
+MoveMillipede_ConditionalTrueBlock9549: ;Main true block ;keep :
+	jp MoveMillipede_loopend2549
+MoveMillipede_elsedoneblock9551:
 	
 ; // Delete sprite
 	; generic assign 
@@ -7455,8 +7453,8 @@ MoveMillipede_elseblock8477:
 	ld a,[hl]
 	; LoadVar Testing if 'milliSegments_milliSegments_record_milliSegments_record_lastGridVal' is word : 0
 	cp $9
-	jp nc,MoveMillipede_elseblock9491
-MoveMillipede_ConditionalTrueBlock9490: ;Main true block ;keep :
+	jp nc,MoveMillipede_elseblock9556
+MoveMillipede_ConditionalTrueBlock9555: ;Main true block ;keep :
 	
 ; // Millipede segments - draw whatever was on the grid before the segment was there.
 	; generic assign 
@@ -7530,8 +7528,8 @@ MoveMillipede_ConditionalTrueBlock9490: ;Main true block ;keep :
 	ld a, $0
 	ld [Sprite_tran], a
 	call Sprite_DrawAt
-	jp MoveMillipede_elsedoneblock9492
-MoveMillipede_elseblock9491:
+	jp MoveMillipede_elsedoneblock9557
+MoveMillipede_elseblock9556:
 	; generic assign 
 	ld a,[s]
 	ld e,a ; variable is 8-bit
@@ -7552,7 +7550,7 @@ MoveMillipede_elseblock9491:
 	ld a, $0
 	ld [t], a
 	call SetGridLocVal
-MoveMillipede_elsedoneblock9492:
+MoveMillipede_elsedoneblock9557:
 	; Binary clause core: NOTEQUALS
 	; Compare with pure num / var optimization
 	; generic assign 
@@ -7568,8 +7566,8 @@ MoveMillipede_elsedoneblock9492:
 	ld [BitFlag], a
 	call IsBitSet
 	cp $0
-	jp z, MoveMillipede_elseblock9499
-MoveMillipede_ConditionalTrueBlock9498: ;Main true block ;keep :
+	jp z, MoveMillipede_elseblock9564
+MoveMillipede_ConditionalTrueBlock9563: ;Main true block ;keep :
 	
 ; // Only direction changing logic in millipede heads
 	ld a, $0
@@ -7589,8 +7587,8 @@ MoveMillipede_ConditionalTrueBlock9498: ;Main true block ;keep :
 	ld [BitFlag], a
 	call IsBitSet
 	cp $0
-	jp z, MoveMillipede_elsedoneblock9980
-MoveMillipede_ConditionalTrueBlock9978: ;Main true block ;keep :
+	jp z, MoveMillipede_elsedoneblock10045
+MoveMillipede_ConditionalTrueBlock10043: ;Main true block ;keep :
 	
 ; // Did we already switch R/L?
 ; // Move millipede right?
@@ -7624,12 +7622,12 @@ MoveMillipede_ConditionalTrueBlock9978: ;Main true block ;keep :
 	; Compare with pure num / var optimization
 	ld a,[q]
 	cp $8
-	jr c, MoveMillipede_elsedoneblock10098
-	jr z, MoveMillipede_elsedoneblock10098
-MoveMillipede_ConditionalTrueBlock10096: ;Main true block ;keep :
+	jr c, MoveMillipede_elsedoneblock10163
+	jr z, MoveMillipede_elsedoneblock10163
+MoveMillipede_ConditionalTrueBlock10161: ;Main true block ;keep :
 	ld a, $0
 	ld [q], a
-MoveMillipede_elsedoneblock10098:
+MoveMillipede_elsedoneblock10163:
 	; Binary clause core: EQUALS
 	; Compare with pure num / var optimization
 	ld a,[s]
@@ -7640,27 +7638,27 @@ MoveMillipede_elsedoneblock10098:
 	ld a,[hl]
 	; LoadVar Testing if 'milliSegments_milliSegments_record_milliSegments_record_x' is word : 0
 	cp $1f
-	jr nz,MoveMillipede_elsedoneblock10104
-MoveMillipede_ConditionalTrueBlock10102: ;Main true block ;keep :
+	jr nz,MoveMillipede_elsedoneblock10169
+MoveMillipede_ConditionalTrueBlock10167: ;Main true block ;keep :
 	
 ; // Don't detect millipede segments
 	ld a, $7b
 	ld [q], a
-MoveMillipede_elsedoneblock10104:
+MoveMillipede_elsedoneblock10169:
 	; Binary clause core: GREATER
 	; Compare with pure num / var optimization
 	ld a,[q]
 	cp $4
-	jr c, MoveMillipede_elsedoneblock10110
-	jr z, MoveMillipede_elsedoneblock10110
-MoveMillipede_localsuccess10112: ;keep:
+	jr c, MoveMillipede_elsedoneblock10175
+	jr z, MoveMillipede_elsedoneblock10175
+MoveMillipede_localsuccess10177: ;keep:
 	; ; logical AND, second requirement
 	; Binary clause core: LESS
 	; Compare with pure num / var optimization
 	ld a,[q]
 	cp $9
-	jr nc,MoveMillipede_elsedoneblock10110
-MoveMillipede_ConditionalTrueBlock10108: ;Main true block ;keep :
+	jr nc,MoveMillipede_elsedoneblock10175
+MoveMillipede_ConditionalTrueBlock10173: ;Main true block ;keep :
 	
 ; // A hack for edge of screen.
 ; // Check for poisoned mushroom
@@ -7685,13 +7683,13 @@ MoveMillipede_ConditionalTrueBlock10108: ;Main true block ;keep :
 	add hl,de
 	pop af
 	ld [hl],a
-MoveMillipede_elsedoneblock10110:
+MoveMillipede_elsedoneblock10175:
 	; Binary clause core: EQUALS
 	; Compare with pure num / var optimization
 	ld a,[q]
 	cp $0
-	jp nz,MoveMillipede_elseblock10116
-MoveMillipede_localsuccess10162: ;keep:
+	jp nz,MoveMillipede_elseblock10181
+MoveMillipede_localsuccess10227: ;keep:
 	; ; logical AND, second requirement
 	; Binary clause core: EQUALS
 	; Compare with pure num / var optimization
@@ -7708,8 +7706,8 @@ MoveMillipede_localsuccess10162: ;keep:
 	ld [BitFlag], a
 	call IsBitSet
 	cp $0
-	jp nz,MoveMillipede_elseblock10116
-MoveMillipede_ConditionalTrueBlock10115: ;Main true block ;keep :
+	jp nz,MoveMillipede_elseblock10181
+MoveMillipede_ConditionalTrueBlock10180: ;Main true block ;keep :
 	
 ; // Will we collide with a mushroom on the grid or screen edge?
 ; // Save current position
@@ -7783,8 +7781,8 @@ MoveMillipede_ConditionalTrueBlock10115: ;Main true block ;keep :
 	ld [w], a
 	call GetGridLocVal
 	cp $9
-	jr nc,MoveMillipede_elsedoneblock10167
-MoveMillipede_ConditionalTrueBlock10165: ;Main true block ;keep :
+	jr nc,MoveMillipede_elsedoneblock10232
+MoveMillipede_ConditionalTrueBlock10230: ;Main true block ;keep :
 	; Storing to array
 	; generic assign 
 	ld a,[s]
@@ -7812,9 +7810,9 @@ MoveMillipede_ConditionalTrueBlock10165: ;Main true block ;keep :
 	add hl,de
 	pop af
 	ld [hl],a
-MoveMillipede_elsedoneblock10167:
-	jp MoveMillipede_elsedoneblock10117
-MoveMillipede_elseblock10116:
+MoveMillipede_elsedoneblock10232:
+	jp MoveMillipede_elsedoneblock10182
+MoveMillipede_elseblock10181:
 	; Binary clause core: NOTEQUALS
 	; Compare with pure num / var optimization
 	; generic assign 
@@ -7830,8 +7828,8 @@ MoveMillipede_elseblock10116:
 	ld [BitFlag], a
 	call IsBitSet
 	cp $0
-	jp z, MoveMillipede_elsedoneblock10174
-MoveMillipede_ConditionalTrueBlock10172: ;Main true block ;keep :
+	jp z, MoveMillipede_elsedoneblock10239
+MoveMillipede_ConditionalTrueBlock10237: ;Main true block ;keep :
 	
 ; // Save current position
 	; Storing to array
@@ -7902,8 +7900,8 @@ MoveMillipede_ConditionalTrueBlock10172: ;Main true block ;keep :
 	ld [w], a
 	call GetGridLocVal
 	cp $9
-	jr nc,MoveMillipede_elsedoneblock10186
-MoveMillipede_ConditionalTrueBlock10184: ;Main true block ;keep :
+	jr nc,MoveMillipede_elsedoneblock10251
+MoveMillipede_ConditionalTrueBlock10249: ;Main true block ;keep :
 	; Storing to array
 	; generic assign 
 	ld a,[s]
@@ -7931,7 +7929,7 @@ MoveMillipede_ConditionalTrueBlock10184: ;Main true block ;keep :
 	add hl,de
 	pop af
 	ld [hl],a
-MoveMillipede_elsedoneblock10186:
+MoveMillipede_elsedoneblock10251:
 	; Storing to array
 	; generic assign 
 	ld a,[s]
@@ -7979,7 +7977,7 @@ MoveMillipede_elsedoneblock10186:
 ; // Set Left direction
 	ld a, $1
 	ld [varPrefixed_p], a
-MoveMillipede_elsedoneblock10174:
+MoveMillipede_elsedoneblock10239:
 	; Binary clause core: NOTEQUALS
 	; Compare with pure num / var optimization
 	; generic assign 
@@ -7995,8 +7993,8 @@ MoveMillipede_elsedoneblock10174:
 	ld [BitFlag], a
 	call IsBitSet
 	cp $0
-	jp z, MoveMillipede_elsedoneblock10192
-MoveMillipede_ConditionalTrueBlock10190: ;Main true block ;keep :
+	jp z, MoveMillipede_elsedoneblock10257
+MoveMillipede_ConditionalTrueBlock10255: ;Main true block ;keep :
 	
 ; // Save current position
 	; Storing to array
@@ -8067,8 +8065,8 @@ MoveMillipede_ConditionalTrueBlock10190: ;Main true block ;keep :
 	ld [w], a
 	call GetGridLocVal
 	cp $9
-	jr nc,MoveMillipede_elsedoneblock10204
-MoveMillipede_ConditionalTrueBlock10202: ;Main true block ;keep :
+	jr nc,MoveMillipede_elsedoneblock10269
+MoveMillipede_ConditionalTrueBlock10267: ;Main true block ;keep :
 	; Storing to array
 	; generic assign 
 	ld a,[s]
@@ -8096,7 +8094,7 @@ MoveMillipede_ConditionalTrueBlock10202: ;Main true block ;keep :
 	add hl,de
 	pop af
 	ld [hl],a
-MoveMillipede_elsedoneblock10204:
+MoveMillipede_elsedoneblock10269:
 	; Storing to array
 	; generic assign 
 	ld a,[s]
@@ -8144,9 +8142,9 @@ MoveMillipede_elsedoneblock10204:
 ; // Set Left direction
 	ld a, $1
 	ld [varPrefixed_p], a
-MoveMillipede_elsedoneblock10192:
-MoveMillipede_elsedoneblock10117:
-MoveMillipede_elsedoneblock9980:
+MoveMillipede_elsedoneblock10257:
+MoveMillipede_elsedoneblock10182:
+MoveMillipede_elsedoneblock10045:
 	; Binary clause core: NOTEQUALS
 	; Compare with pure num / var optimization
 	; generic assign 
@@ -8162,15 +8160,15 @@ MoveMillipede_elsedoneblock9980:
 	ld [BitFlag], a
 	call IsBitSet
 	cp $0
-	jp z, MoveMillipede_elsedoneblock10210
-MoveMillipede_localsuccess10300: ;keep:
+	jp z, MoveMillipede_elsedoneblock10275
+MoveMillipede_localsuccess10365: ;keep:
 	; ; logical AND, second requirement
 	; Binary clause core: EQUALS
 	; Compare with pure num / var optimization
 	ld a,[varPrefixed_p]
 	cp $0
-	jp nz,MoveMillipede_elsedoneblock10210
-MoveMillipede_ConditionalTrueBlock10208: ;Main true block ;keep :
+	jp nz,MoveMillipede_elsedoneblock10275
+MoveMillipede_ConditionalTrueBlock10273: ;Main true block ;keep :
 	
 ; // End moving down
 ; // Move millipede left?
@@ -8204,12 +8202,12 @@ MoveMillipede_ConditionalTrueBlock10208: ;Main true block ;keep :
 	; Compare with pure num / var optimization
 	ld a,[q]
 	cp $8
-	jr c, MoveMillipede_elsedoneblock10305
-	jr z, MoveMillipede_elsedoneblock10305
-MoveMillipede_ConditionalTrueBlock10303: ;Main true block ;keep :
+	jr c, MoveMillipede_elsedoneblock10370
+	jr z, MoveMillipede_elsedoneblock10370
+MoveMillipede_ConditionalTrueBlock10368: ;Main true block ;keep :
 	ld a, $0
 	ld [q], a
-MoveMillipede_elsedoneblock10305:
+MoveMillipede_elsedoneblock10370:
 	; Binary clause core: EQUALS
 	; Compare with pure num / var optimization
 	ld a,[s]
@@ -8220,27 +8218,27 @@ MoveMillipede_elsedoneblock10305:
 	ld a,[hl]
 	; LoadVar Testing if 'milliSegments_milliSegments_record_milliSegments_record_x' is word : 0
 	cp $0
-	jr nz,MoveMillipede_elsedoneblock10311
-MoveMillipede_ConditionalTrueBlock10309: ;Main true block ;keep :
+	jr nz,MoveMillipede_elsedoneblock10376
+MoveMillipede_ConditionalTrueBlock10374: ;Main true block ;keep :
 	
 ; // Don't detect millipede segments
 	ld a, $7b
 	ld [q], a
-MoveMillipede_elsedoneblock10311:
+MoveMillipede_elsedoneblock10376:
 	; Binary clause core: GREATER
 	; Compare with pure num / var optimization
 	ld a,[q]
 	cp $4
-	jr c, MoveMillipede_elsedoneblock10317
-	jr z, MoveMillipede_elsedoneblock10317
-MoveMillipede_localsuccess10319: ;keep:
+	jr c, MoveMillipede_elsedoneblock10382
+	jr z, MoveMillipede_elsedoneblock10382
+MoveMillipede_localsuccess10384: ;keep:
 	; ; logical AND, second requirement
 	; Binary clause core: LESS
 	; Compare with pure num / var optimization
 	ld a,[q]
 	cp $9
-	jr nc,MoveMillipede_elsedoneblock10317
-MoveMillipede_ConditionalTrueBlock10315: ;Main true block ;keep :
+	jr nc,MoveMillipede_elsedoneblock10382
+MoveMillipede_ConditionalTrueBlock10380: ;Main true block ;keep :
 	
 ; // A hack for edge of screen.
 ; // Check for poisoned mushroom
@@ -8265,13 +8263,13 @@ MoveMillipede_ConditionalTrueBlock10315: ;Main true block ;keep :
 	add hl,de
 	pop af
 	ld [hl],a
-MoveMillipede_elsedoneblock10317:
+MoveMillipede_elsedoneblock10382:
 	; Binary clause core: EQUALS
 	; Compare with pure num / var optimization
 	ld a,[q]
 	cp $0
-	jp nz,MoveMillipede_elseblock10323
-MoveMillipede_localsuccess10357: ;keep:
+	jp nz,MoveMillipede_elseblock10388
+MoveMillipede_localsuccess10422: ;keep:
 	; ; logical AND, second requirement
 	; Binary clause core: EQUALS
 	; Compare with pure num / var optimization
@@ -8288,8 +8286,8 @@ MoveMillipede_localsuccess10357: ;keep:
 	ld [BitFlag], a
 	call IsBitSet
 	cp $0
-	jp nz,MoveMillipede_elseblock10323
-MoveMillipede_ConditionalTrueBlock10322: ;Main true block ;keep :
+	jp nz,MoveMillipede_elseblock10388
+MoveMillipede_ConditionalTrueBlock10387: ;Main true block ;keep :
 	
 ; // Will we collide with a mushroom on the grid or screen edge?
 ; // Save current position
@@ -8363,8 +8361,8 @@ MoveMillipede_ConditionalTrueBlock10322: ;Main true block ;keep :
 	ld [w], a
 	call GetGridLocVal
 	cp $9
-	jr nc,MoveMillipede_elsedoneblock10362
-MoveMillipede_ConditionalTrueBlock10360: ;Main true block ;keep :
+	jr nc,MoveMillipede_elsedoneblock10427
+MoveMillipede_ConditionalTrueBlock10425: ;Main true block ;keep :
 	; Storing to array
 	; generic assign 
 	ld a,[s]
@@ -8392,9 +8390,9 @@ MoveMillipede_ConditionalTrueBlock10360: ;Main true block ;keep :
 	add hl,de
 	pop af
 	ld [hl],a
-MoveMillipede_elsedoneblock10362:
-	jp MoveMillipede_elsedoneblock10324
-MoveMillipede_elseblock10323:
+MoveMillipede_elsedoneblock10427:
+	jp MoveMillipede_elsedoneblock10389
+MoveMillipede_elseblock10388:
 	
 ; // Set Left direction
 	; Binary clause core: NOTEQUALS
@@ -8412,8 +8410,8 @@ MoveMillipede_elseblock10323:
 	ld [BitFlag], a
 	call IsBitSet
 	cp $0
-	jp z, MoveMillipede_elsedoneblock10369
-MoveMillipede_ConditionalTrueBlock10367: ;Main true block ;keep :
+	jp z, MoveMillipede_elsedoneblock10434
+MoveMillipede_ConditionalTrueBlock10432: ;Main true block ;keep :
 	
 ; // Save current position
 	; Storing to array
@@ -8532,7 +8530,7 @@ MoveMillipede_ConditionalTrueBlock10367: ;Main true block ;keep :
 	add hl,de
 	pop af
 	ld [hl],a
-MoveMillipede_elsedoneblock10369:
+MoveMillipede_elsedoneblock10434:
 	
 ; // Set Left direction
 	; Binary clause core: NOTEQUALS
@@ -8550,8 +8548,8 @@ MoveMillipede_elsedoneblock10369:
 	ld [BitFlag], a
 	call IsBitSet
 	cp $0
-	jp z, MoveMillipede_elsedoneblock10375
-MoveMillipede_ConditionalTrueBlock10373: ;Main true block ;keep :
+	jp z, MoveMillipede_elsedoneblock10440
+MoveMillipede_ConditionalTrueBlock10438: ;Main true block ;keep :
 	
 ; // Save current position
 	; Storing to array
@@ -8622,8 +8620,8 @@ MoveMillipede_ConditionalTrueBlock10373: ;Main true block ;keep :
 	ld [w], a
 	call GetGridLocVal
 	cp $9
-	jr nc,MoveMillipede_elsedoneblock10387
-MoveMillipede_ConditionalTrueBlock10385: ;Main true block ;keep :
+	jr nc,MoveMillipede_elsedoneblock10452
+MoveMillipede_ConditionalTrueBlock10450: ;Main true block ;keep :
 	; Storing to array
 	; generic assign 
 	ld a,[s]
@@ -8651,7 +8649,7 @@ MoveMillipede_ConditionalTrueBlock10385: ;Main true block ;keep :
 	add hl,de
 	pop af
 	ld [hl],a
-MoveMillipede_elsedoneblock10387:
+MoveMillipede_elsedoneblock10452:
 	; Storing to array
 	; generic assign 
 	ld a,[s]
@@ -8695,9 +8693,9 @@ MoveMillipede_elsedoneblock10387:
 	add hl,de
 	pop af
 	ld [hl],a
-MoveMillipede_elsedoneblock10375:
-MoveMillipede_elsedoneblock10324:
-MoveMillipede_elsedoneblock10210:
+MoveMillipede_elsedoneblock10440:
+MoveMillipede_elsedoneblock10389:
+MoveMillipede_elsedoneblock10275:
 	
 ; // End moving left
 ; // Test if reached top or bottom of area
@@ -8718,8 +8716,8 @@ MoveMillipede_elsedoneblock10210:
 	ld [BitFlag], a
 	call IsBitSet
 	cp $0
-	jp z, MoveMillipede_elsedoneblock10393
-MoveMillipede_ConditionalTrueBlock10391: ;Main true block ;keep :
+	jp z, MoveMillipede_elsedoneblock10458
+MoveMillipede_ConditionalTrueBlock10456: ;Main true block ;keep :
 	; Binary clause core: GREATER
 	; Compare with pure num / var optimization
 	ld a,[s]
@@ -8730,9 +8728,9 @@ MoveMillipede_ConditionalTrueBlock10391: ;Main true block ;keep :
 	ld a,[hl]
 	; LoadVar Testing if 'milliSegments_milliSegments_record_milliSegments_record_y' is word : 0
 	cp $d
-	jp c, MoveMillipede_elsedoneblock10417
-	jp z, MoveMillipede_elsedoneblock10417
-MoveMillipede_ConditionalTrueBlock10415: ;Main true block ;keep :
+	jp c, MoveMillipede_elsedoneblock10482
+	jp z, MoveMillipede_elsedoneblock10482
+MoveMillipede_ConditionalTrueBlock10480: ;Main true block ;keep :
 	; Storing to array
 	; generic assign 
 	ld a,[s]
@@ -8797,8 +8795,8 @@ MoveMillipede_ConditionalTrueBlock10415: ;Main true block ;keep :
 	ld [BitFlag], a
 	call IsBitSet
 	cp $0
-	jr z, MoveMillipede_elsedoneblock10429
-MoveMillipede_ConditionalTrueBlock10427: ;Main true block ;keep :
+	jr z, MoveMillipede_elsedoneblock10494
+MoveMillipede_ConditionalTrueBlock10492: ;Main true block ;keep :
 	; Storing to array
 	; generic assign 
 	ld a,[s]
@@ -8820,10 +8818,10 @@ MoveMillipede_ConditionalTrueBlock10427: ;Main true block ;keep :
 	add hl,de
 	pop af
 	ld [hl],a
-MoveMillipede_elsedoneblock10429:
+MoveMillipede_elsedoneblock10494:
 	call SpawnMillipedeHead
-MoveMillipede_elsedoneblock10417:
-MoveMillipede_elsedoneblock10393:
+MoveMillipede_elsedoneblock10482:
+MoveMillipede_elsedoneblock10458:
 	; Binary clause core: NOTEQUALS
 	; Compare with pure num / var optimization
 	; generic assign 
@@ -8839,8 +8837,8 @@ MoveMillipede_elsedoneblock10393:
 	ld [BitFlag], a
 	call IsBitSet
 	cp $0
-	jr z, MoveMillipede_elsedoneblock10435
-MoveMillipede_ConditionalTrueBlock10433: ;Main true block ;keep :
+	jr z, MoveMillipede_elsedoneblock10500
+MoveMillipede_ConditionalTrueBlock10498: ;Main true block ;keep :
 	; Binary clause core: LESS
 	; Compare with pure num / var optimization
 	ld a,[s]
@@ -8851,8 +8849,8 @@ MoveMillipede_ConditionalTrueBlock10433: ;Main true block ;keep :
 	ld a,[hl]
 	; LoadVar Testing if 'milliSegments_milliSegments_record_milliSegments_record_y' is word : 0
 	cp $a
-	jr nc,MoveMillipede_elsedoneblock10447
-MoveMillipede_ConditionalTrueBlock10445: ;Main true block ;keep :
+	jr nc,MoveMillipede_elsedoneblock10512
+MoveMillipede_ConditionalTrueBlock10510: ;Main true block ;keep :
 	; Storing to array
 	; generic assign 
 	ld a,[s]
@@ -8896,11 +8894,11 @@ MoveMillipede_ConditionalTrueBlock10445: ;Main true block ;keep :
 	add hl,de
 	pop af
 	ld [hl],a
-MoveMillipede_elsedoneblock10447:
-MoveMillipede_elsedoneblock10435:
+MoveMillipede_elsedoneblock10512:
+MoveMillipede_elsedoneblock10500:
 	call DrawMilliSprite
-	jp MoveMillipede_elsedoneblock9500
-MoveMillipede_elseblock9499:
+	jp MoveMillipede_elsedoneblock9565
+MoveMillipede_elseblock9564:
 	; Storing to array
 	ld a,[s]
 	ld e,a ; variable is 8-bit
@@ -8989,31 +8987,23 @@ MoveMillipede_elseblock9499:
 	pop af
 	ld [hl],a
 	call DrawMilliSprite
-MoveMillipede_elsedoneblock9500:
-MoveMillipede_elsedoneblock8478:
-MoveMillipede_elsedoneblock6496:
+MoveMillipede_elsedoneblock9565:
+MoveMillipede_elsedoneblock8531:
+MoveMillipede_elsedoneblock6537:
 	
 ; // Reset mushroom just shot storage
 	ld a, $0
 	ld [mushroomJustShot_mushroomJustShot_record_mushroomJustShot_record_x], a
 	ld [mushroomJustShot_mushroomJustShot_record_mushroomJustShot_record_y], a
-MoveMillipede_forloopcounter2530:
-MoveMillipede_loopstart2531:
+MoveMillipede_forloopcounter2547:
+MoveMillipede_loopstart2548:
 	ld a,[s]
 	add a,1
 	ld [s],a
 	cp $a
-	jp nz,MoveMillipede_forloop2528
-MoveMillipede_forloopend2529:
-MoveMillipede_loopend2532:
-	; Binary clause core: NOTEQUALS
-	; Compare with pure num / var optimization
-	ld a,[playerSnake_playerSnake_record_playerSnake_record_dead]
-	cp $0
-	jr z, MoveMillipede_elsedoneblock10454
-MoveMillipede_ConditionalTrueBlock10452: ;Main true block ;keep :
-	call MillipedeKilledPlayer
-MoveMillipede_elsedoneblock10454:
+	jp nz,MoveMillipede_forloop2545
+MoveMillipede_forloopend2546:
+MoveMillipede_loopend2549:
 	ret
 	
 ; // Check millipede segments left
@@ -9024,11 +9014,11 @@ CheckMillipedesLeft:
 	; Compare with pure num / var optimization
 	ld a,[gameStats_gameStats_record_gameStats_record_milliSegsAlive]
 	cp $0
-	jr c, CheckMillipedesLeft_elsedoneblock10461
-	jr z, CheckMillipedesLeft_elsedoneblock10461
-CheckMillipedesLeft_ConditionalTrueBlock10459: ;Main true block ;keep :
+	jr c, CheckMillipedesLeft_elsedoneblock10520
+	jr z, CheckMillipedesLeft_elsedoneblock10520
+CheckMillipedesLeft_ConditionalTrueBlock10518: ;Main true block ;keep :
 	ret
-CheckMillipedesLeft_elsedoneblock10461:
+CheckMillipedesLeft_elsedoneblock10520:
 	
 ; // Reset millipede
 	call ResetMillipedeToStart
@@ -9044,17 +9034,17 @@ CheckMillipedesLeft_elsedoneblock10461:
 	ld [BitFlag], a
 	call IsBitSet
 	cp $0
-	jr z, CheckMillipedesLeft_elseblock10466
-CheckMillipedesLeft_ConditionalTrueBlock10465: ;Main true block ;keep :
+	jr z, CheckMillipedesLeft_elseblock10525
+CheckMillipedesLeft_ConditionalTrueBlock10524: ;Main true block ;keep :
 	ld a, $1
 	ld [Screen_c], a
 	call Screen_SetPaper
-	jr CheckMillipedesLeft_elsedoneblock10467
-CheckMillipedesLeft_elseblock10466:
+	jr CheckMillipedesLeft_elsedoneblock10526
+CheckMillipedesLeft_elseblock10525:
 	ld a, $0
 	ld [Screen_c], a
 	call Screen_SetPaper
-CheckMillipedesLeft_elsedoneblock10467:
+CheckMillipedesLeft_elsedoneblock10526:
 	ret
 block1:
 	
@@ -9071,14 +9061,14 @@ block1:
 	ld a, $1
 	ld [Screen_ga], a
 	call Screen_SetMode
-MainProgram_while10473:
-MainProgram_loopstart10477:
+MainProgram_while10532:
+MainProgram_loopstart10536:
 	; Binary clause core: NOTEQUALS
 	; Compare with pure num / var optimization
 	ld a,$1
 	cp $0
-	jp z, MainProgram_elsedoneblock10476
-MainProgram_ConditionalTrueBlock10474: ;Main true block ;keep :
+	jp z, MainProgram_elsedoneblock10535
+MainProgram_ConditionalTrueBlock10533: ;Main true block ;keep :
 	
 ; // Decompress the image to the screen
 	ld hl,data
@@ -9104,14 +9094,14 @@ MainProgram_ConditionalTrueBlock10474: ;Main true block ;keep :
 	call PlaySound
 	call InitialiseGame
 	call DrawGrid
-MainProgram_while10783:
-MainProgram_loopstart10787:
+MainProgram_while10854:
+MainProgram_loopstart10858:
 	; Binary clause core: NOTEQUALS
 	; Compare with pure num / var optimization
 	ld a,[gameStats_gameStats_record_gameStats_record_gameRunning]
 	cp $0
-	jp z, MainProgram_elsedoneblock10786
-MainProgram_ConditionalTrueBlock10784: ;Main true block ;keep :
+	jp z, MainProgram_elsedoneblock10857
+MainProgram_ConditionalTrueBlock10855: ;Main true block ;keep :
 	
 ; // Keep game going until gameRunning is false(Game over)
 ; // Sync everything so the speed is correct
@@ -9120,99 +9110,116 @@ MainProgram_ConditionalTrueBlock10784: ;Main true block ;keep :
 	; Compare with pure num / var optimization
 	ld a,[scorpionEnemy_scorpion_record_scorpion_record_enabled]
 	cp $0
-	jr nz,MainProgram_elsedoneblock10915
-MainProgram_localsuccess10917: ;keep:
+	jr nz,MainProgram_elsedoneblock10992
+MainProgram_localsuccess10994: ;keep:
 	; ; logical AND, second requirement
 	; Binary clause core: EQUALS
 	; Compare with pure num / var optimization
 	ld a,[fleaEnemy_flea_record_flea_record_enabled]
 	cp $0
-	jr nz,MainProgram_elsedoneblock10915
-MainProgram_localsuccess10918: ;keep:
+	jr nz,MainProgram_elsedoneblock10992
+MainProgram_localsuccess10995: ;keep:
 	; ; logical AND, second requirement
 	; Binary clause core: EQUALS
 	; Compare with pure num / var optimization
 	ld a,[scorpionEnemy_scorpion_record_scorpion_record_dead]
 	cp $0
-	jr nz,MainProgram_elsedoneblock10915
-MainProgram_ConditionalTrueBlock10913: ;Main true block ;keep :
+	jr nz,MainProgram_elsedoneblock10992
+MainProgram_ConditionalTrueBlock10990: ;Main true block ;keep :
 	
 ; // Try spawning the scorpion
 	call SpawnScorpion
-MainProgram_elsedoneblock10915:
+MainProgram_elsedoneblock10992:
 	; Binary clause core: NOTEQUALS
 	; Compare with pure num / var optimization
 	ld a,[scorpionEnemy_scorpion_record_scorpion_record_enabled]
 	cp $0
-	jr z, MainProgram_elsedoneblock10923
-MainProgram_localsuccess10925: ;keep:
+	jr z, MainProgram_elsedoneblock11000
+MainProgram_localsuccess11002: ;keep:
 	; ; logical AND, second requirement
 	; Binary clause core: EQUALS
 	; Compare with pure num / var optimization
 	ld a,[scorpionEnemy_scorpion_record_scorpion_record_dead]
 	cp $0
-	jr nz,MainProgram_elsedoneblock10923
-MainProgram_ConditionalTrueBlock10921: ;Main true block ;keep :
+	jr nz,MainProgram_elsedoneblock11000
+MainProgram_ConditionalTrueBlock10998: ;Main true block ;keep :
 	
 ; // Move scorpion
 	call MoveScorpion
 	call CheckScorpionShot
-MainProgram_elsedoneblock10923:
+MainProgram_elsedoneblock11000:
 	; Binary clause core: EQUALS
 	; Compare with pure num / var optimization
 	ld a,[spiderEnemy_spider_record_spider_record_enabled]
 	cp $0
-	jr nz,MainProgram_elsedoneblock10930
-MainProgram_localsuccess10932: ;keep:
+	jr nz,MainProgram_elsedoneblock11007
+MainProgram_localsuccess11009: ;keep:
 	; ; logical AND, second requirement
 	; Binary clause core: EQUALS
 	; Compare with pure num / var optimization
 	ld a,[spiderEnemy_spider_record_spider_record_dead]
 	cp $0
-	jr nz,MainProgram_elsedoneblock10930
-MainProgram_ConditionalTrueBlock10928: ;Main true block ;keep :
+	jr nz,MainProgram_elsedoneblock11007
+MainProgram_ConditionalTrueBlock11005: ;Main true block ;keep :
 	
 ; // SPIDER
 	call SpawnSpider
-MainProgram_elsedoneblock10930:
+MainProgram_elsedoneblock11007:
 	; Binary clause core: NOTEQUALS
 	; Compare with pure num / var optimization
 	ld a,[spiderEnemy_spider_record_spider_record_enabled]
 	cp $0
-	jr z, MainProgram_elsedoneblock10937
-MainProgram_localsuccess10939: ;keep:
+	jr z, MainProgram_elsedoneblock11014
+MainProgram_localsuccess11016: ;keep:
 	; ; logical AND, second requirement
 	; Binary clause core: EQUALS
 	; Compare with pure num / var optimization
 	ld a,[spiderEnemy_spider_record_spider_record_dead]
 	cp $0
-	jr nz,MainProgram_elsedoneblock10937
-MainProgram_ConditionalTrueBlock10935: ;Main true block ;keep :
+	jr nz,MainProgram_elsedoneblock11014
+MainProgram_ConditionalTrueBlock11012: ;Main true block ;keep :
 	
 ; // Move spider
 	call MoveSpider
 	call CheckSpiderShot
 	call CheckSpiderCollide
-MainProgram_elsedoneblock10937:
+MainProgram_elsedoneblock11014:
+	; Binary clause core: EQUALS
+	; Compare with pure num / var optimization
+	ld a,[fleaEnemy_flea_record_flea_record_enabled]
+	cp $0
+	jr nz,MainProgram_elsedoneblock11021
+MainProgram_localsuccess11023: ;keep:
+	; ; logical AND, second requirement
+	; Binary clause core: EQUALS
+	; Compare with pure num / var optimization
+	ld a,[spiderEnemy_spider_record_spider_record_enabled]
+	cp $0
+	jr nz,MainProgram_elsedoneblock11021
+MainProgram_ConditionalTrueBlock11019: ;Main true block ;keep :
+	
+; // Spawn Flea
+	call SpawnFlea
+MainProgram_elsedoneblock11021:
 	; Binary clause core: NOTEQUALS
 	; Compare with pure num / var optimization
 	ld a,[fleaEnemy_flea_record_flea_record_enabled]
 	cp $0
-	jr z, MainProgram_elsedoneblock10944
-MainProgram_localsuccess10952: ;keep:
+	jr z, MainProgram_elsedoneblock11028
+MainProgram_localsuccess11036: ;keep:
 	; ; logical AND, second requirement
 	; Binary clause core: EQUALS
 	; Compare with pure num / var optimization
 	ld a,[fleaEnemy_flea_record_flea_record_dead]
 	cp $0
-	jr nz,MainProgram_elsedoneblock10944
-MainProgram_ConditionalTrueBlock10942: ;Main true block ;keep :
+	jr nz,MainProgram_elsedoneblock11028
+MainProgram_ConditionalTrueBlock11026: ;Main true block ;keep :
 	; Binary clause core: LESS
 	; Compare with pure num / var optimization
 	ld a,[fleaEnemy_flea_record_flea_record_shotCount]
 	cp $2
-	jr nc,MainProgram_elsedoneblock10957
-MainProgram_ConditionalTrueBlock10955: ;Main true block ;keep :
+	jr nc,MainProgram_elsedoneblock11041
+MainProgram_ConditionalTrueBlock11039: ;Main true block ;keep :
 	
 ; // Move flea if enabled
 ; // Only move flea if it's not dead.
@@ -9221,25 +9228,8 @@ MainProgram_ConditionalTrueBlock10955: ;Main true block ;keep :
 	
 ; // Check if flea collided with player
 	call CheckFleaCollide
-MainProgram_elsedoneblock10957:
-MainProgram_elsedoneblock10944:
-	; Binary clause core: EQUALS
-	; Compare with pure num / var optimization
-	ld a,[fleaEnemy_flea_record_flea_record_enabled]
-	cp $0
-	jr nz,MainProgram_elsedoneblock10963
-MainProgram_localsuccess10965: ;keep:
-	; ; logical AND, second requirement
-	; Binary clause core: EQUALS
-	; Compare with pure num / var optimization
-	ld a,[spiderEnemy_spider_record_spider_record_enabled]
-	cp $0
-	jr nz,MainProgram_elsedoneblock10963
-MainProgram_ConditionalTrueBlock10961: ;Main true block ;keep :
-	
-; // Spawn Flea
-	call SpawnFlea
-MainProgram_elsedoneblock10963:
+MainProgram_elsedoneblock11041:
+MainProgram_elsedoneblock11028:
 	
 ; // Move Millipede
 	; 'a:=a + const'  optimization 
@@ -9249,47 +9239,47 @@ MainProgram_elsedoneblock10963:
 	; Binary clause core: EQUALS
 	; Compare with pure num / var optimization
 	cp $0
-	jr nz,MainProgram_elsedoneblock10970
-MainProgram_ConditionalTrueBlock10968: ;Main true block ;keep :
+	jr nz,MainProgram_elsedoneblock11047
+MainProgram_ConditionalTrueBlock11045: ;Main true block ;keep :
 	; Binary clause core: LESS
 	; Compare with pure num / var optimization
 	ld a,[gameStats_gameStats_record_gameStats_record_level]
 	cp $f
-	jr nc,MainProgram_elsedoneblock11000
-MainProgram_ConditionalTrueBlock10998: ;Main true block ;keep :
+	jr nc,MainProgram_elsedoneblock11077
+MainProgram_ConditionalTrueBlock11075: ;Main true block ;keep :
 	ld a, $2
 	ld [gameStats_gameStats_record_gameStats_record_milliSpeed], a
-MainProgram_elsedoneblock11000:
+MainProgram_elsedoneblock11077:
 	; Binary clause core: LESS
 	; Compare with pure num / var optimization
 	ld a,[gameStats_gameStats_record_gameStats_record_level]
 	cp $a
-	jr nc,MainProgram_elsedoneblock11006
-MainProgram_ConditionalTrueBlock11004: ;Main true block ;keep :
+	jr nc,MainProgram_elsedoneblock11083
+MainProgram_ConditionalTrueBlock11081: ;Main true block ;keep :
 	ld a, $3
 	ld [gameStats_gameStats_record_gameStats_record_milliSpeed], a
-MainProgram_elsedoneblock11006:
+MainProgram_elsedoneblock11083:
 	; Binary clause core: LESS
 	; Compare with pure num / var optimization
 	ld a,[gameStats_gameStats_record_gameStats_record_level]
 	cp $5
-	jr nc,MainProgram_elsedoneblock11012
-MainProgram_ConditionalTrueBlock11010: ;Main true block ;keep :
+	jr nc,MainProgram_elsedoneblock11089
+MainProgram_ConditionalTrueBlock11087: ;Main true block ;keep :
 	ld a, $4
 	ld [gameStats_gameStats_record_gameStats_record_milliSpeed], a
-MainProgram_elsedoneblock11012:
+MainProgram_elsedoneblock11089:
 	; Binary clause core: GREATER
 	; Compare with pure num / var optimization
 	ld a,[gameStats_gameStats_record_gameStats_record_level]
 	cp $e
-	jr c, MainProgram_elsedoneblock11018
-	jr z, MainProgram_elsedoneblock11018
-MainProgram_ConditionalTrueBlock11016: ;Main true block ;keep :
+	jr c, MainProgram_elsedoneblock11095
+	jr z, MainProgram_elsedoneblock11095
+MainProgram_ConditionalTrueBlock11093: ;Main true block ;keep :
 	ld a, $1
 	ld [gameStats_gameStats_record_gameStats_record_milliSpeed], a
-MainProgram_elsedoneblock11018:
+MainProgram_elsedoneblock11095:
 	call MoveMillipede
-MainProgram_elsedoneblock10970:
+MainProgram_elsedoneblock11047:
 	; 'a:=a + const'  optimization 
 	ld a,[playerSnake_playerSnake_record_playerSnake_record_moveCount]
 	sub $1
@@ -9297,30 +9287,40 @@ MainProgram_elsedoneblock10970:
 	; Binary clause core: EQUALS
 	; Compare with pure num / var optimization
 	cp $0
-	jr nz,MainProgram_elsedoneblock11024
-MainProgram_ConditionalTrueBlock11022: ;Main true block ;keep :
+	jr nz,MainProgram_elsedoneblock11101
+MainProgram_ConditionalTrueBlock11099: ;Main true block ;keep :
 	ld a, $2
 	ld [playerSnake_playerSnake_record_playerSnake_record_moveCount], a
 	call ControlPlayer
-MainProgram_elsedoneblock11024:
+MainProgram_elsedoneblock11101:
 	; Binary clause core: NOTEQUALS
 	; Compare with pure num / var optimization
 	ld a,[playerBullet_playerBullet_record_playerBullet_record_fired]
 	cp $0
-	jr z, MainProgram_elsedoneblock11030
-MainProgram_ConditionalTrueBlock11028: ;Main true block ;keep :
+	jr z, MainProgram_elsedoneblock11107
+MainProgram_ConditionalTrueBlock11105: ;Main true block ;keep :
 	call MoveBullet
 	call MoveBullet
-MainProgram_elsedoneblock11030:
+MainProgram_elsedoneblock11107:
 	
 ; // Test if any enemies shot and if so, animate sprite
 	call DoEnemyDeathAnim
 	
 ; // Check to see if the millipede is dead
 	call CheckMillipedesLeft
-	jp MainProgram_while10783
-MainProgram_elsedoneblock10786:
-MainProgram_loopend10788:
+	; Binary clause core: NOTEQUALS
+	; Compare with pure num / var optimization
+	ld a,[playerSnake_playerSnake_record_playerSnake_record_dead]
+	cp $0
+	jr z, MainProgram_elsedoneblock11113
+MainProgram_ConditionalTrueBlock11111: ;Main true block ;keep :
+	
+; // See if player is alive
+	call DoPlayerDeath
+MainProgram_elsedoneblock11113:
+	jp MainProgram_while10854
+MainProgram_elsedoneblock10857:
+MainProgram_loopend10859:
 	
 ; // Game over
 	; generic assign 
@@ -9337,7 +9337,7 @@ MainProgram_loopend10788:
 	ld [Screen_c], a
 	call Screen_SetPen
 	; Assigning a string : Font_text
-	ld hl,MainProgram_stringassignstr11033
+	ld hl,MainProgram_stringassignstr11116
 	; Loading pointer
 	ld [Font_text],hl
 	ld a, $b
@@ -9349,7 +9349,7 @@ MainProgram_loopend10788:
 	call Font_DrawTextAt
 	ld a, $1
 	ld [u], a
-MainProgram_forloop11035:
+MainProgram_forloop11118:
 	; generic assign 
 	ld hl,$70c0
 	; Integer assignment 
@@ -9377,26 +9377,26 @@ MainProgram_forloop11035:
 	; Loading pointer
 	ld [Sound_dur],hl
 	call Sound_Play
-MainProgram_forloopcounter11037:
-MainProgram_loopstart11038:
+MainProgram_forloopcounter11120:
+MainProgram_loopstart11121:
 	ld a,[u]
 	add a,1
 	ld [u],a
 	cp $35
-	jr nz,MainProgram_forloop11035
-MainProgram_forloopend11036:
-MainProgram_loopend11039:
+	jr nz,MainProgram_forloop11118
+MainProgram_forloopend11119:
+MainProgram_loopend11122:
 	ld a, $1
 	ld [t], a
 	ld a, $0
 	ld [u], a
-MainProgram_forloop11044:
+MainProgram_forloop11127:
 	; generic assign 
 	ld a,[t]
 	ld [Screen_c], a
 	call Screen_SetPen
 	; Assigning a string : Font_text
-	ld hl,MainProgram_stringassignstr11068
+	ld hl,MainProgram_stringassignstr11151
 	; Loading pointer
 	ld [Font_text],hl
 	ld a, $b
@@ -9408,21 +9408,21 @@ MainProgram_forloop11044:
 	call Font_DrawTextAt
 	ld a, $0
 	ld [w], a
-MainProgram_forloop11070:
+MainProgram_forloop11153:
 	; Wait
 	ld a,$c8
-MainProgram_wait11078:
+MainProgram_wait11161:
 	sub 1
-	jr nz,MainProgram_wait11078
-MainProgram_forloopcounter11072:
-MainProgram_loopstart11073:
+	jr nz,MainProgram_wait11161
+MainProgram_forloopcounter11155:
+MainProgram_loopstart11156:
 	ld a,[w]
 	add a,1
 	ld [w],a
 	cp $64
-	jr nz,MainProgram_forloop11070
-MainProgram_forloopend11071:
-MainProgram_loopend11074:
+	jr nz,MainProgram_forloop11153
+MainProgram_forloopend11154:
+MainProgram_loopend11157:
 	; 'a:=a + const'  optimization 
 	ld a,[t]
 	add  a,$1
@@ -9430,24 +9430,24 @@ MainProgram_loopend11074:
 	; Binary clause core: GREATER
 	; Compare with pure num / var optimization
 	cp $3
-	jr c, MainProgram_elsedoneblock11082
-	jr z, MainProgram_elsedoneblock11082
-MainProgram_ConditionalTrueBlock11080: ;Main true block ;keep :
+	jr c, MainProgram_elsedoneblock11165
+	jr z, MainProgram_elsedoneblock11165
+MainProgram_ConditionalTrueBlock11163: ;Main true block ;keep :
 	ld a, $1
 	ld [t], a
-MainProgram_elsedoneblock11082:
-MainProgram_forloopcounter11046:
-MainProgram_loopstart11047:
+MainProgram_elsedoneblock11165:
+MainProgram_forloopcounter11129:
+MainProgram_loopstart11130:
 	ld a,[u]
 	add a,1
 	ld [u],a
 	cp $28
-	jr nz,MainProgram_forloop11044
-MainProgram_forloopend11045:
-MainProgram_loopend11048:
-	jp MainProgram_while10473
-MainProgram_elsedoneblock10476:
-MainProgram_loopend10478:
+	jr nz,MainProgram_forloop11127
+MainProgram_forloopend11128:
+MainProgram_loopend11131:
+	jp MainProgram_while10532
+MainProgram_elsedoneblock10535:
+MainProgram_loopend10537:
 ; Copy BC bytes from HL to DE.
 z80_copy_mem:
     ld      a,b

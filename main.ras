@@ -420,15 +420,15 @@ end;
 procedure ControlPlayer();
 begin
 	// Get player input
-	u := Input::GetJoystick(1);
-	v := Input::GetJoystick(2);
-	w := Screen::Peek(26863);	// Scan for key values separately
+	p := Input::GetJoystick(1);
+	q := Input::GetJoystick(2);
+	s := Screen::Peek(26863);	// Scan for key values separately
 	
 	Sprite::DrawAt(playerSnake.x,playerSnake.y,snakeSprite,false);
 	// Test for player movement
-	if (u = Input::Joy_None and (v = Input::Joy_None and (w = Input::Key_None))) then return;
+	if (p = Input::Joy_None and (q = Input::Joy_None and (s = Input::Key_None))) then return;
 	// Player shooting
-	if (u = Input::Joy_Fire or (v = Input::Joy_Fire or (IsBitSet(w,16) = false))) then
+	if (p = Input::Joy_Fire or (q = Input::Joy_Fire or (IsBitSet(s,16) = false))) then
 	begin
 		// Test if a bullet already exists onscreen. Snake can only shoot once at a time
 		if (playerBullet.fired) then return;
@@ -441,29 +441,33 @@ begin
 	end;		
   // Erase player sprite
 	Sprite::DrawAt(playerSnake.x,playerSnake.y,0,false);
-	if (u = Input::Joy_Left or (v = Input::Joy_Left or (IsBitSet(w,32) = false))) then
+	if (p = Input::Joy_Left or (q = Input::Joy_Left or (IsBitSet(s,32) = false))) then
 	begin
 		if (playerSnake.x > 0) then
 		begin
 			playerSnake.x := playerSnake.x - 1;
-			if (GetGridLocVal(playerSnake.x,screenYtogridY[playerSnake.y - screenYOffset]) > 0) then playerSnake.x := playerSnake.x + 1;
+			u := GetGridLocVal(playerSnake.x,screenYtogridY[playerSnake.y - screenYOffset]);
+			if (u > 0 and (u < milliBody)) then playerSnake.x := playerSnake.x + 1;
 			// Test bottom of sprite
-			if (GetGridLocVal(playerSnake.x,screenYtogridY[playerSnake.y + 3 - screenYOffset]) > 0) then playerSnake.x := playerSnake.x + 1;
+			u := GetGridLocVal(playerSnake.x,screenYtogridY[playerSnake.y + 3 - screenYOffset]);
+			if (u > 0 and (u < milliBody)) then playerSnake.x := playerSnake.x + 1;
 		end;
 	end;
-	if (u = Input::Joy_Right or (v = Input::Joy_Right or (IsBitSet(w,8) = false))) then
+	if (p = Input::Joy_Right or (q = Input::Joy_Right or (IsBitSet(s,8) = false))) then
 	begin
 		if (playerSnake.x < PlayerXMax) then
 		begin
 			playerSnake.x := playerSnake.x + 1;
-			if (GetGridLocVal(playerSnake.x,screenYtogridY[playerSnake.y - screenYOffset]) > 0) then playerSnake.x := playerSnake.x - 1;		
+			u := GetGridLocVal(playerSnake.x,screenYtogridY[playerSnake.y - screenYOffset]);
+			if (u > 0 and (u < milliBody)) then playerSnake.x := playerSnake.x - 1;		
 			// Test bottom of sprite
-			if (GetGridLocVal(playerSnake.x,screenYtogridY[playerSnake.y + 3 - screenYOffset]) > 0) then playerSnake.x := playerSnake.x - 1;			
+			u := GetGridLocVal(playerSnake.x,screenYtogridY[playerSnake.y + 3 - screenYOffset]);
+			if (u > 0 and (u < milliBody)) then playerSnake.x := playerSnake.x - 1;			
 		end;
 	end;
-	w := Screen::Peek(26878);
+	s := Screen::Peek(26878);
 	// Check if player wants to move UP
-	if (u = Input::Joy_Up or (v = Input::Joy_Up or (IsBitSet(w,16) = false))) then
+	if (p = Input::Joy_Up or (q = Input::Joy_Up or (IsBitSet(s,16) = false))) then
 	begin
 		// Make sure we're not already at the top of the player area
 		if (playerSnake.y > PlayerYMin) then 
@@ -471,20 +475,21 @@ begin
 			// Move player y pos
 			playerSnake.y := playerSnake.y - 1;
 			// Test if we're colliding with a mushroom. If so, move player y back
-			if (GetGridLocVal(playerSnake.x,screenYtogridY[playerSnake.y - screenYOffset]) > 0) then playerSnake.y := playerSnake.y + 1;
+			u := GetGridLocVal(playerSnake.x,screenYtogridY[playerSnake.y - screenYOffset]);
+			if (u > 0 and (u < milliBody)) then playerSnake.y := playerSnake.y + 1;
 		end;
 	end;
-	w := Screen::Peek(26877);
-	if (u = Input::Joy_Down or (v = Input::Joy_Down or (IsBitSet(w,16) = false))) then
+	s := Screen::Peek(26877);
+	if (p = Input::Joy_Down or (q = Input::Joy_Down or (IsBitSet(s,16) = false))) then
 	begin
 		if (playerSnake.y < PlayerYMax) then 
 		begin
 			// Due to player sprite being 4 pixels high we need to check 4 below the Y value.
 			playerSnake.y := playerSnake.y + 4;
-			u := GetGridLocVal(playerSnake.x,screenYtogridY[playerSnake.y + 3 - screenYOffset]);
+			u := GetGridLocVal(playerSnake.x,screenYtogridY[playerSnake.y - screenYOffset]);
 			
 			// If a mushroom is below the player, move the y back to where it was, otherwise move one pixel down
-			if (GetGridLocVal(playerSnake.x,screenYtogridY[playerSnake.y - screenYOffset]) > 0) then playerSnake.y := playerSnake.y - 4 else playerSnake.y := playerSnake.y - 3;
+			if (u > 0 and (u < milliBody)) then playerSnake.y := playerSnake.y - 4 else playerSnake.y := playerSnake.y - 3;
 		end;
 	end;		
 	// Draw player sprite at new location
@@ -668,10 +673,14 @@ begin
 	begin
 		Sprite::DrawAt(playerSnake.x,playerSnake.y,snakeDeathSprite + v,false);
 		PlaySound(Sfx_PlayerDead);	
-		Sprite::DrawAt(playerSnake.x,playerSnake.y,0,false);
 	end;
+	// Erase and disable stuff
+	Sprite::DrawAt(playerSnake.x,playerSnake.y,0,false);
+	playerBullet.fired := false;
+	Sprite::DrawAt(playerBullet.x,playerBullet.y,0,false);	
 	playerSnake.x := 16;
 	playerSnake.y := 58;
+	playerSnake.dead := false;
 	Sprite::DrawAt(playerSnake.x,playerSnake.y,snakeSprite,false);
 	// Reset scorpion 
 	ResetScorpionGrid();
@@ -681,7 +690,9 @@ begin
 	spiderEnemy.dead := false;	
 	fleaEnemy.enabled := false;	
 	fleaEnemy.dead := false;	
-	SubtractLife();	
+	SubtractLife();
+	// Erase flea sprite
+	Sprite::DrawAt(fleaEnemy.x, fleaEnemy.y, 0,false);	
 	// Delete spider sprite
 	Sprite::DrawAt(spiderEnemy.x,spiderEnemy.y,0,false);
 	Sprite::DrawAt(spiderEnemy.x+1,spiderEnemy.y,0,false);
@@ -787,10 +798,7 @@ begin
 	Sprite::DrawAt(spiderEnemy.x,spiderEnemy.y,0,false);
 	Sprite::DrawAt(spiderEnemy.x+1,spiderEnemy.y,0,false);
 	Sprite::DrawAt(spiderEnemy.x+2,spiderEnemy.y,0,false);	
-	Sprite::DrawAt(playerSnake.x,playerSnake.y,0,false);
-	playerBullet.fired := false;
-	Sprite::DrawAt(playerBullet.x,playerBullet.y,0,false);
-	DoPlayerDeath();
+	playerSnake.dead := true;
 end;
 
 // Check if flea and player collided
@@ -804,9 +812,7 @@ begin
 	fleaEnemy.enabled := false;
 	Sprite::DrawAt(fleaEnemy.x,fleaEnemy.y,0,false);
 	Sprite::DrawAt(playerSnake.x,playerSnake.y,0,false);
-	playerBullet.fired := false;
-	Sprite::DrawAt(playerBullet.x,playerBullet.y,0,false);
-	DoPlayerDeath();
+	playerSnake.dead := true;
 end;
 
 // Move the flea down the screen, dropping mushies on the way
@@ -1171,16 +1177,6 @@ begin
 	playerSnake.dead := true;
 end;
 
-procedure MillipedeKilledPlayer();
-begin
-	// Erase and disable stuff
-	Sprite::DrawAt(playerSnake.x,playerSnake.y,0,false);
-	playerBullet.fired := false;
-	Sprite::DrawAt(playerBullet.x,playerBullet.y,0,false);
-	ResetMillipedeToStart();
-	DoPlayerDeath();	
-end;
-
 // Move Millipede
 procedure MoveMillipede();
 begin
@@ -1210,6 +1206,7 @@ begin
 			begin
 			// Check if colliding with player
 			CheckMillipedeCollide();
+			if (playerSnake.dead = true) then break;
 
 			// Delete sprite
 			Sprite::DrawAt(milliSegments[s].x,screenYOffset+lookupScreenY[milliSegments[s].y],0,false);
@@ -1347,7 +1344,6 @@ begin
 		mushroomJustShot.x := 0;
 		mushroomJustShot.y := 0;
 	end;
-	if (playerSnake.dead) then MillipedeKilledPlayer();
 end;
 
 // Check millipede segments left
@@ -1371,6 +1367,7 @@ begin
 		Compression::Decompress(#data, #screen); 
 		// Set pen colour
 		Screen::SetPen(1);
+		Screen::SetPaper(0);
 		Font::SetFont(#Font::font1);
 	
 		// Do titlescreen stuff
@@ -1393,7 +1390,6 @@ begin
 				MoveScorpion();
 				CheckScorpionShot();
 			end;
-	
 			
 			// SPIDER
 			if (spiderEnemy.enabled = false and (spiderEnemy.dead = false)) then SpawnSpider();	
@@ -1405,6 +1401,8 @@ begin
 				CheckSpiderCollide();
 			end;
 	
+			// Spawn Flea
+			if (fleaEnemy.enabled = false and (spiderEnemy.enabled = false)) then SpawnFlea();
 			// Move flea if enabled
 			if (fleaEnemy.enabled and (fleaEnemy.dead = false)) then
 			begin
@@ -1417,8 +1415,7 @@ begin
 					CheckFleaCollide();
 				end;
 			end;
-			// Spawn Flea
-			if (fleaEnemy.enabled = false and (spiderEnemy.enabled = false)) then SpawnFlea();
+			
 			// Move Millipede
 			gameStats.milliSpeed := gameStats.milliSpeed - 1;
 			if (gameStats.milliSpeed = 0) then
@@ -1444,6 +1441,8 @@ begin
 			DoEnemyDeathAnim();
 			// Check to see if the millipede is dead
 			CheckMillipedesLeft();
+			// See if player is alive
+			if (playerSnake.dead) then 	DoPlayerDeath();
 		end;
 		// Game over
 		Sprite::DrawAt(playerSnake.x,playerSnake.y,0,false);
