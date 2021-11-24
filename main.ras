@@ -434,7 +434,7 @@ begin
 		playerBullet.fired := true;
 		PlaySound(Sfx_Playershoot);
 		playerBullet.x := playerSnake.x;
-		playerBullet.y := bulletYConstrain[playerSnake.y - PlayerYMin ];
+		playerBullet.y := bulletYConstrain[playerSnake.y - PlayerYMin];
 		DrawBullet(playerBullet.x,playerBullet.y);
 		return;
 	end;		
@@ -770,6 +770,27 @@ begin
 		fleaEnemy.animFrame := fleaEnemy.animFrame + 1;
 	end;
 end;
+
+// Check if spider and player collided
+procedure CheckSpiderCollide();
+begin
+	// If not touching player, ignore
+	if (spiderEnemy.enabled = false) then return;
+	if (playerSnake.x < spiderEnemy.x or (playerSnake.x > spiderEnemy.x + 2)) then return;
+	if (spiderEnemy.y < playerSnake.y) then return;
+	// Passed the above, so flea and snake are touching
+	spiderEnemy.enabled := false;
+	// Delete spider sprite
+	Sprite::DrawAt(spiderEnemy.x,spiderEnemy.y,0,false);
+	Sprite::DrawAt(spiderEnemy.x+1,spiderEnemy.y,0,false);
+	Sprite::DrawAt(spiderEnemy.x+2,spiderEnemy.y,0,false);	
+	Sprite::DrawAt(playerSnake.x,playerSnake.y,0,false);
+	playerBullet.fired := false;
+	Sprite::DrawAt(playerBullet.x,playerBullet.y,0,false);
+	SubtractLife();
+	DoPlayerDeath();
+end;
+
 
 // Check if flea and player collided
 procedure CheckFleaCollide();
@@ -1357,6 +1378,7 @@ begin
 		begin
 			MoveSpider();
 			CheckSpiderShot();
+			CheckSpiderCollide();
 		end;
 
 		// Move flea if enabled
