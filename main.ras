@@ -66,7 +66,7 @@ var
 	tempint : Integer;
 	mychar : string = "A";
 	myp, mym : pointer;
-	strpos : byte = 0;
+	strpos : byte;
 	Value, BitFlag: byte;
 	// Set up an array for the mushrooms
 	gameGrid : array[gridWidth*gridHeight] of byte;
@@ -341,7 +341,6 @@ begin
 	Sprite::SetData(#smallSprites);
 	Sprite::SetSize(1,4);	
 	Sprite::DrawAt(playerSnake.x,playerSnake.y,snakeSprite,false);
-	if (gameStats.level = 1) then return;
 end;
 
 // Initialise the mushrooms in an array grid and display
@@ -389,7 +388,7 @@ begin
 	// Check if Game Over
 	if (gameStats.lives = 0) then
 	begin
-		// Player dead. TODO
+		// Player dead. 
 		gameStats.gameRunning := false;
 	end;
 	DrawHUD();
@@ -672,6 +671,7 @@ begin
 		Sprite::DrawAt(playerSnake.x,playerSnake.y,0,false);
 	end;
 	playerSnake.x := 16;
+	playerSnake.y := 58;
 	Sprite::DrawAt(playerSnake.x,playerSnake.y,snakeSprite,false);
 	// Reset scorpion 
 	ResetScorpionGrid();
@@ -680,7 +680,8 @@ begin
 	spiderEnemy.enabled := false;	
 	spiderEnemy.dead := false;	
 	fleaEnemy.enabled := false;	
-	fleaEnemy.dead := false;		
+	fleaEnemy.dead := false;	
+	SubtractLife();	
 	// Delete spider sprite
 	Sprite::DrawAt(spiderEnemy.x,spiderEnemy.y,0,false);
 	Sprite::DrawAt(spiderEnemy.x+1,spiderEnemy.y,0,false);
@@ -789,7 +790,6 @@ begin
 	Sprite::DrawAt(playerSnake.x,playerSnake.y,0,false);
 	playerBullet.fired := false;
 	Sprite::DrawAt(playerBullet.x,playerBullet.y,0,false);
-	SubtractLife();
 	DoPlayerDeath();
 end;
 
@@ -806,7 +806,6 @@ begin
 	Sprite::DrawAt(playerSnake.x,playerSnake.y,0,false);
 	playerBullet.fired := false;
 	Sprite::DrawAt(playerBullet.x,playerBullet.y,0,false);
-	SubtractLife();
 	DoPlayerDeath();
 end;
 
@@ -1178,10 +1177,8 @@ begin
 	Sprite::DrawAt(playerSnake.x,playerSnake.y,0,false);
 	playerBullet.fired := false;
 	Sprite::DrawAt(playerBullet.x,playerBullet.y,0,false);
-	SubtractLife();
-	DoPlayerDeath();	
 	ResetMillipedeToStart();
-	playerSnake.dead := false;
+	DoPlayerDeath();	
 end;
 
 // Move Millipede
@@ -1369,86 +1366,103 @@ begin
 	Memory::DisableInterrupts();
 	// Set Graphics mode
 	Screen::SetMode(1);
+	while (1) do	begin
+		// Decompress the image to the screen
+		Compression::Decompress(#data, #screen); 
+		// Set pen colour
+		Screen::SetPen(1);
+		Font::SetFont(#Font::font1);
 	
-	// Decompress the image to the screen
-	Compression::Decompress(#data, #screen); 
-	// Set pen colour
-	Screen::SetPen(1);
-	Font::SetFont(#Font::font1);
-
-	// Do titlescreen stuff
-	TitleScreen();
-	PlaySound(Sfx_Gamestart);
-	InitialiseGame();
-	DrawGrid();
-	// Keep game going until gameRunning is false (Game over)
-	while (gameStats.gameRunning) do
-	begin
-		// Sync everything so the speed is correct
-		Screen::WaitForVerticalBlank();
-
-		// Try spawning the scorpion
-		if (scorpionEnemy.enabled = false and (fleaEnemy.enabled = false and (scorpionEnemy.dead = false))) then SpawnScorpion();		
-		// Move scorpion
-		if (scorpionEnemy.enabled and (scorpionEnemy.dead = false)) then
+		// Do titlescreen stuff
+		strpos := 0;
+		TitleScreen();
+		PlaySound(Sfx_Gamestart);
+		InitialiseGame();
+		DrawGrid();
+		// Keep game going until gameRunning is false (Game over)
+		while (gameStats.gameRunning) do
 		begin
-			MoveScorpion();
-			CheckScorpionShot();
-		end;
-
-		
-		// SPIDER
-		if (spiderEnemy.enabled = false and (spiderEnemy.dead = false)) then SpawnSpider();	
-		// Move spider
-		if (spiderEnemy.enabled = true and (spiderEnemy.dead = false)) then
-		begin
-			MoveSpider();
-			CheckSpiderShot();
-			CheckSpiderCollide();
-		end;
-
-		// Move flea if enabled
-		if (fleaEnemy.enabled and (fleaEnemy.dead = false)) then
-		begin
-			// Only move flea if it's not dead.
-			if (fleaEnemy.shotCount < 2) then
+			// Sync everything so the speed is correct
+			Screen::WaitForVerticalBlank();
+	
+			// Try spawning the scorpion
+			if (scorpionEnemy.enabled = false and (fleaEnemy.enabled = false and (scorpionEnemy.dead = false))) then SpawnScorpion();		
+			// Move scorpion
+			if (scorpionEnemy.enabled and (scorpionEnemy.dead = false)) then
 			begin
-				MoveFlea();
-				CheckFleaShot();
-				// Check if flea collided with player
-				CheckFleaCollide();
+				MoveScorpion();
+				CheckScorpionShot();
 			end;
+	
+			
+			// SPIDER
+			if (spiderEnemy.enabled = false and (spiderEnemy.dead = false)) then SpawnSpider();	
+			// Move spider
+			if (spiderEnemy.enabled = true and (spiderEnemy.dead = false)) then
+			begin
+				MoveSpider();
+				CheckSpiderShot();
+				CheckSpiderCollide();
+			end;
+	
+			// Move flea if enabled
+			if (fleaEnemy.enabled and (fleaEnemy.dead = false)) then
+			begin
+				// Only move flea if it's not dead.
+				if (fleaEnemy.shotCount < 2) then
+				begin
+					MoveFlea();
+					CheckFleaShot();
+					// Check if flea collided with player
+					CheckFleaCollide();
+				end;
+			end;
+			// Spawn Flea
+			if (fleaEnemy.enabled = false and (spiderEnemy.enabled = false)) then SpawnFlea();
+			// Move Millipede
+			gameStats.milliSpeed := gameStats.milliSpeed - 1;
+			if (gameStats.milliSpeed = 0) then
+			begin
+				if (gameStats.level < 15) then gameStats.milliSpeed := MilliMoveSpeed-2;
+				if (gameStats.level < 10) then gameStats.milliSpeed := MilliMoveSpeed-1;
+				if (gameStats.level < 5)  then gameStats.milliSpeed := MilliMoveSpeed;
+				if (gameStats.level > 14) then gameStats.milliSpeed := MilliMoveSpeed-3;
+				MoveMillipede();
+			end;
+			playerSnake.moveCount := playerSnake.moveCount - 1;
+			if (playerSnake.moveCount = 0) then
+			begin
+				playerSnake.moveCount := PlayerMoveSpeed;
+				ControlPlayer();
+			end;		
+			if (playerBullet.fired) then
+			begin
+				MoveBullet();
+				MoveBullet();
+			end;		
+			// Test if any enemies shot and if so, animate sprite
+			DoEnemyDeathAnim();
+			// Check to see if the millipede is dead
+			CheckMillipedesLeft();
 		end;
-		// Spawn Flea
-		if (fleaEnemy.enabled = false and (spiderEnemy.enabled = false)) then SpawnFlea();
-		// Move Millipede
-		gameStats.milliSpeed := gameStats.milliSpeed - 1;
-		if (gameStats.milliSpeed = 0) then
+		// Game over
+		Sprite::DrawAt(playerSnake.x,playerSnake.y,0,false);
+		Screen::SetPen(3);
+		Font::DrawTextAt("GAME OVER!",11,58,false);	
+		for u:= 1 to 53 do
 		begin
-			if (gameStats.level < 15) then gameStats.milliSpeed := MilliMoveSpeed-2;
-			if (gameStats.level < 10) then gameStats.milliSpeed := MilliMoveSpeed-1;
-			if (gameStats.level < 5)  then gameStats.milliSpeed := MilliMoveSpeed;
-			if (gameStats.level > 14) then gameStats.milliSpeed := MilliMoveSpeed-3;
-			MoveMillipede();
+			Screen::doLineScroll(28864, 57);
+			Sound::Play(u * 5,20);
 		end;
-		playerSnake.moveCount := playerSnake.moveCount - 1;
-		if (playerSnake.moveCount = 0) then
+		t := 1;
+		for u:= 0 to 40 do
 		begin
-			playerSnake.moveCount := PlayerMoveSpeed;
-			ControlPlayer();
-		end;		
-		if (playerBullet.fired) then
-		begin
-			MoveBullet();
-			MoveBullet();
-		end;		
-		// Test if any enemies shot and if so, animate sprite
-		DoEnemyDeathAnim();
-		// Check to see if the millipede is dead
-		CheckMillipedesLeft();
+			Screen::SetPen(t);
+			Font::DrawTextAt("GAME OVER!",11,6,false);
+			for w := 0 to 100 do wait(200);
+			t := t + 1;
+			if (t > 3) then t := 1; 		
+		end;
 	end;
-	// Game over
-	Sprite::DrawAt(playerBullet.x,playerBullet.y,0,false);
-	Loop();
-
+	
 end.
