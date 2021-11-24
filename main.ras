@@ -93,6 +93,7 @@ var
 	playerSnake_record = record
 		moveCount : byte;
 		x,y : byte;
+		dead : boolean;
 	end;
 	playerBullet_record = record
 		fired : boolean;
@@ -325,6 +326,7 @@ begin
 	playerSnake.x := 16;
 	playerSnake.y := 58;
 	playerSnake.moveCount := PlayerMoveSpeed;
+	playerSnake.dead := false;
 	playerBullet.fired := false;
 	fleaEnemy.enabled := false;
 	scorpionEnemy.enabled := false;
@@ -791,7 +793,6 @@ begin
 	DoPlayerDeath();
 end;
 
-
 // Check if flea and player collided
 procedure CheckFleaCollide();
 begin
@@ -1162,6 +1163,27 @@ begin
 	end;
 end;
 
+// Check Millipede colliding with player
+procedure CheckMillipedeCollide();
+begin
+	v := screenYOffset+lookupScreenY[milliSegments[s].y];
+	if (v < playerSnake.y - 3 or (v > playerSnake.y + 3)) then return;
+	if (milliSegments[s].x <> playerSnake.x) then return;
+	playerSnake.dead := true;
+end;
+
+procedure MillipedeKilledPlayer();
+begin
+	// Erase and disable stuff
+	Sprite::DrawAt(playerSnake.x,playerSnake.y,0,false);
+	playerBullet.fired := false;
+	Sprite::DrawAt(playerBullet.x,playerBullet.y,0,false);
+	SubtractLife();
+	DoPlayerDeath();	
+	ResetMillipedeToStart();
+	playerSnake.dead := false;
+end;
+
 // Move Millipede
 procedure MoveMillipede();
 begin
@@ -1189,6 +1211,9 @@ begin
 			// Segment is already on the grid
 			else
 			begin
+			// Check if colliding with player
+			CheckMillipedeCollide();
+
 			// Delete sprite
 			Sprite::DrawAt(milliSegments[s].x,screenYOffset+lookupScreenY[milliSegments[s].y],0,false);
       // Millipede segments - draw whatever was on the grid before the segment was there.
@@ -1200,7 +1225,7 @@ begin
 			begin
 				SetGridLocVal(milliSegments[s].x,milliSegments[s].y,0);	
 			end;	
-     // Only direction changing logic in millipede heads
+      // Only direction changing logic in millipede heads
       if IsBitSet(milliSegments[s].flags, Flag_Head) then
 				begin
 					p := 0; // Did we already switch R/L?
@@ -1325,6 +1350,7 @@ begin
 		mushroomJustShot.x := 0;
 		mushroomJustShot.y := 0;
 	end;
+	if (playerSnake.dead) then MillipedeKilledPlayer();
 end;
 
 // Check millipede segments left
@@ -1421,6 +1447,8 @@ begin
 		// Check to see if the millipede is dead
 		CheckMillipedesLeft();
 	end;
+	// Game over
+	Sprite::DrawAt(playerBullet.x,playerBullet.y,0,false);
 	Loop();
 
 end.
