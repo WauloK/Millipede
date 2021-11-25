@@ -44,6 +44,8 @@ var
 	const ScorpionMoveSpeed : byte = 3;
 	const SpiderMoveSpeed : byte = 2;
 	const fleaMovespeed : byte = 2;
+	const spiderTimer : byte = 100;
+	const scorpionTimer : byte = 175;
 	const screenYOffset : byte = 6;
 	const Sfx_Gamestart : byte = 1;
 	const Sfx_Playershoot : byte = 2;
@@ -126,6 +128,7 @@ var
 		direction : boolean;
 		animFrame : byte;
 		moveSpeed : byte;
+		spawnTimer : byte;
 	end;
 	spider_record = record
 		enabled : boolean;
@@ -136,6 +139,7 @@ var
 		vertcount : byte;
 		animFrame : byte;
 		moveSpeed : byte;
+		spawnTimer : byte;
 	end;	
 	playerBullet : playerBullet_record;
 	playerSnake : playerSnake_record;
@@ -339,6 +343,8 @@ begin
 	spiderEnemy.dead := false;	
 	gameStats.milliSpeed := MilliMoveSpeed;
 	gameStats.milliSegsAlive := milliLength;
+	spiderEnemy.spawnTimer := spiderTimer;
+	scorpionEnemy.spawnTimer := scorpionTimer;
 	DrawHUD();
 	// Draw player sprite
 	Sprite::SetData(#smallSprites);
@@ -1093,9 +1099,9 @@ end;
 procedure SpawnScorpion();
 begin
 	// Pick a random number to see if we spawn it
-	t := Functions::getRandomByte(200);	
-	// Spawn or not
-	if (t < 197) then	return;
+	scorpionEnemy.spawnTimer := scorpionEnemy.spawnTimer - 1;
+	if (scorpionEnemy.spawnTimer > 0) then return;
+	scorpionEnemy.spawnTimer := scorpionTimer + Functions::IntToByte(Functions::GetRnd(70));
 	// Pick a random side of the screen to spawn a scorpion
 	t := Functions::IntToByte(Functions::GetRnd(100));
 	// Spawn on the random side
@@ -1123,9 +1129,9 @@ end;
 procedure SpawnSpider();
 begin
 	// Pick a random number to see if we spawn it
-	t := Functions::getRandomByte(200);	
-	// Spawn or not
-	if (t < 195) then return;
+	spiderEnemy.spawnTimer := spiderEnemy.spawnTimer - 1;
+	if (spiderEnemy.spawnTimer > 0) then return;
+	spiderEnemy.spawnTimer := spiderTimer + Functions::IntToByte(Functions::GetRnd(100));
 	// Pick a random side of the screen to spawn a scorpion
 	t := Functions::IntToByte(Functions::GetRnd(100));
 	// Spawn on the random side

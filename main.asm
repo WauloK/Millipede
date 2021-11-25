@@ -250,6 +250,7 @@ scorpionEnemy_scorpion_record_scorpion_record_y	db	0
 scorpionEnemy_scorpion_record_scorpion_record_direction	db	0
 scorpionEnemy_scorpion_record_scorpion_record_animFrame	db	0
 scorpionEnemy_scorpion_record_scorpion_record_moveSpeed	db	0
+scorpionEnemy_scorpion_record_scorpion_record_spawnTimer	db	0
 spiderEnemy_spider_record_spider_record_enabled	db	0
 spiderEnemy_spider_record_spider_record_dead	db	0
 spiderEnemy_spider_record_spider_record_x	db	0
@@ -259,6 +260,7 @@ spiderEnemy_spider_record_spider_record_vertical	db	0
 spiderEnemy_spider_record_spider_record_vertcount	db	0
 spiderEnemy_spider_record_spider_record_animFrame	db	0
 spiderEnemy_spider_record_spider_record_moveSpeed	db	0
+spiderEnemy_spider_record_spider_record_spawnTimer	db	0
 milliSegments_milliSegments_record_milliSegments_record_x	db	0
 	    db 0,0,0,0,0,0,0,0,0
 milliSegments_milliSegments_record_milliSegments_record_y	db	0
@@ -2947,6 +2949,10 @@ InitialiseGame_loopend406:
 	ld [gameStats_gameStats_record_gameStats_record_milliSpeed], a
 	ld a, $a
 	ld [gameStats_gameStats_record_gameStats_record_milliSegsAlive], a
+	ld a, $64
+	ld [spiderEnemy_spider_record_spider_record_spawnTimer], a
+	ld a, $af
+	ld [scorpionEnemy_scorpion_record_scorpion_record_spawnTimer], a
 	call DrawHUD
 	
 ; // Draw player sprite
@@ -7008,23 +7014,36 @@ MoveScorpion_elsedoneblock2554:
 SpawnScorpion:
 	
 ; // Pick a random number to see if we spawn it
+	; 'a:=a + const'  optimization 
+	ld a,[scorpionEnemy_scorpion_record_scorpion_record_spawnTimer]
+	sub $1
+	ld [scorpionEnemy_scorpion_record_scorpion_record_spawnTimer], a
+	; Binary clause core: GREATER
+	; Compare with pure num / var optimization
+	cp $0
+	jr c, SpawnScorpion_elsedoneblock2561
+	jr z, SpawnScorpion_elsedoneblock2561
+SpawnScorpion_ConditionalTrueBlock2559: ;Main true block ;keep :
+	ret
+SpawnScorpion_elsedoneblock2561:
+	; generic assign 
+	ld a,$af
+	push af
 	; generic assign 
 	; generic assign 
-	ld hl,$c8
+	ld hl,$46
 	; Integer assignment 
 	; Loading pointer
 	ld [Functions_i],hl
-	call Functions_getRandomByte
-	ld [t], a
-	; Binary clause core: LESS
-	; Compare with pure num / var optimization
-	cp $c5
-	jr nc,SpawnScorpion_elsedoneblock2561
-SpawnScorpion_ConditionalTrueBlock2559: ;Main true block ;keep :
-	
-; // Spawn or not
-	ret
-SpawnScorpion_elsedoneblock2561:
+	call Functions_GetRnd
+	; Integer assignment 
+	; Loading pointer
+	ld [Functions_i],hl
+	call Functions_IntToByte
+	ld b,a
+	pop af
+	add  a, b
+	ld [scorpionEnemy_scorpion_record_scorpion_record_spawnTimer], a
 	
 ; // Pick a random side of the screen to spawn a scorpion
 	; generic assign 
@@ -7127,23 +7146,36 @@ SpawnScorpion_elsedoneblock2567:
 SpawnSpider:
 	
 ; // Pick a random number to see if we spawn it
+	; 'a:=a + const'  optimization 
+	ld a,[spiderEnemy_spider_record_spider_record_spawnTimer]
+	sub $1
+	ld [spiderEnemy_spider_record_spider_record_spawnTimer], a
+	; Binary clause core: GREATER
+	; Compare with pure num / var optimization
+	cp $0
+	jr c, SpawnSpider_elsedoneblock2580
+	jr z, SpawnSpider_elsedoneblock2580
+SpawnSpider_ConditionalTrueBlock2578: ;Main true block ;keep :
+	ret
+SpawnSpider_elsedoneblock2580:
+	; generic assign 
+	ld a,$64
+	push af
 	; generic assign 
 	; generic assign 
-	ld hl,$c8
+	ld hl,$64
 	; Integer assignment 
 	; Loading pointer
 	ld [Functions_i],hl
-	call Functions_getRandomByte
-	ld [t], a
-	; Binary clause core: LESS
-	; Compare with pure num / var optimization
-	cp $c3
-	jr nc,SpawnSpider_elsedoneblock2580
-SpawnSpider_ConditionalTrueBlock2578: ;Main true block ;keep :
-	
-; // Spawn or not
-	ret
-SpawnSpider_elsedoneblock2580:
+	call Functions_GetRnd
+	; Integer assignment 
+	; Loading pointer
+	ld [Functions_i],hl
+	call Functions_IntToByte
+	ld b,a
+	pop af
+	add  a, b
+	ld [spiderEnemy_spider_record_spider_record_spawnTimer], a
 	
 ; // Pick a random side of the screen to spawn a scorpion
 	; generic assign 
