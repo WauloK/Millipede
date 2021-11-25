@@ -3059,11 +3059,16 @@ DrawGrid_forloop410:
 	call Sprite_DrawAt
 	; generic assign 
 	; generic assign 
+	; generic assign 
 	ld hl,$1f
 	; Integer assignment 
 	; Loading pointer
 	ld [Functions_i],hl
-	call Functions_getRandomByte
+	call Functions_GetRnd
+	; Integer assignment 
+	; Loading pointer
+	ld [Functions_i],hl
+	call Functions_IntToByte
 	ld [varPrefixed_p], a
 DrawGrid_while425:
 DrawGrid_loopstart429:
@@ -3077,11 +3082,16 @@ DrawGrid_loopstart429:
 DrawGrid_ConditionalTrueBlock426: ;Main true block ;keep :
 	; generic assign 
 	; generic assign 
+	; generic assign 
 	ld hl,$1f
 	; Integer assignment 
 	; Loading pointer
 	ld [Functions_i],hl
-	call Functions_getRandomByte
+	call Functions_GetRnd
+	; Integer assignment 
+	; Loading pointer
+	ld [Functions_i],hl
+	call Functions_IntToByte
 	ld [varPrefixed_p], a
 	jr DrawGrid_while425
 DrawGrid_elsedoneblock428:
@@ -4058,11 +4068,16 @@ SpawnFlea_loopend759:
 	ld [fleaEnemy_flea_record_flea_record_dead], a
 	; generic assign 
 	; generic assign 
+	; generic assign 
 	ld hl,$1f
 	; Integer assignment 
 	; Loading pointer
 	ld [Functions_i],hl
-	call Functions_getRandomByte
+	call Functions_GetRnd
+	; Integer assignment 
+	; Loading pointer
+	ld [Functions_i],hl
+	call Functions_IntToByte
 	ld [fleaEnemy_flea_record_flea_record_x], a
 	ld a, $e
 	ld [fleaEnemy_flea_record_flea_record_y], a
@@ -7014,11 +7029,16 @@ SpawnScorpion_elsedoneblock2561:
 ; // Pick a random side of the screen to spawn a scorpion
 	; generic assign 
 	; generic assign 
+	; generic assign 
 	ld hl,$64
 	; Integer assignment 
 	; Loading pointer
 	ld [Functions_i],hl
-	call Functions_getRandomByte
+	call Functions_GetRnd
+	; Integer assignment 
+	; Loading pointer
+	ld [Functions_i],hl
+	call Functions_IntToByte
 	ld [t], a
 	; Binary clause core: GREATER
 	; Compare with pure num / var optimization
@@ -7032,11 +7052,16 @@ SpawnScorpion_ConditionalTrueBlock2565: ;Main true block ;keep :
 	ld [scorpionEnemy_scorpion_record_scorpion_record_x], a
 	; generic assign 
 	; generic assign 
+	; generic assign 
 	ld hl,$9
 	; Integer assignment 
 	; Loading pointer
 	ld [Functions_i],hl
-	call Functions_getRandomByte
+	call Functions_GetRnd
+	; Integer assignment 
+	; Loading pointer
+	ld [Functions_i],hl
+	call Functions_IntToByte
 	ld [t], a
 	; generic assign 
 	; Generic mul
@@ -7123,17 +7148,22 @@ SpawnSpider_elsedoneblock2580:
 ; // Pick a random side of the screen to spawn a scorpion
 	; generic assign 
 	; generic assign 
+	; generic assign 
 	ld hl,$64
 	; Integer assignment 
 	; Loading pointer
 	ld [Functions_i],hl
-	call Functions_getRandomByte
+	call Functions_GetRnd
+	; Integer assignment 
+	; Loading pointer
+	ld [Functions_i],hl
+	call Functions_IntToByte
 	ld [t], a
 	
 ; // Going down
 	; Binary clause core: GREATER
 	; Compare with pure num / var optimization
-	cp $14
+	cp $32
 	jr c, SpawnSpider_elseblock2585
 	jr z, SpawnSpider_elseblock2585
 SpawnSpider_ConditionalTrueBlock2584: ;Main true block ;keep :
@@ -7213,11 +7243,16 @@ SpawnMillipedeHead_ConditionalTrueBlock2628: ;Main true block ;keep :
 ; // Pick a random side of the screen to spawn a new head
 	; generic assign 
 	; generic assign 
+	; generic assign 
 	ld hl,$1f
 	; Integer assignment 
 	; Loading pointer
 	ld [Functions_i],hl
-	call Functions_getRandomByte
+	call Functions_GetRnd
+	; Integer assignment 
+	; Loading pointer
+	ld [Functions_i],hl
+	call Functions_IntToByte
 	ld [t], a
 	; Binary clause core: GREATER
 	; Compare with pure num / var optimization

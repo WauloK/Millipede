@@ -358,8 +358,8 @@ begin
 		tempint := lookupGridY[y] + x;
 		gameGrid[tempint] := mushroomSprite;
 		Sprite::DrawAt(x,screenYOffset+lookupScreenY[y],mushroomSprite,false);
-		p := Functions::getRandomByte(31);	
-		while (p = x) do p := Functions::getRandomByte(31);	
+		p := Functions::IntToByte(Functions::GetRnd(31));	
+		while (p = x) do p := Functions::IntToByte(Functions::GetRnd(31));
 		x := p;
 		tempint := lookupGridY[y] + x;
 		gameGrid[tempint] := mushroomSprite;
@@ -516,7 +516,7 @@ begin
 	end;
 	fleaEnemy.enabled := true;
 	fleaEnemy.dead := false;
-	fleaEnemy.x := Functions::getRandomByte(31);
+	fleaEnemy.x := Functions::IntToByte(Functions::GetRnd(31));
 	fleaEnemy.y := screenYOffset + 8;
 	fleaEnemy.moveSpeed := fleaMovespeed;
 	fleaEnemy.shotCount := 0;
@@ -1097,12 +1097,12 @@ begin
 	// Spawn or not
 	if (t < 197) then	return;
 	// Pick a random side of the screen to spawn a scorpion
-	t := Functions::getRandomByte(100);
+	t := Functions::IntToByte(Functions::GetRnd(100));
 	// Spawn on the random side
 	if (t > 50) then	
 	begin
 		scorpionEnemy.x := PlayerXMax - 2;
-		t := Functions::getRandomByte(9);
+		t := Functions::IntToByte(Functions::GetRnd(9));
 		scorpionEnemy.y := t * 4 + screenYOffset;
 		scorpionEnemy.direction := false;
 	end
@@ -1127,9 +1127,9 @@ begin
 	// Spawn or not
 	if (t < 195) then return;
 	// Pick a random side of the screen to spawn a scorpion
-	t := Functions::getRandomByte(100);
+	t := Functions::IntToByte(Functions::GetRnd(100));
 	// Spawn on the random side
-	if (t > 20) then	
+	if (t > 50) then	
 	begin
 		spiderEnemy.x := PlayerXMax - 2;
 		spiderEnemy.y := SpiderYMin;
@@ -1161,7 +1161,7 @@ begin
 		if (IsBitSet(milliSegments[u].flags, Flag_Alive) = false) then
 		begin
 			// Pick a random side of the screen to spawn a new head
-			t := Functions::getRandomByte(31);	
+			t := Functions::IntToByte(Functions::GetRnd(31));	
 			// Spawn on the random side
 			if (t > 15) then	
 			begin
