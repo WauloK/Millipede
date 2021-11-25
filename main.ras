@@ -761,7 +761,7 @@ begin
 		Sprite::SetData(#bigSprites);
 		Sprite::SetSize(3,4);	
 		// Draw spider death
-		Sprite::DrawAt(spiderEnemy.x,spiderEnemy.y, spiderDeathSprite + spiderEnemy.animFrame,false);
+		if (spiderEnemy.animFrame < 4) then Sprite::DrawAt(spiderEnemy.x,spiderEnemy.y, spiderDeathSprite + spiderEnemy.animFrame,false);
 		// Reset sprite data
 		Sprite::SetData(#smallSprites);
 		Sprite::SetSize(1,4);
@@ -769,7 +769,18 @@ begin
 		PlaySound(Sfx_EnemyDead);
 		if (spiderEnemy.animFrame = 4) then
 		begin
-			Sprite::DrawAt(spiderEnemy.x+1,spiderEnemy.y, 0, false);
+			if (playerSnake.y - spiderEnemy.y  > 12) then p := 30;
+			if (playerSnake.y - spiderEnemy.y  < 13) then p := 60;
+			if (playerSnake.y - spiderEnemy.y  < 7) then p := 90;
+			AddScore(p);	
+			Screen::SetPen(1);
+			Functions::ByteToString(p);
+			Font::DrawTextAt(#Functions_s,spiderEnemy.x,spiderEnemy.y,false);
+			Font::DrawTextAt("0",spiderEnemy.x+2,spiderEnemy.y,false);
+		end;
+		if (spiderEnemy.animFrame = 6) then
+		begin
+			Font::DrawTextAt("   ",spiderEnemy.x,spiderEnemy.y,false);
 			spiderEnemy.enabled := false;
 			spiderEnemy.dead := false;
 		end;
@@ -927,10 +938,6 @@ begin
 	spiderEnemy.animFrame := 0;
 	DeleteBullet(playerBullet.x,playerBullet.y);
 	playerBullet.fired := false;
-	p := 30;
-	if (playerSnake.y - spiderEnemy.y  < 20) then p := 60;
-	if (playerSnake.y - spiderEnemy.y  < 10) then p := 90;
-	AddScore(p);
 end;
 
 // Move scorpion
