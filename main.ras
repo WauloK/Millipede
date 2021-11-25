@@ -810,7 +810,7 @@ begin
 	// If not touching player, ignore
 	if (spiderEnemy.enabled = false) then return;
 	if (playerSnake.x < spiderEnemy.x or (playerSnake.x > spiderEnemy.x + 2)) then return;
-	if (spiderEnemy.y < playerSnake.y) then return;
+	if (spiderEnemy.y < playerSnake.y - 3 or (spiderEnemy.y > playerSnake.y + 3)) then return;
 	// Passed the above, so flea and snake are touching
 	spiderEnemy.enabled := false;
 	// Delete spider sprite
@@ -1129,7 +1129,7 @@ begin
 	// Pick a random side of the screen to spawn a scorpion
 	t := Functions::getRandomByte(100);
 	// Spawn on the random side
-	if (t > 50) then	
+	if (t > 20) then	
 	begin
 		spiderEnemy.x := PlayerXMax - 2;
 		spiderEnemy.y := SpiderYMin;
@@ -1473,7 +1473,7 @@ begin
 		begin
 			Screen::SetPen(t);
 			Font::DrawTextAt("GAME OVER!",11,6,false);
-			for w := 0 to 100 do wait(200);
+			for w := 0 to 200 do wait(200);
 			t := t + 1;
 			if (t > 3) then t := 1; 		
 		end;
