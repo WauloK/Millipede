@@ -197,7 +197,7 @@ begin
 	// Game start sfx
 	case u of
 		Sfx_Gamestart:
-			begin
+			begin			
 				Sound::Play(80,50);
 				Sound::Play(50,50);
 			end;

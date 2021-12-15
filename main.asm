@@ -321,7 +321,10 @@ cls
 	;    Procedure type : User-defined procedure
 Screen_SetMode_block3:
 Screen_SetMode:
-	ld a, $783b
+	; generic assign 
+	; Optimization : zp[0]
+	ld hl,$783B
+	ld a,[hl]
 	ld [Screen_j], a
 	; Binary clause core: EQUALS
 	; Compare with pure num / var optimization
@@ -346,9 +349,11 @@ Screen_SetMode_ConditionalTrueBlock5: ;Main true block ;keep :
 	ld a,[Screen_j]
 	and  b
 	ld [Screen_j], a
-	ld [$783b],a
+	; Storing to array
+	ld [$783B+$0],a
+	; Storing to array
 	ld a,[Screen_j]
-	ld [$6800],a
+	ld [$6800+$0],a
 	jr Screen_SetMode_elsedoneblock7
 Screen_SetMode_elseblock6:
 	ld a, $0
@@ -368,7 +373,8 @@ Screen_SetMode_elseblock6:
 	ld a,[Screen_j]
 	and  b
 	ld [Screen_j], a
-	ld [$783b],a
+	; Storing to array
+	ld [$783B+$0],a
 Screen_SetMode_elsedoneblock7:
 	ret
 	;*
@@ -1666,7 +1672,7 @@ joyend
 	;    Procedure type : User-defined procedure
 Sound_Beep:
 	; ****** Inline assembler section
-  call #3450
+  call $3450
 	
 	ret
 	; ***********  Defining procedure : Sound_Play
@@ -1676,8 +1682,61 @@ Sound_Play:
 	; ****** Inline assembler section
   ld hl,[Sound_freq]
   ld bc,[Sound_dur]
-  call #345c
-	
+sound
+	call toggle	; call toggling speaker bits
+	dec c		; decrement counter1
+	jr nz,sound	; repeat if not 0
+	ret
+; Toggle speaker bit
+toggle
+	push bc		; save counter1
+	ld a,$20		; Speaker B
+	or $0a	; restore graphicsmode
+  push af
+  ld a,(#783B)
+  bit 4,a
+  jr nz,xxpal1
+	pop af
+  or #08
+  and #ef
+  jp xset
+xxpal1
+  pop af
+  or #18
+  and #ff
+xset
+	ld(#783B),a
+	ld(#6800),a	; set $6800
+	push hl		; save counter1
+	pop bc		; set counter2
+toggle0
+	dec c		; decrement counter2
+	jr nz,toggle0	; repeat if not 0
+	ld a,$01		; Speaker A
+	or $0a	; restore graphicsmode
+  push af
+  ld a,(#783b)
+  bit 4,a
+  jr nz,xxpal2
+	pop af
+  or #08
+  and #ef
+  jp xset2
+xxpal2
+  pop af
+  or #18
+  and #ff
+xset2
+	ld(#783B),a
+	ld(#6800),a	; set $6800
+	push hl		; save counter1
+	pop bc		; set counter2
+toggle1
+	dec c		; decrement counter2
+	jr nz,toggle1	; repeat if not 0
+	pop bc		; restore counter1
+	ret
+  
 	ret
 	; ***********  Defining procedure : Sound_Shoot
 	;    Procedure type : User-defined procedure
