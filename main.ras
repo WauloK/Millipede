@@ -360,7 +360,7 @@ begin
 	// Playfield grid array
 	for y := 0 to gridHeight - 1 do
 	begin
-		x := Functions::getRandomByte(31);	
+		x := Functions::IntToByte(Functions::GetRnd(31));	
 		tempint := lookupGridY[y] + x;
 		gameGrid[tempint] := mushroomSprite;
 		Sprite::DrawAt(x,screenYOffset+lookupScreenY[y],mushroomSprite,false);
@@ -867,7 +867,7 @@ begin
 	if (fleaEnemy.dropCount = 4) then
 	begin
 	fleaEnemy.dropCount := 0;
-	t := Functions::getRandomByte(100);
+	t := Functions::IntToByte(Functions::GetRnd(100));
 	if (t > 30) then
 		begin
 			// Update grid info
@@ -983,7 +983,7 @@ begin
 	begin	
 		if (spiderEnemy.x < PlayerXMax - 2) then
 		begin
-			t := Functions::getRandomByte(100);	
+			t := Functions::IntToByte(Functions::GetRnd(100));	
 			if (t > 40) then if (spiderEnemy.vertcount = 0) then spiderEnemy.x := spiderEnemy.x + 1;
 		end
 		else
@@ -995,7 +995,7 @@ begin
 	begin	
 		if (spiderEnemy.x > 0) then
 		begin
-			t := Functions::getRandomByte(100);	
+			t := Functions::IntToByte(Functions::GetRnd(100));	
 			if (t > 40) then  if (spiderEnemy.vertcount = 0) then spiderEnemy.x := spiderEnemy.x - 1;
 		end
 		else
@@ -1115,7 +1115,7 @@ begin
 	else
 	begin
 		scorpionEnemy.x := 0;
-		t := Functions::getRandomByte(9);	
+		t := Functions::IntToByte(Functions::GetRnd(9));	
 		scorpionEnemy.y := t * 4 + screenYOffset;
 		scorpionEnemy.direction := true;
 	end;	
@@ -1159,7 +1159,7 @@ end;
 // If Millipede reaches the bottom, see if a new head can be spawned
 procedure SpawnMillipedeHead();
 begin
-	u := Functions::getRandomByte(100);
+	u := Functions::IntToByte(Functions::GetRnd(100));
 	if (u < 50) then return;
 	// Find unused millipede part in array
 	for u := 0 to milliLength do
